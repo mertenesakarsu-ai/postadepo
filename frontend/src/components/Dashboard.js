@@ -341,34 +341,27 @@ const Dashboard = ({ user, onLogout }) => {
     try {
       const token = localStorage.getItem('token');
       
-      // For demo purposes, we'll simulate a successful connection
-      setTimeout(async () => {
-        try {
-          const newAccount = {
-            id: Date.now().toString(),
-            user_id: user.id,
-            type: 'Outlook',
-            email: user.email.replace('@postadepo.com', '@outlook.com'),
-            connected_at: new Date().toISOString()
-          };
-          
-          // Save to backend and update local state
-          setConnectedAccounts(prev => {
-            const updated = [...prev, newAccount];
-            localStorage.setItem('connectedAccounts', JSON.stringify(updated));
-            return updated;
-          });
-          
-          toast.success(t('notifications.outlookConnected'));
-          setLoading(false);
-        } catch (error) {
-          toast.error(t('notifications.outlookError'));
-          setLoading(false);
-        }
-      }, 2000);
+      // Call backend API to connect Outlook
+      const response = await axios.post(`${API}/connect-account`, 
+        { type: 'outlook' },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
       
+      // Update local state
+      setConnectedAccounts(prev => {
+        const updated = [...prev, response.data.account];
+        localStorage.setItem('connectedAccounts', JSON.stringify(updated));
+        return updated;
+      });
+      
+      toast.success(t('notifications.outlookConnected'));
+      setLoading(false);
     } catch (error) {
-      toast.error(t('notifications.outlookError'));
+      if (error.response?.status === 400) {
+        toast.error('Outlook hesabı zaten bağlı');
+      } else {
+        toast.error(t('notifications.outlookError'));
+      }
       setLoading(false);
     }
   };
@@ -380,34 +373,27 @@ const Dashboard = ({ user, onLogout }) => {
     try {
       const token = localStorage.getItem('token');
       
-      // For demo purposes, we'll simulate a successful connection
-      setTimeout(async () => {
-        try {
-          const newAccount = {
-            id: Date.now().toString(),
-            user_id: user.id,
-            type: 'Gmail',
-            email: user.email.replace('@postadepo.com', '@gmail.com'),
-            connected_at: new Date().toISOString()
-          };
-          
-          // Save to backend and update local state
-          setConnectedAccounts(prev => {
-            const updated = [...prev, newAccount];
-            localStorage.setItem('connectedAccounts', JSON.stringify(updated));
-            return updated;
-          });
-          
-          toast.success(t('notifications.gmailConnected'));
-          setLoading(false);
-        } catch (error) {
-          toast.error(t('notifications.gmailError'));
-          setLoading(false);
-        }
-      }, 2000);
+      // Call backend API to connect Gmail
+      const response = await axios.post(`${API}/connect-account`, 
+        { type: 'gmail' },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
       
+      // Update local state
+      setConnectedAccounts(prev => {
+        const updated = [...prev, response.data.account];
+        localStorage.setItem('connectedAccounts', JSON.stringify(updated));
+        return updated;
+      });
+      
+      toast.success(t('notifications.gmailConnected'));
+      setLoading(false);
     } catch (error) {
-      toast.error(t('notifications.gmailError'));
+      if (error.response?.status === 400) {
+        toast.error('Gmail hesabı zaten bağlı');
+      } else {
+        toast.error(t('notifications.gmailError'));
+      }
       setLoading(false);
     }
   };
