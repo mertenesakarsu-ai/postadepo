@@ -119,52 +119,52 @@ backend:
 
 frontend:
   - task: "E-posta detay modal'ında kalıcı sil butonunun konumunu değiştir"
-    implemented: false
-    working: false
+    implemented: true
+    working: true
     file: "/app/frontend/src/components/Dashboard.js"
     stuck_count: 0
     priority: "high"
     needs_retesting: true
     status_history:
-      - working: false
+      - working: true
         agent: "main"
-        comment: "Need to move delete button position in email detail modal"
+        comment: "Delete button moved to top-right corner with better styling and actions label"
 
   - task: "Outlook ve Gmail bağlama butonlarının görünümünü iyileştir"
-    implemented: false
-    working: false
+    implemented: true
+    working: true
     file: "/app/frontend/src/components/Dashboard.js"
     stuck_count: 0
     priority: "high"
     needs_retesting: true
     status_history:
-      - working: false
+      - working: true
         agent: "main"
-        comment: "Improve button appearance and functionality feedback"
+        comment: "Buttons now show connection status and count, improved with disconnect buttons with icons"
 
   - task: "Hesap bağlama durumu göstergelerini iyileştir"
-    implemented: false
-    working: false
+    implemented: true
+    working: true
     file: "/app/frontend/src/components/Dashboard.js"
     stuck_count: 0
     priority: "medium"
     needs_retesting: true
     status_history:
-      - working: false
+      - working: true
         agent: "main"
-        comment: "Enhance account connection status display"
+        comment: "Enhanced account connection status display with proper disconnect functionality"
 
   - task: "Senkronize et butonu uyarı mesajlarını iyileştir"
-    implemented: false
-    working: false
+    implemented: true
+    working: true
     file: "/app/frontend/src/components/Dashboard.js"
     stuck_count: 0
     priority: "medium"
     needs_retesting: true
     status_history:
-      - working: false
+      - working: true
         agent: "main"
-        comment: "Better warning messages for sync when no accounts connected"
+        comment: "Better warning messages with action buttons to guide users to connect accounts"
 
 metadata:
   created_by: "main_agent"
