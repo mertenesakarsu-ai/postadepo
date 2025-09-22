@@ -355,33 +355,31 @@ const Dashboard = ({ user, onLogout }) => {
     try {
       const token = localStorage.getItem('token');
       
-      // Simulate OAuth flow - in real implementation, this would redirect to Google OAuth
-      const gmailAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=your_client_id&response_type=code&redirect_uri=${encodeURIComponent(window.location.origin + '/auth/gmail/callback')}&scope=https://www.googleapis.com/auth/gmail.readonly&state=${user.id}`;
-      
       // For demo purposes, we'll simulate a successful connection
       setTimeout(async () => {
         try {
           const newAccount = {
             id: Date.now().toString(),
             user_id: user.id,
-            type: 'gmail',
+            type: 'Gmail',
             email: user.email.replace('@postadepo.com', '@gmail.com'),
             connected_at: new Date().toISOString()
           };
           
-          // In real implementation, this would be handled by the backend after OAuth callback
-          setConnectedAccounts(prev => [...prev, newAccount]);
+          // Save to backend and update local state
+          setConnectedAccounts(prev => {
+            const updated = [...prev, newAccount];
+            localStorage.setItem('connectedAccounts', JSON.stringify(updated));
+            return updated;
+          });
+          
           toast.success(t('notifications.gmailConnected'));
           setLoading(false);
-          setAccountConnectOpen(false);
         } catch (error) {
           toast.error(t('notifications.gmailError'));
           setLoading(false);
         }
       }, 2000);
-      
-      // Uncomment this for real OAuth flow
-      // window.location.href = gmailAuthUrl;
       
     } catch (error) {
       toast.error(t('notifications.gmailError'));
