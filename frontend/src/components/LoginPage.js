@@ -142,7 +142,7 @@ const LoginPage = ({ onLogin }) => {
             <img 
               src="https://customer-assets.emergentagent.com/job_4338b971-040d-400e-9544-183651a406e5/artifacts/g6inru6i_postadepo_logo_transparent.png" 
               alt="PostaDepo"
-              className="h-20 w-auto"
+              className="h-28 w-auto"
             />
           </div>
           <h1 className="text-4xl font-bold text-[#2c5282] mb-2">PostaDepo</h1>
