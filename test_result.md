@@ -172,6 +172,4 @@ test_plan:
 
 agent_communication:
   - agent: "main"
-    message: "Completed implementation of all requested email UI improvements and account connection enhancements. Ready for backend testing."
-  - agent: "testing"
-    message: "✅ BACKEND TESTING COMPLETED SUCCESSFULLY - All PostaDepo account connection APIs are working perfectly. Comprehensive testing performed on all requested endpoints: 1) POST /api/connect-account (Outlook & Gmail demo connections), 2) DELETE /api/connected-accounts/{account_id} (account disconnection), 3) GET /api/connected-accounts (listing connected accounts), 4) POST /api/sync-emails (email synchronization with/without accounts). All test scenarios passed including demo user login, duplicate connection prevention, invalid account type rejection, and proper error handling. Fixed minor JSON serialization issue during testing. Backend APIs are production-ready for the demo environment."
+    message: "reCAPTCHA ve whitelist sistemi entegrasyonu tamamlandı. Backend'de: User model'ine approved field eklendi, register endpoint'i güncellenip varsayılan approved=false yapıldı, login endpoint'ine whitelist kontrolü eklendi, reCAPTCHA doğrulama endpoint'i ve admin endpoint'leri eklendi. Frontend'de: react-google-recaptcha paketi yüklendi, LoginPage'e reCAPTCHA bileşeni eklendi, doğrulama olmadan kayıt yapılamıyor. reCAPTCHA anahtarları .env dosyalarına eklendi. Backend ve frontend test edilmeye hazır."
