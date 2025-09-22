@@ -31,7 +31,7 @@ const LoginPage = ({ onLogin }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!email || !password) {
-      toast.error('Lütfen tüm alanları doldurun');
+      toast.error(t('auth.fillAllFields'));
       return;
     }
 
@@ -39,7 +39,7 @@ const LoginPage = ({ onLogin }) => {
     const result = await onLogin(email, password);
     
     if (result.success) {
-      toast.success('Başarıyla giriş yapıldı!');
+      toast.success(t('auth.loginSuccess'));
     } else {
       toast.error(result.message);
     }
