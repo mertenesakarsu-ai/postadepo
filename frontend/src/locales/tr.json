@@ -87,7 +87,7 @@
     "authWarning": "Bilgileriniz yalnızca e-postalarınızı okuyup veritabanına kaydetmek için kullanılacaktır. Hiçbir şekilde şifre bilgisi istenmez."
   },
   "auth": {
-    "loginTitle": "Giriş Yap",
+    "loginTitle": "E-posta Yönetim Sistemi Giriş",
     "registerTitle": "Kayıt Ol",
     "forgotPassword": "Şifremi Unuttum",
     "noAccount": "Hesabınız yok mu? Kayıt olun",
