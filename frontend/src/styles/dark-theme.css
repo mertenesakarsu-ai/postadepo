@@ -1,0 +1,196 @@
+/* Dark Theme Styles */
+.dark {
+  /* Background gradients */
+  --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+  --sidebar-gradient: linear-gradient(180deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.95) 100%);
+  --card-gradient: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(51, 65, 85, 0.8) 100%);
+  
+  /* Colors */
+  --primary-blue: #3b82f6;
+  --primary-blue-hover: #2563eb;
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --border-color: #334155;
+  --card-bg: rgba(30, 41, 59, 0.8);
+  --input-bg: rgba(51, 65, 85, 0.6);
+}
+
+.dark body {
+  background: var(--bg-gradient);
+  color: var(--text-primary);
+}
+
+.dark .bg-gradient-to-br {
+  background: var(--bg-gradient) !important;
+}
+
+.dark .bg-white\/90,
+.dark .bg-white\/80 {
+  background: var(--card-bg) !important;
+  backdrop-filter: blur(12px);
+}
+
+.dark .sidebar {
+  background: var(--sidebar-gradient) !important;
+  border-color: var(--border-color) !important;
+}
+
+.dark .text-slate-800,
+.dark .text-slate-700,
+.dark .text-slate-900 {
+  color: var(--text-primary) !important;
+}
+
+.dark .text-slate-600,
+.dark .text-slate-500 {
+  color: var(--text-secondary) !important;
+}
+
+.dark .text-slate-400 {
+  color: var(--text-muted) !important;
+}
+
+.dark .border-slate-200,
+.dark .border-slate-300 {
+  border-color: var(--border-color) !important;
+}
+
+.dark .bg-slate-50,
+.dark .bg-slate-100 {
+  background: rgba(51, 65, 85, 0.3) !important;
+}
+
+.dark .bg-slate-200 {
+  background: rgba(51, 65, 85, 0.5) !important;
+}
+
+.dark .hover\:bg-slate-100:hover {
+  background: rgba(51, 65, 85, 0.4) !important;
+}
+
+.dark .focus\:border-\[\#2c5282\]:focus {
+  border-color: var(--primary-blue) !important;
+}
+
+.dark .focus\:ring-\[\#2c5282\]:focus {
+  --tw-ring-color: var(--primary-blue) !important;
+}
+
+.dark input,
+.dark select,
+.dark textarea {
+  background: var(--input-bg) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+.dark input::placeholder {
+  color: var(--text-muted);
+}
+
+/* Scrollbar for dark theme */
+.dark ::-webkit-scrollbar-track {
+  background: #1e293b;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #475569;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* Email cards in dark theme */
+.dark .bg-red-50\/50 {
+  background: rgba(127, 29, 29, 0.3) !important;
+}
+
+.dark .bg-blue-50 {
+  background: rgba(30, 58, 138, 0.3) !important;
+}
+
+.dark .border-blue-200 {
+  border-color: rgba(59, 130, 246, 0.3) !important;
+}
+
+.dark .text-blue-800,
+.dark .text-blue-700 {
+  color: #93c5fd !important;
+}
+
+.dark .text-blue-600 {
+  color: #60a5fa !important;
+}
+
+.dark .bg-red-50 {
+  background: rgba(127, 29, 29, 0.3) !important;
+}
+
+.dark .border-red-200 {
+  border-color: rgba(239, 68, 68, 0.3) !important;
+}
+
+.dark .text-red-800,
+.dark .text-red-700 {
+  color: #fca5a5 !important;
+}
+
+.dark .text-red-600 {
+  color: #f87171 !important;
+}
+
+/* Gradient buttons for dark theme */
+.dark .bg-gradient-to-r.from-green-500 {
+  background: linear-gradient(90deg, #059669 0%, #047857 100%) !important;
+}
+
+.dark .bg-gradient-to-r.from-purple-500 {
+  background: linear-gradient(90deg, #7c3aed 0%, #6d28d9 100%) !important;
+}
+
+.dark .bg-gradient-to-r.from-blue-500 {
+  background: linear-gradient(90deg, var(--primary-blue) 0%, var(--primary-blue-hover) 100%) !important;
+}
+
+/* Storage info section */
+.dark .bg-gradient-to-r.from-slate-50 {
+  background: linear-gradient(90deg, rgba(30, 41, 59, 0.5) 0%, rgba(51, 65, 85, 0.5) 100%) !important;
+}
+
+.dark .bg-gradient-to-r.from-purple-50 {
+  background: linear-gradient(90deg, rgba(88, 28, 135, 0.3) 0%, rgba(107, 33, 168, 0.3) 100%) !important;
+}
+
+/* Modal backdrop for dark theme */
+.dark .backdrop-blur-md {
+  background: rgba(0, 0, 0, 0.6) !important;
+}
+
+/* Logo and branding elements */
+.dark .text-\[\#2c5282\] {
+  color: var(--primary-blue) !important;
+}
+
+.dark .bg-\[\#2c5282\] {
+  background: var(--primary-blue) !important;
+}
+
+.dark .hover\:bg-\[\#1a365d\]:hover {
+  background: var(--primary-blue-hover) !important;
+}
+
+/* Animation adjustments for dark theme */
+.dark .transform.scale-\[1\.02\] {
+  box-shadow: 0 10px 25px rgba(59, 130, 246, 0.2);
+}
+
+/* Important email styling */
+.dark .border-l-red-500 {
+  border-left-color: #ef4444 !important;
+}
+
+.dark .bg-red-50\/50 {
+  background: rgba(127, 29, 29, 0.2) !important;
+}

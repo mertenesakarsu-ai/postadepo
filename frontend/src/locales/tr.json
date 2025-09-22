@@ -1,0 +1,126 @@
+{
+  "common": {
+    "login": "Giriş Yap",
+    "logout": "Çıkış Yap",
+    "save": "Kaydet",
+    "cancel": "İptal",
+    "delete": "Sil",
+    "edit": "Düzenle",
+    "loading": "Yükleniyor...",
+    "error": "Hata",
+    "success": "Başarılı",
+    "email": "E-posta",
+    "password": "Şifre",
+    "name": "Ad",
+    "settings": "Ayarlar",
+    "search": "Ara"
+  },
+  "navigation": {
+    "allMails": "Tüm Mailler",
+    "inbox": "Gelen Kutusu",
+    "sent": "Gönderilenler",
+    "deleted": "Silinenler",
+    "spam": "Spam"
+  },
+  "dashboard": {
+    "sync": "Senkronize Et",
+    "lastSync": "Son senkronizasyon",
+    "totalMails": "Toplam Mail",
+    "storage": "Kapladığı Alan",
+    "import": "İçe Aktar",
+    "export": "Dışa Aktar",
+    "connectAccount": "Hesabı Bağla",
+    "searchPlaceholder": "E-posta ara...",
+    "searchDisabled": "Arama sadece 'Tüm Mailler' bölümünde çalışır",
+    "noEmails": "Bu klasörde henüz e-posta yok"
+  },
+  "settings": {
+    "title": "Ayarlar",
+    "version": "Sürüm 1.0.0",
+    "theme": "Tema",
+    "language": "Dil",
+    "autoSync": "Otomatik Senkronizasyon",
+    "user": "Kullanıcı",
+    "themes": {
+      "light": "Açık Tema",
+      "dark": "Koyu Tema",
+      "auto": "Otomatik"
+    },
+    "languages": {
+      "tr": "Türkçe",
+      "en": "English"
+    },
+    "syncIntervals": {
+      "5": "5 Dakika",
+      "10": "10 Dakika",
+      "15": "15 Dakika"
+    }
+  },
+  "email": {
+    "from": "Gönderen",
+    "to": "Alıcı",
+    "subject": "Konu",
+    "date": "Tarih",
+    "size": "Boyut",
+    "important": "Önemli",
+    "read": "Okundu",
+    "unread": "Okunmadı",
+    "yes": "Evet",
+    "no": "Hayır",
+    "permanentlyDelete": "Kalıcı Sil",
+    "deleteConfirm": "Bu e-postayı kalıcı olarak silmek istediğinizden emin misiniz?",
+    "deleteWarning": "Bu işlem geri alınamaz."
+  },
+  "connect": {
+    "title": "Veri Yönetimi Paneli",
+    "connectedAccounts": "Bağlı Hesaplar",
+    "connectDate": "Bağlantı tarihi",
+    "outlookTitle": "Outlook Mail Hesabınızı Bağlayın",
+    "outlookSubtitle": "Microsoft 365 / Exchange Online / Hotmail",
+    "gmailTitle": "Gmail Hesabınızı Bağlayın",
+    "gmailSubtitle": "Google Workspace / Gmail",
+    "connectOutlook": "Outlook Hesabı Bağla",
+    "connectGmail": "Gmail Hesabı Bağla",
+    "authWarning": "Bilgileriniz yalnızca e-postalarınızı okuyup veritabanına kaydetmek için kullanılacaktır. Hiçbir şekilde şifre bilgisi istenmez."
+  },
+  "auth": {
+    "loginTitle": "Giriş Yap",
+    "registerTitle": "Kayıt Ol",
+    "forgotPassword": "Şifremi Unuttum",
+    "noAccount": "Hesabınız yok mu? Kayıt olun",
+    "emailPlaceholder": "E-posta adresiniz",
+    "passwordPlaceholder": "Şifreniz",
+    "confirmPasswordPlaceholder": "Şifrenizi tekrar girin",
+    "namePlaceholder": "Adınız Soyadınız",
+    "demoLogin": "Demo Bilgileri",
+    "demoUse": "Demo Bilgilerini Kullan",
+    "loginSuccess": "Başarıyla giriş yapıldı!",
+    "registerSuccess": "Kayıt başarılı! Şimdi giriş yapabilirsiniz.",
+    "invalidCredentials": "Geçersiz e-posta veya şifre",
+    "passwordMismatch": "Şifreler eşleşmiyor",
+    "passwordTooShort": "Şifre en az 6 karakter olmalıdır",
+    "fillAllFields": "Lütfen tüm alanları doldurun",
+    "resetPasswordText": "E-posta adresinizi girin, size şifre sıfırlama bağlantısı göndereceğiz.",
+    "sendResetLink": "Şifre Sıfırlama Bağlantısı Gönder",
+    "resetLinkSent": "Şifre sıfırlama bağlantısı e-posta adresinize gönderildi"
+  },
+  "notifications": {
+    "syncSuccess": "E-postalar başarıyla senkronize edildi",
+    "syncError": "Senkronizasyon hatası",
+    "importSuccess": "İçe aktarma başarılı! {count} e-posta eklendi.",
+    "importError": "İçe aktarma hatası",
+    "exportSuccess": "Dışa aktarma başarılı!",
+    "exportError": "Dışa aktarma hatası",
+    "deleteSuccess": "E-posta kalıcı olarak silindi",
+    "deleteError": "E-posta silinirken hata oluştu",
+    "settingsSaved": "Ayarlar kaydedildi",
+    "autoSyncEnabled": "Otomatik senkronizasyon {interval} dakikada bir çalışacak",
+    "emailsLoadError": "E-postalar yüklenirken hata oluştu",
+    "outlookConnecting": "Outlook hesabı bağlanıyor...",
+    "outlookConnected": "Outlook hesabı başarıyla bağlandı!",
+    "outlookError": "Outlook bağlantı hatası",
+    "gmailConnecting": "Gmail hesabı bağlanıyor...",
+    "gmailConnected": "Gmail hesabı başarıyla bağlandı!",
+    "gmailError": "Gmail bağlantı hatası"
+  }
+}

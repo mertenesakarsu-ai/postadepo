@@ -1,0 +1,126 @@
+{
+  "common": {
+    "login": "Login",
+    "logout": "Logout",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "email": "Email",
+    "password": "Password",
+    "name": "Name",
+    "settings": "Settings",
+    "search": "Search"
+  },
+  "navigation": {
+    "allMails": "All Mails",
+    "inbox": "Inbox",
+    "sent": "Sent",
+    "deleted": "Deleted",
+    "spam": "Spam"
+  },
+  "dashboard": {
+    "sync": "Synchronize",
+    "lastSync": "Last sync",
+    "totalMails": "Total Emails",
+    "storage": "Storage Used",
+    "import": "Import",
+    "export": "Export",
+    "connectAccount": "Connect Account",
+    "searchPlaceholder": "Search emails...",
+    "searchDisabled": "Search only works in 'All Mails' section",
+    "noEmails": "No emails in this folder yet"
+  },
+  "settings": {
+    "title": "Settings",
+    "version": "Version 1.0.0",
+    "theme": "Theme",
+    "language": "Language",
+    "autoSync": "Auto Sync",
+    "user": "User",
+    "themes": {
+      "light": "Light Theme",
+      "dark": "Dark Theme",
+      "auto": "Auto"
+    },
+    "languages": {
+      "tr": "Türkçe",
+      "en": "English"
+    },
+    "syncIntervals": {
+      "5": "5 Minutes",
+      "10": "10 Minutes",
+      "15": "15 Minutes"
+    }
+  },
+  "email": {
+    "from": "From",
+    "to": "To",
+    "subject": "Subject",
+    "date": "Date",
+    "size": "Size",
+    "important": "Important",
+    "read": "Read",
+    "unread": "Unread",
+    "yes": "Yes",
+    "no": "No",
+    "permanentlyDelete": "Delete Permanently",
+    "deleteConfirm": "Are you sure you want to permanently delete this email?",
+    "deleteWarning": "This action cannot be undone."
+  },
+  "connect": {
+    "title": "Data Management Panel",
+    "connectedAccounts": "Connected Accounts",
+    "connectDate": "Connected on",
+    "outlookTitle": "Connect Your Outlook Account",
+    "outlookSubtitle": "Microsoft 365 / Exchange Online / Hotmail",
+    "gmailTitle": "Connect Your Gmail Account",
+    "gmailSubtitle": "Google Workspace / Gmail",
+    "connectOutlook": "Connect Outlook Account",
+    "connectGmail": "Connect Gmail Account",
+    "authWarning": "Your information will only be used to read your emails and save them to the database. No password information is requested."
+  },
+  "auth": {
+    "loginTitle": "Login",
+    "registerTitle": "Register",
+    "forgotPassword": "Forgot Password",
+    "noAccount": "Don't have an account? Register",
+    "emailPlaceholder": "Your email address",
+    "passwordPlaceholder": "Your password",
+    "confirmPasswordPlaceholder": "Confirm your password",
+    "namePlaceholder": "Your full name",
+    "demoLogin": "Demo Login",
+    "demoUse": "Use Demo Credentials",
+    "loginSuccess": "Successfully logged in!",
+    "registerSuccess": "Registration successful! You can now login.",
+    "invalidCredentials": "Invalid email or password",
+    "passwordMismatch": "Passwords do not match",
+    "passwordTooShort": "Password must be at least 6 characters",
+    "fillAllFields": "Please fill in all fields",
+    "resetPasswordText": "Enter your email address and we'll send you a password reset link.",
+    "sendResetLink": "Send Password Reset Link",
+    "resetLinkSent": "Password reset link has been sent to your email address"
+  },
+  "notifications": {
+    "syncSuccess": "Emails successfully synchronized",
+    "syncError": "Synchronization error",
+    "importSuccess": "Import successful! {count} emails added.",
+    "importError": "Import error",
+    "exportSuccess": "Export successful!",
+    "exportError": "Export error",
+    "deleteSuccess": "Email permanently deleted",
+    "deleteError": "Error deleting email",
+    "settingsSaved": "Settings saved",
+    "autoSyncEnabled": "Auto sync will run every {interval} minutes",
+    "emailsLoadError": "Error loading emails",
+    "outlookConnecting": "Connecting Outlook account...",
+    "outlookConnected": "Outlook account successfully connected!",
+    "outlookError": "Outlook connection error",
+    "gmailConnecting": "Connecting Gmail account...",
+    "gmailConnected": "Gmail account successfully connected!",
+    "gmailError": "Gmail connection error"
+  }
+}
