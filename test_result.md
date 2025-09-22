@@ -105,17 +105,17 @@
 user_problem_statement: "Git hubdaki web site dosyalarımı al ve bu değişiklikleri ekle eposta detay kısmında kalıcı sil butonunun yerini değiştir outlook ve gmail hesabı bağla butonunu işlevsel yap hesap bağlanırsa hesap bağlandı hesap epostası yazsın butonda ve hesap tan çıkış için buttona simgede eklene bilir senden senkronize et butonunu düzeltmeni istiyorum eğer hesap bağlı değil ise uyar"
 
 backend:
-  - task: "Hesap bağlama API endpoint'leri zaten mevcut - demo modda çalışıyor"
+  - task: "Hesap bağlama API endpoint'leri - demo modda çalışıyor"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "low"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
-      - working: "NA"
+      - working: true
         agent: "main"
-        comment: "API endpoints already exist and working in demo mode"
+        comment: "Added POST /connect-account and DELETE /connected-accounts/{id} endpoints for better demo functionality"
 
 frontend:
   - task: "E-posta detay modal'ında kalıcı sil butonunun konumunu değiştir"
