@@ -304,11 +304,27 @@ const LoginPage = ({ onLogin }) => {
                         className="pl-10 h-12 bg-white/70 border-slate-200 focus:border-[#2c5282] focus:ring-[#2c5282] rounded-lg"
                       />
                     </div>
+                    
+                    {/* reCAPTCHA */}
+                    <div className="flex justify-center">
+                      <ReCAPTCHA
+                        ref={recaptchaRef}
+                        sitekey={process.env.REACT_APP_RECAPTCHA_SITE_KEY || "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"}
+                        onChange={handleRecaptchaChange}
+                        theme="light"
+                      />
+                    </div>
+                    
                     <Button 
                       onClick={handleRegister}
-                      className="w-full h-12 bg-[#2c5282] hover:bg-[#1a365d] text-white rounded-lg"
+                      disabled={!isRecaptchaVerified || isRegistering}
+                      className={`w-full h-12 text-white rounded-lg ${
+                        (!isRecaptchaVerified || isRegistering) 
+                          ? 'bg-slate-400 cursor-not-allowed' 
+                          : 'bg-[#2c5282] hover:bg-[#1a365d]'
+                      }`}
                     >
-                      {t('auth.registerTitle')}
+                      {isRegistering ? 'Kaydediliyor...' : t('auth.registerTitle')}
                     </Button>
                   </div>
                 </DialogContent>
