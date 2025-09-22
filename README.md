@@ -2,7 +2,7 @@
 
 PostaDepo, kullanıcıların Outlook maillerini kolayca yedeklemelerine ve gerektiğinde geri yüklemelerine olanak tanıyan modern bir web uygulamasıdır.<br>
 
-💡 Gerçek sahibi: @mertenesakarsu<br>
+💡 Gerçek sahibi:<a href="https://github.com/mertenesakarsu"> @mertenesakarsu</a><br>
 
 ✨ Özellikler<br>
 Özellik	Açıklama<br>
