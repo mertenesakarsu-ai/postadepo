@@ -272,11 +272,19 @@ async def login(user_data: UserLogin):
             # Handle existing user without name field
             if 'name' not in existing_user:
                 existing_user['name'] = 'Demo Kullanıcı'
-                # Update the user in database
+                # Update the user in database with approved status
                 await db.users.update_one(
                     {"email": user_data.email},
-                    {"$set": {"name": "Demo Kullanıcı"}}
+                    {"$set": {"name": "Demo Kullanıcı", "approved": True}}
                 )
+                existing_user['approved'] = True
+            # Ensure demo user is always approved
+            if 'approved' not in existing_user:
+                await db.users.update_one(
+                    {"email": user_data.email},
+                    {"$set": {"approved": True}}
+                )
+                existing_user['approved'] = True
             user = User(**existing_user)
         
         token = create_jwt_token(user.dict())
