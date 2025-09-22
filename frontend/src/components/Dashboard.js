@@ -667,8 +667,11 @@ const Dashboard = ({ user, onLogout }) => {
                 </div>
               </div>
               
-              {/* Move delete button to bottom */}
-              <div className="flex justify-end pt-4 border-t">
+              {/* Move delete button to top-right corner */}
+              <div className="flex justify-between items-center pt-4 border-t">
+                <div className="text-sm text-slate-500">
+                  {t('email.actions')}
+                </div>
                 <Button
                   onClick={() => setDeleteConfirmOpen(true)}
                   variant="outline"
