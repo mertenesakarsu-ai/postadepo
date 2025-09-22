@@ -11,7 +11,7 @@ PostaDepo, kullanıcıların Outlook maillerini kolayca yedeklemelerine ve gerek
 🔒 Güvenli Saklama	Tüm mail verileri güvenli bir şekilde saklanır<br>
 🖥️ Modern Arayüz	Kullanıcı dostu ve responsive tasarım<br>
 🎨 Demo / Ekran Görüntüleri<br>
-
+<img src="logindashboard.png"></img>
 
 
 
