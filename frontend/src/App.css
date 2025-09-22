@@ -338,9 +338,7 @@ body {
 
 /* Logo styles */
 .logo {
-  background: linear-gradient(135deg, #2c5282 0%, #3b82f6 100%);
-  border-radius: 16px;
-  box-shadow: 0 8px 25px rgba(44, 82, 130, 0.3);
+  /* Logo styling removed - using clean logo display without borders or shadows */
 }
 
 /* Action buttons */
