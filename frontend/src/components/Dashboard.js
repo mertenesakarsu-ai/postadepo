@@ -947,8 +947,10 @@ const Dashboard = ({ user, onLogout }) => {
                     variant="outline"
                     size="sm"
                     className="border-red-300 text-red-600 hover:bg-red-50"
+                    title="Gmail hesabını ayır"
                   >
-                    <LogOut className="w-4 h-4" />
+                    <LogOut className="w-4 h-4 mr-1" />
+                    Ayır
                   </Button>
                 )}
               </div>
