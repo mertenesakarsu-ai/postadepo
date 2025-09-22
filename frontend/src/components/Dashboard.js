@@ -866,41 +866,55 @@ const Dashboard = ({ user, onLogout }) => {
                 <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
                   <Mail className="w-6 h-6 text-white" />
                 </div>
-                <div>
+                <div className="flex-1">
                   <h3 className="font-semibold text-blue-800">{t('connect.outlookTitle')}</h3>
                   <p className="text-sm text-blue-600">{t('connect.outlookSubtitle')}</p>
                 </div>
+                {connectedAccounts.some(acc => acc.type === 'Outlook') && (
+                  <Button
+                    onClick={() => {
+                      const outlookAccount = connectedAccounts.find(acc => acc.type === 'Outlook');
+                      handleDisconnectAccount(outlookAccount.id, 'Outlook');
+                    }}
+                    variant="outline"
+                    size="sm"
+                    className="border-red-300 text-red-600 hover:bg-red-50"
+                  >
+                    <LogOut className="w-4 h-4" />
+                  </Button>
+                )}
               </div>
               
-              <div className="space-y-4 text-sm text-blue-700">
-                <p className="font-medium">👉 {language === 'tr' ? 'Eğer kurumsal (Microsoft 365/Exchange Online) hesabı kullanıyorsanız:' : 'If you are using a corporate (Microsoft 365/Exchange Online) account:'}</p>
-                <ul className="list-disc list-inside space-y-1 ml-4 text-blue-600">
-                  <li><span className="font-medium">Tenant (Directory) ID</span> – Azure Active Directory &gt; {language === 'tr' ? 'Genel Bakış kısmında bulabilirsiniz.' : 'You can find it in the Overview section.'}</li>
-                  <li><span className="font-medium">Client ID</span> – Azure Portal &gt; App registrations {language === 'tr' ? 'kısmında oluşturulur.' : 'section is created.'}</li>
-                  <li><span className="font-medium">Client Secret</span> – App registrations &gt; Certificates & Secrets {language === 'tr' ? 'altında oluşturulur.' : 'is created under.'}</li>
-                  <li><span className="font-medium">Mail.Read {language === 'tr' ? 'izni' : 'permission'}</span> – {language === 'tr' ? 'Uygulama kaydına bu izin eklenip onaylanmalıdır.' : 'This permission must be added and approved to the application registration.'}</li>
-                  <li><span className="font-medium">Mailbox {language === 'tr' ? 'adresi' : 'address'}</span> – {language === 'tr' ? 'Hangi e-posta kutusunun okunacağını belirtiniz.' : 'Specify which mailbox to read.'}</li>
-                </ul>
-                
-                <p className="font-medium">👉 {language === 'tr' ? 'Eğer kişisel Outlook/Hotmail hesabı kullanıyorsanız:' : 'If you are using a personal Outlook/Hotmail account:'}</p>
-                <ul className="list-disc list-inside space-y-1 ml-4 text-blue-600">
-                  <li>{language === 'tr' ? 'Tenant ID gerekmez.' : 'Tenant ID is not required.'}</li>
-                  <li>{language === 'tr' ? 'Sadece uygulamamızın bağlantı isteğini onaylamanız ve e-posta adresinizi (mailbox) paylaşmanız yeterlidir.' : 'You just need to approve our app connection request and share your email address (mailbox).'}</li>
-                </ul>
-                
-                <p className="text-xs bg-blue-100 p-2 rounded">
-                  ⚠️ {t('connect.authWarning')}
-                </p>
-              </div>
-              
-              <Button 
-                onClick={handleConnectOutlook}
-                disabled={loading}
-                className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                <Zap className="w-4 h-4 mr-2" />
-                {t('connect.connectOutlook')}
-              </Button>
+              {connectedAccounts.some(acc => acc.type === 'Outlook') ? (
+                <div className="bg-green-100 border border-green-300 p-4 rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    <CheckCircle className="w-5 h-5 text-green-600" />
+                    <div>
+                      <p className="font-medium text-green-800">{t('connect.connected')}</p>
+                      <p className="text-sm text-green-700">
+                        {connectedAccounts.find(acc => acc.type === 'Outlook')?.email}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="space-y-4 text-sm text-blue-700 mb-4">
+                    <p className="text-xs bg-blue-100 p-2 rounded">
+                      ⚠️ {t('connect.authWarning')}
+                    </p>
+                  </div>
+                  
+                  <Button 
+                    onClick={handleConnectOutlook}
+                    disabled={loading}
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    <Zap className="w-4 h-4 mr-2" />
+                    {t('connect.connectOutlook')}
+                  </Button>
+                </>
+              )}
             </div>
 
             {/* Gmail Connection */}
