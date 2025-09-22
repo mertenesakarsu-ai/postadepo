@@ -86,7 +86,6 @@
     "connectGmail": "Connect Gmail Account",
     "authWarning": "Your information will only be used to read your emails and save them to the database. No password information is requested."
   },
-  },
   "auth": {
     "loginTitle": "Login",
     "registerTitle": "Register",
