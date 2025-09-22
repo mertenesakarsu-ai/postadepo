@@ -147,6 +147,14 @@ const Dashboard = ({ user, onLogout }) => {
 
   const loadConnectedAccounts = async () => {
     try {
+      // First try to load from localStorage
+      const savedAccounts = localStorage.getItem('connectedAccounts');
+      if (savedAccounts) {
+        setConnectedAccounts(JSON.parse(savedAccounts));
+        return;
+      }
+
+      // Fallback to backend
       const token = localStorage.getItem('token');
       const response = await axios.get(`${API}/connected-accounts`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -155,6 +163,15 @@ const Dashboard = ({ user, onLogout }) => {
     } catch (error) {
       console.error('Connected accounts load error:', error);
     }
+  };
+
+  const handleDisconnectAccount = (accountId, accountType) => {
+    setConnectedAccounts(prev => {
+      const updated = prev.filter(acc => acc.id !== accountId);
+      localStorage.setItem('connectedAccounts', JSON.stringify(updated));
+      return updated;
+    });
+    toast.success(t('notifications.accountDisconnected').replace('{type}', accountType));
   };
 
   const handleSync = async () => {
