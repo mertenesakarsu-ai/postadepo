@@ -140,12 +140,12 @@ const LoginPage = ({ onLogin }) => {
         <Card className="backdrop-blur-sm bg-white/90 border-0 shadow-2xl">
           <CardHeader className="space-y-1 pb-4">
             {/* Logo Section - moved here above the title */}
-            <div className="text-center mb-4">
+            <div className="text-center mb-2">
               <div className="inline-flex items-center justify-center">
                 <img 
                   src="https://customer-assets.emergentagent.com/job_4338b971-040d-400e-9544-183651a406e5/artifacts/g6inru6i_postadepo_logo_transparent.png" 
                   alt="PostaDepo"
-                  className="h-56 w-auto"
+                  className="h-64 w-auto"
                 />
               </div>
             </div>
