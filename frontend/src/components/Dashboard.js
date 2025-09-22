@@ -435,14 +435,14 @@ const Dashboard = ({ user, onLogout }) => {
       {/* Sidebar */}
       <div className="w-80 bg-white/90 backdrop-blur-sm border-r border-slate-200 flex flex-col shadow-lg sidebar">
         {/* Header */}
-        <div className="p-4 border-b border-slate-200">
-          <div className="flex flex-col items-center mb-2">
+        <div className="p-2 border-b border-slate-200">
+          <div className="flex flex-col items-center">
             <img 
               src="https://customer-assets.emergentagent.com/job_240f2e1c-9c13-45be-8f51-23631a027e43/artifacts/kpwl9rr8_postadepo_logo_transparent.png"
               alt="PostaDepo"
-              className="w-48 h-48 mb-1"
+              className="w-48 h-48"
             />
-            <p className="text-sm text-slate-600 text-center">{user?.email}</p>
+            <p className="text-sm text-slate-600 text-center -mt-1">{user?.email}</p>
           </div>
           
           <div className="flex space-x-2">
