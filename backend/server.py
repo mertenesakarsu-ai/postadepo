@@ -113,6 +113,13 @@ class ConnectedAccount(BaseModel):
     type: str  # outlook, gmail
     email: str
     connected_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class RecaptchaVerificationRequest(BaseModel):
+    recaptcha_token: str
+
+class RecaptchaVerificationResponse(BaseModel):
+    success: bool
+    message: Optional[str] = None
     
 # Demo data generation
 def generate_demo_emails(user_id: str) -> List[Dict[str, Any]]:
