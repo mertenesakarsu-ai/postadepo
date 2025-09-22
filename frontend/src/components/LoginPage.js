@@ -53,10 +53,10 @@ const LoginPage = ({ onLogin }) => {
 
   const handleForgotPassword = () => {
     if (!forgotEmail) {
-      toast.error('Lütfen e-posta adresinizi girin');
+      toast.error(t('auth.fillAllFields'));
       return;
     }
-    toast.success('Şifre sıfırlama bağlantısı e-posta adresinize gönderildi');
+    toast.success(t('auth.resetLinkSent'));
     setForgotPasswordOpen(false);
     setForgotEmail('');
   };
