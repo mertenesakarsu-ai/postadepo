@@ -161,7 +161,7 @@ frontend:
     status_history:
       - working: true
         agent: "main"
-        comment: "Login sayfasında logo h-20'den h-28'e büyütüldü, Dashboard sidebar'da w-12 h-12'den w-16 h-16'ya çıkarıldı ve rounded-xl/shadow-lg kaldırıldı, Settings dialog'da w-16 h-16'dan w-20 h-20'ye çıkarıldı ve çerçeve/gölge efektleri kaldırıldı"
+        comment: "Login sayfasında PostaDepo yazısı kaldırıldı ve logo h-28'den h-16'ya ayarlandı, Dashboard sidebar'da w-12 h-12'den w-16 h-16'ya çıkarıldı ve rounded-xl/shadow-lg kaldırıldı, Settings dialog'da w-16 h-16'dan w-20 h-20'ye çıkarıldı ve çerçeve/gölge efektleri kaldırıldı. Artık sadece logo ve açıklama metni görünüyor."
         
   - task: "Kayıt formuna reCAPTCHA entegrasyonu"
     implemented: true
