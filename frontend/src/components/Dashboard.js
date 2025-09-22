@@ -5,6 +5,8 @@ import { Input } from './ui/input';
 import { Card, CardContent } from './ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { toast } from 'sonner';
+import { useTheme } from '../contexts/ThemeContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { 
   Mail, 
   Search, 
@@ -38,6 +40,9 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
 const Dashboard = ({ user, onLogout }) => {
+  const { theme, setTheme } = useTheme();
+  const { language, setLanguage, t } = useLanguage();
+  
   const [selectedFolder, setSelectedFolder] = useState('inbox');
   const [emails, setEmails] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -51,20 +56,32 @@ const Dashboard = ({ user, onLogout }) => {
   const [loading, setLoading] = useState(false);
   const [lastSync, setLastSync] = useState(null);
   const [folders, setFolders] = useState({
-    all: { name: 'Tüm Mailler', count: 0, icon: Archive },
-    inbox: { name: 'Gelen Kutusu', count: 0, icon: Inbox },
-    sent: { name: 'Gönderilenler', count: 0, icon: Send },
-    deleted: { name: 'Silinenler', count: 0, icon: Trash2 },
-    spam: { name: 'Spam', count: 0, icon: AlertTriangle }
+    all: { name: t('navigation.allMails'), count: 0, icon: Archive },
+    inbox: { name: t('navigation.inbox'), count: 0, icon: Inbox },
+    sent: { name: t('navigation.sent'), count: 0, icon: Send },
+    deleted: { name: t('navigation.deleted'), count: 0, icon: Trash2 },
+    spam: { name: t('navigation.spam'), count: 0, icon: AlertTriangle }
   });
   const [storageInfo, setStorageInfo] = useState({ totalEmails: 0, totalSize: 0 });
   const [settings, setSettings] = useState({
-    theme: 'light',
-    language: 'tr',
+    theme: theme,
+    language: language,
     autoSync: false,
     autoSyncInterval: 10
   });
   const [connectedAccounts, setConnectedAccounts] = useState([]);
+
+  // Update folder names when language changes
+  useEffect(() => {
+    setFolders(prev => ({
+      ...prev,
+      all: { ...prev.all, name: t('navigation.allMails') },
+      inbox: { ...prev.inbox, name: t('navigation.inbox') },
+      sent: { ...prev.sent, name: t('navigation.sent') },
+      deleted: { ...prev.deleted, name: t('navigation.deleted') },
+      spam: { ...prev.spam, name: t('navigation.spam') }
+    }));
+  }, [language, t]);
 
   useEffect(() => {
     loadEmails();
@@ -93,7 +110,7 @@ const Dashboard = ({ user, onLogout }) => {
         spam: { ...prev.spam, count: folderCounts.spam || 0 }
       }));
     } catch (error) {
-      toast.error('E-postalar yüklenirken hata oluştu');
+      toast.error(t('notifications.emailsLoadError'));
     }
   };
 
@@ -119,7 +136,12 @@ const Dashboard = ({ user, onLogout }) => {
   const loadSettings = () => {
     const savedSettings = localStorage.getItem('userSettings');
     if (savedSettings) {
-      setSettings(JSON.parse(savedSettings));
+      const parsed = JSON.parse(savedSettings);
+      setSettings({
+        ...parsed,
+        theme: theme,
+        language: language
+      });
     }
   };
 
@@ -147,11 +169,11 @@ const Dashboard = ({ user, onLogout }) => {
       setLastSync(now);
       localStorage.setItem('lastSync', now.toISOString());
       
-      toast.success('E-postalar başarıyla senkronize edildi');
+      toast.success(t('notifications.syncSuccess'));
       loadEmails();
       loadStorageInfo();
     } catch (error) {
-      toast.error('Senkronizasyon hatası');
+      toast.error(t('notifications.syncError'));
     }
     setLoading(false);
   };
@@ -187,13 +209,13 @@ const Dashboard = ({ user, onLogout }) => {
         headers: { Authorization: `Bearer ${token}` }
       });
       
-      toast.success('E-posta kalıcı olarak silindi');
+      toast.success(t('notifications.deleteSuccess'));
       setDeleteConfirmOpen(false);
       setEmailDetailOpen(false);
       loadEmails();
       loadStorageInfo();
     } catch (error) {
-      toast.error('E-posta silinirken hata oluştu');
+      toast.error(t('notifications.deleteError'));
     }
   };
 
@@ -213,16 +235,16 @@ const Dashboard = ({ user, onLogout }) => {
         },
         onUploadProgress: (progressEvent) => {
           const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-          toast.info(`Yükleme: %${percentCompleted}`);
+          toast.info(`${t('common.loading')}: %${percentCompleted}`);
         }
       });
       
-      toast.success(`✅ İçe aktarma başarılı! ${response.data.count} e-posta eklendi.`);
+      toast.success(t('notifications.importSuccess').replace('{count}', response.data.count));
       setImportOpen(false);
       loadEmails();
       loadStorageInfo();
     } catch (error) {
-      toast.error('İçe aktarma hatası: ' + (error.response?.data?.detail || 'Bilinmeyen hata'));
+      toast.error(t('notifications.importError') + ': ' + (error.response?.data?.detail || t('common.error')));
     }
     setLoading(false);
   };
@@ -250,17 +272,25 @@ const Dashboard = ({ user, onLogout }) => {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
       
-      toast.success('✅ Dışa aktarma başarılı!');
+      toast.success(t('notifications.exportSuccess'));
       setExportOpen(false);
     } catch (error) {
-      toast.error('Dışa aktarma hatası');
+      toast.error(t('notifications.exportError'));
     }
     setLoading(false);
   };
 
   const handleSaveSettings = () => {
+    // Save theme and language to contexts
+    if (settings.theme !== theme) {
+      setTheme(settings.theme);
+    }
+    if (settings.language !== language) {
+      setLanguage(settings.language);
+    }
+    
     localStorage.setItem('userSettings', JSON.stringify(settings));
-    toast.success('Ayarlar kaydedildi');
+    toast.success(t('notifications.settingsSaved'));
     setSettingsOpen(false);
     
     // If auto sync is enabled, set up interval
@@ -269,7 +299,89 @@ const Dashboard = ({ user, onLogout }) => {
       setInterval(() => {
         handleSync();
       }, interval);
-      toast.info(`Otomatik senkronizasyon ${settings.autoSyncInterval} dakikada bir çalışacak`);
+      toast.info(t('notifications.autoSyncEnabled').replace('{interval}', settings.autoSyncInterval));
+    }
+  };
+
+  const handleConnectOutlook = async () => {
+    setLoading(true);
+    toast.info(t('notifications.outlookConnecting'));
+    
+    try {
+      const token = localStorage.getItem('token');
+      
+      // Simulate OAuth flow - in real implementation, this would redirect to Microsoft OAuth
+      const outlookAuthUrl = `https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=your_client_id&response_type=code&redirect_uri=${encodeURIComponent(window.location.origin + '/auth/outlook/callback')}&scope=https://graph.microsoft.com/Mail.Read&state=${user.id}`;
+      
+      // For demo purposes, we'll simulate a successful connection
+      setTimeout(async () => {
+        try {
+          const newAccount = {
+            id: Date.now().toString(),
+            user_id: user.id,
+            type: 'outlook',
+            email: user.email.replace('@postadepo.com', '@outlook.com'),
+            connected_at: new Date().toISOString()
+          };
+          
+          // In real implementation, this would be handled by the backend after OAuth callback
+          setConnectedAccounts(prev => [...prev, newAccount]);
+          toast.success(t('notifications.outlookConnected'));
+          setLoading(false);
+          setAccountConnectOpen(false);
+        } catch (error) {
+          toast.error(t('notifications.outlookError'));
+          setLoading(false);
+        }
+      }, 2000);
+      
+      // Uncomment this for real OAuth flow
+      // window.location.href = outlookAuthUrl;
+      
+    } catch (error) {
+      toast.error(t('notifications.outlookError'));
+      setLoading(false);
+    }
+  };
+
+  const handleConnectGmail = async () => {
+    setLoading(true);
+    toast.info(t('notifications.gmailConnecting'));
+    
+    try {
+      const token = localStorage.getItem('token');
+      
+      // Simulate OAuth flow - in real implementation, this would redirect to Google OAuth
+      const gmailAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=your_client_id&response_type=code&redirect_uri=${encodeURIComponent(window.location.origin + '/auth/gmail/callback')}&scope=https://www.googleapis.com/auth/gmail.readonly&state=${user.id}`;
+      
+      // For demo purposes, we'll simulate a successful connection
+      setTimeout(async () => {
+        try {
+          const newAccount = {
+            id: Date.now().toString(),
+            user_id: user.id,
+            type: 'gmail',
+            email: user.email.replace('@postadepo.com', '@gmail.com'),
+            connected_at: new Date().toISOString()
+          };
+          
+          // In real implementation, this would be handled by the backend after OAuth callback
+          setConnectedAccounts(prev => [...prev, newAccount]);
+          toast.success(t('notifications.gmailConnected'));
+          setLoading(false);
+          setAccountConnectOpen(false);
+        } catch (error) {
+          toast.error(t('notifications.gmailError'));
+          setLoading(false);
+        }
+      }, 2000);
+      
+      // Uncomment this for real OAuth flow
+      // window.location.href = gmailAuthUrl;
+      
+    } catch (error) {
+      toast.error(t('notifications.gmailError'));
+      setLoading(false);
     }
   };
 
@@ -281,7 +393,7 @@ const Dashboard = ({ user, onLogout }) => {
   });
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('tr-TR', {
+    return new Date(dateString).toLocaleDateString(language === 'tr' ? 'tr-TR' : 'en-US', {
       day: '2-digit',
       month: '2-digit', 
       year: 'numeric',
@@ -299,12 +411,12 @@ const Dashboard = ({ user, onLogout }) => {
   return (
     <div className="h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 flex">
       {/* Sidebar */}
-      <div className="w-80 bg-white/90 backdrop-blur-sm border-r border-slate-200 flex flex-col shadow-lg">
+      <div className="w-80 bg-white/90 backdrop-blur-sm border-r border-slate-200 flex flex-col shadow-lg sidebar">
         {/* Header */}
         <div className="p-6 border-b border-slate-200">
           <div className="flex items-center space-x-3 mb-4">
             <img 
-              src="https://customer-assets.emergentagent.com/job_4338b971-040d-400e-9544-183651a406e5/artifacts/g6inru6i_postadepo_logo_transparent.png" 
+              src="https://customer-assets.emergentagent.com/job_240f2e1c-9c13-45be-8f51-23631a027e43/artifacts/kpwl9rr8_postadepo_logo_transparent.png"
               alt="PostaDepo"
               className="w-12 h-12 rounded-xl shadow-lg"
             />
@@ -321,7 +433,7 @@ const Dashboard = ({ user, onLogout }) => {
               className="flex-1 h-10 bg-[#2c5282] hover:bg-[#1a365d] text-white rounded-lg text-sm"
             >
               <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-              Senkronize Et
+              {t('dashboard.sync')}
             </Button>
             
             <Button 
@@ -335,7 +447,7 @@ const Dashboard = ({ user, onLogout }) => {
           
           {lastSync && (
             <p className="text-xs text-slate-500 mt-2">
-              Son senkronizasyon: {formatDate(lastSync)}
+              {t('dashboard.lastSync')}: {formatDate(lastSync)}
             </p>
           )}
         </div>
@@ -378,12 +490,12 @@ const Dashboard = ({ user, onLogout }) => {
             <div className="flex items-center justify-between text-sm">
               <div className="flex items-center space-x-2">
                 <HardDrive className="w-4 h-4 text-slate-500" />
-                <span className="text-slate-600">Toplam Mail</span>
+                <span className="text-slate-600">{t('dashboard.totalMails')}</span>
               </div>
               <span className="font-semibold text-slate-800">{storageInfo.totalEmails}</span>
             </div>
             <div className="flex items-center justify-between text-sm">
-              <span className="text-slate-600">Kapladığı Alan</span>
+              <span className="text-slate-600">{t('dashboard.storage')}</span>
               <span className="font-semibold text-slate-800">{formatSize(storageInfo.totalSize)}</span>
             </div>
           </div>
@@ -397,14 +509,14 @@ const Dashboard = ({ user, onLogout }) => {
               className="flex-1 h-10 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-lg text-sm shadow-lg"
             >
               <Upload className="w-4 h-4 mr-2" />
-              İçe Aktar
+              {t('dashboard.import')}
             </Button>
             <Button 
               onClick={() => setExportOpen(true)}
               className="flex-1 h-10 bg-gradient-to-r from-purple-500 to-violet-600 hover:from-purple-600 hover:to-violet-700 text-white rounded-lg text-sm shadow-lg"
             >
               <Download className="w-4 h-4 mr-2" />
-              Dışa Aktar
+              {t('dashboard.export')}
             </Button>
           </div>
           
@@ -413,7 +525,7 @@ const Dashboard = ({ user, onLogout }) => {
             className="w-full h-10 bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 text-white rounded-lg shadow-lg"
           >
             <Link2 className="w-4 h-4 mr-2" />
-            Hesabı Bağla
+            {t('dashboard.connectAccount')}
           </Button>
           
           <Button 
@@ -422,7 +534,7 @@ const Dashboard = ({ user, onLogout }) => {
             className="w-full h-10 border-red-300 text-red-600 hover:bg-red-50 rounded-lg"
           >
             <LogOut className="w-4 h-4 mr-2" />
-            Çıkış Yap
+            {t('common.logout')}
           </Button>
         </div>
       </div>
@@ -436,7 +548,7 @@ const Dashboard = ({ user, onLogout }) => {
               <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
               <Input
                 type="text"
-                placeholder={selectedFolder === 'all' ? "E-posta ara..." : "Arama sadece 'Tüm Mailler' bölümünde çalışır"}
+                placeholder={selectedFolder === 'all' ? t('dashboard.searchPlaceholder') : t('dashboard.searchDisabled')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 disabled={selectedFolder !== 'all'}
@@ -454,7 +566,7 @@ const Dashboard = ({ user, onLogout }) => {
             {filteredEmails.length === 0 ? (
               <div className="text-center py-12">
                 <Mail className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-                <p className="text-slate-500 text-lg">Bu klasörde henüz e-posta yok</p>
+                <p className="text-slate-500 text-lg">{t('dashboard.noEmails')}</p>
               </div>
             ) : (
               filteredEmails.map((email) => (
@@ -515,7 +627,7 @@ const Dashboard = ({ user, onLogout }) => {
                 className="border-red-300 text-red-600 hover:bg-red-50"
               >
                 <Trash className="w-4 h-4 mr-2" />
-                Kalıcı Sil
+                {t('email.permanentlyDelete')}
               </Button>
             </div>
           </DialogHeader>
@@ -530,14 +642,14 @@ const Dashboard = ({ user, onLogout }) => {
                   <div className="text-right">
                     <p className="text-sm text-slate-500">{formatDate(selectedEmail.date)}</p>
                     <span className="inline-block text-xs text-slate-500 bg-slate-200 px-2 py-1 rounded-full mt-1">
-                      Boyut: {formatSize(selectedEmail.size || 1024)}
+                      {t('email.size')}: {formatSize(selectedEmail.size || 1024)}
                     </span>
                   </div>
                 </div>
                 {selectedEmail.important && (
                   <div className="flex items-center space-x-2 text-red-600">
                     <Flag className="w-4 h-4" />
-                    <span className="text-sm font-medium">Önemli</span>
+                    <span className="text-sm font-medium">{t('email.important')}</span>
                   </div>
                 )}
               </div>
@@ -557,14 +669,14 @@ const Dashboard = ({ user, onLogout }) => {
           <DialogHeader>
             <DialogTitle className="text-center text-red-700 flex items-center justify-center gap-2">
               <AlertTriangle className="w-5 h-5" />
-              E-postayı Sil
+              {t('common.delete')} {t('common.email')}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 pt-4">
             <div className="text-center">
               <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-              <p className="text-slate-700 mb-2">Bu e-postayı kalıcı olarak silmek istediğinizden emin misiniz?</p>
-              <p className="text-sm text-slate-500">Bu işlem geri alınamaz.</p>
+              <p className="text-slate-700 mb-2">{t('email.deleteConfirm')}</p>
+              <p className="text-sm text-slate-500">{t('email.deleteWarning')}</p>
             </div>
             <div className="flex space-x-2">
               <Button 
@@ -572,13 +684,13 @@ const Dashboard = ({ user, onLogout }) => {
                 variant="outline" 
                 className="flex-1"
               >
-                İptal
+                {t('common.cancel')}
               </Button>
               <Button 
                 onClick={handleDeleteEmail}
                 className="flex-1 bg-red-600 hover:bg-red-700 text-white"
               >
-                Evet, Sil
+                {t('email.yes')}, {t('common.delete')}
               </Button>
             </div>
           </div>
@@ -591,35 +703,35 @@ const Dashboard = ({ user, onLogout }) => {
           <DialogHeader>
             <DialogTitle className="text-center text-slate-800 flex items-center justify-center gap-2">
               <Settings className="w-5 h-5" />
-              Ayarlar
+              {t('settings.title')}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-6 pt-4">
             <div className="text-center">
               <img 
-                src="https://customer-assets.emergentagent.com/job_4338b971-040d-400e-9544-183651a406e5/artifacts/g6inru6i_postadepo_logo_transparent.png" 
+                src="https://customer-assets.emergentagent.com/job_240f2e1c-9c13-45be-8f51-23631a027e43/artifacts/kpwl9rr8_postadepo_logo_transparent.png"
                 alt="PostaDepo"
                 className="w-16 h-16 mx-auto mb-4 rounded-xl shadow-lg"
               />
               <h3 className="text-lg font-semibold text-slate-800">PostaDepo</h3>
               <p className="text-sm text-slate-600">E-posta Yönetim Sistemi</p>
-              <p className="text-xs text-slate-500 mt-2">Sürüm 1.0.0</p>
+              <p className="text-xs text-slate-500 mt-2">{t('settings.version')}</p>
             </div>
             
             {/* Theme Settings */}
             <div className="space-y-3">
               <div className="flex items-center space-x-2">
                 <Palette className="w-4 h-4 text-slate-600" />
-                <label className="text-sm font-medium text-slate-700">Tema</label>
+                <label className="text-sm font-medium text-slate-700">{t('settings.theme')}</label>
               </div>
               <select 
                 value={settings.theme}
                 onChange={(e) => setSettings({...settings, theme: e.target.value})}
                 className="w-full p-2 border border-slate-300 rounded-lg focus:border-[#2c5282] focus:ring-1 focus:ring-[#2c5282]"
               >
-                <option value="light">Açık Tema</option>
-                <option value="dark">Koyu Tema</option>
-                <option value="auto">Otomatik</option>
+                <option value="light">{t('settings.themes.light')}</option>
+                <option value="dark">{t('settings.themes.dark')}</option>
+                <option value="auto">{t('settings.themes.auto')}</option>
               </select>
             </div>
 
@@ -627,15 +739,15 @@ const Dashboard = ({ user, onLogout }) => {
             <div className="space-y-3">
               <div className="flex items-center space-x-2">
                 <Globe className="w-4 h-4 text-slate-600" />
-                <label className="text-sm font-medium text-slate-700">Dil</label>
+                <label className="text-sm font-medium text-slate-700">{t('settings.language')}</label>
               </div>
               <select 
                 value={settings.language}
                 onChange={(e) => setSettings({...settings, language: e.target.value})}
                 className="w-full p-2 border border-slate-300 rounded-lg focus:border-[#2c5282] focus:ring-1 focus:ring-[#2c5282]"
               >
-                <option value="tr">Türkçe</option>
-                <option value="en">English</option>
+                <option value="tr">{t('settings.languages.tr')}</option>
+                <option value="en">{t('settings.languages.en')}</option>
               </select>
             </div>
 
@@ -644,7 +756,7 @@ const Dashboard = ({ user, onLogout }) => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                   <Clock className="w-4 h-4 text-slate-600" />
-                  <label className="text-sm font-medium text-slate-700">Otomatik Senkronizasyon</label>
+                  <label className="text-sm font-medium text-slate-700">{t('settings.autoSync')}</label>
                 </div>
                 <button
                   onClick={() => setSettings({...settings, autoSync: !settings.autoSync})}
@@ -664,9 +776,9 @@ const Dashboard = ({ user, onLogout }) => {
                   onChange={(e) => setSettings({...settings, autoSyncInterval: parseInt(e.target.value)})}
                   className="w-full p-2 border border-slate-300 rounded-lg focus:border-[#2c5282] focus:ring-1 focus:ring-[#2c5282]"
                 >
-                  <option value={5}>5 Dakika</option>
-                  <option value={10}>10 Dakika</option>
-                  <option value={15}>15 Dakika</option>
+                  <option value={5}>{t('settings.syncIntervals.5')}</option>
+                  <option value={10}>{t('settings.syncIntervals.10')}</option>
+                  <option value={15}>{t('settings.syncIntervals.15')}</option>
                 </select>
               )}
             </div>
@@ -674,15 +786,15 @@ const Dashboard = ({ user, onLogout }) => {
             {/* User Info */}
             <div className="pt-4 border-t space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="text-slate-600">Kullanıcı:</span>
+                <span className="text-slate-600">{t('settings.user')}:</span>
                 <span className="text-slate-800">{user?.email}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-slate-600">Toplam E-posta:</span>
+                <span className="text-slate-600">{t('dashboard.totalMails')}:</span>
                 <span className="text-slate-800">{storageInfo.totalEmails}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-slate-600">Depolama:</span>
+                <span className="text-slate-600">{t('dashboard.storage')}:</span>
                 <span className="text-slate-800">{formatSize(storageInfo.totalSize)}</span>
               </div>
             </div>
@@ -692,7 +804,7 @@ const Dashboard = ({ user, onLogout }) => {
               className="w-full h-10 bg-[#2c5282] hover:bg-[#1a365d] text-white rounded-lg"
             >
               <Save className="w-4 h-4 mr-2" />
-              Kaydet
+              {t('common.save')}
             </Button>
           </div>
         </DialogContent>
@@ -704,22 +816,22 @@ const Dashboard = ({ user, onLogout }) => {
           <DialogHeader>
             <DialogTitle className="text-center text-slate-800 flex items-center justify-center gap-2">
               <Link2 className="w-5 h-5" />
-              Veri Yönetimi Paneli
+              {t('connect.title')}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-6 pt-4">
             {/* Connected Accounts */}
             {connectedAccounts.length > 0 && (
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-slate-800">Bağlı Hesaplar</h3>
+                <h3 className="text-lg font-semibold text-slate-800">{t('connect.connectedAccounts')}</h3>
                 {connectedAccounts.map((account, index) => (
                   <div key={index} className="bg-green-50 border border-green-200 p-4 rounded-lg">
                     <div className="flex items-center space-x-3">
                       <CheckCircle className="w-5 h-5 text-green-600" />
                       <div>
-                        <p className="font-medium text-green-800">{account.type} Hesabı</p>
+                        <p className="font-medium text-green-800">{account.type} {t('common.email')}</p>
                         <p className="text-sm text-green-600">{account.email}</p>
-                        <p className="text-xs text-green-500">Bağlantı tarihi: {formatDate(account.connectedAt)}</p>
+                        <p className="text-xs text-green-500">{t('connect.connectDate')}: {formatDate(account.connected_at)}</p>
                       </div>
                     </div>
                   </div>
@@ -734,35 +846,39 @@ const Dashboard = ({ user, onLogout }) => {
                   <Mail className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-blue-800">Outlook Mail Hesabınızı Bağlayın</h3>
-                  <p className="text-sm text-blue-600">Microsoft 365 / Exchange Online / Hotmail</p>
+                  <h3 className="font-semibold text-blue-800">{t('connect.outlookTitle')}</h3>
+                  <p className="text-sm text-blue-600">{t('connect.outlookSubtitle')}</p>
                 </div>
               </div>
               
               <div className="space-y-4 text-sm text-blue-700">
-                <p className="font-medium">👉 Eğer kurumsal (Microsoft 365/Exchange Online) hesabı kullanıyorsanız:</p>
+                <p className="font-medium">👉 {language === 'tr' ? 'Eğer kurumsal (Microsoft 365/Exchange Online) hesabı kullanıyorsanız:' : 'If you are using a corporate (Microsoft 365/Exchange Online) account:'}</p>
                 <ul className="list-disc list-inside space-y-1 ml-4 text-blue-600">
-                  <li><span className="font-medium">Tenant (Directory) ID</span> – Azure Active Directory &gt; Genel Bakış kısmında bulabilirsiniz.</li>
-                  <li><span className="font-medium">Client ID</span> – Azure Portal &gt; App registrations kısmında oluşturulur.</li>
-                  <li><span className="font-medium">Client Secret</span> – App registrations &gt; Certificates & Secrets altında oluşturulur.</li>
-                  <li><span className="font-medium">Mail.Read izni</span> – Uygulama kaydına bu izin eklenip onaylanmalıdır.</li>
-                  <li><span className="font-medium">Mailbox adresi</span> – Hangi e-posta kutusunun okunacağını belirtiniz.</li>
+                  <li><span className="font-medium">Tenant (Directory) ID</span> – Azure Active Directory &gt; {language === 'tr' ? 'Genel Bakış kısmında bulabilirsiniz.' : 'You can find it in the Overview section.'}</li>
+                  <li><span className="font-medium">Client ID</span> – Azure Portal &gt; App registrations {language === 'tr' ? 'kısmında oluşturulur.' : 'section is created.'}</li>
+                  <li><span className="font-medium">Client Secret</span> – App registrations &gt; Certificates & Secrets {language === 'tr' ? 'altında oluşturulur.' : 'is created under.'}</li>
+                  <li><span className="font-medium">Mail.Read {language === 'tr' ? 'izni' : 'permission'}</span> – {language === 'tr' ? 'Uygulama kaydına bu izin eklenip onaylanmalıdır.' : 'This permission must be added and approved to the application registration.'}</li>
+                  <li><span className="font-medium">Mailbox {language === 'tr' ? 'adresi' : 'address'}</span> – {language === 'tr' ? 'Hangi e-posta kutusunun okunacağını belirtiniz.' : 'Specify which mailbox to read.'}</li>
                 </ul>
                 
-                <p className="font-medium">👉 Eğer kişisel Outlook/Hotmail hesabı kullanıyorsanız:</p>
+                <p className="font-medium">👉 {language === 'tr' ? 'Eğer kişisel Outlook/Hotmail hesabı kullanıyorsanız:' : 'If you are using a personal Outlook/Hotmail account:'}</p>
                 <ul className="list-disc list-inside space-y-1 ml-4 text-blue-600">
-                  <li>Tenant ID gerekmez.</li>
-                  <li>Sadece uygulamamızın bağlantı isteğini onaylamanız ve e-posta adresinizi (mailbox) paylaşmanız yeterlidir.</li>
+                  <li>{language === 'tr' ? 'Tenant ID gerekmez.' : 'Tenant ID is not required.'}</li>
+                  <li>{language === 'tr' ? 'Sadece uygulamamızın bağlantı isteğini onaylamanız ve e-posta adresinizi (mailbox) paylaşmanız yeterlidir.' : 'You just need to approve our app connection request and share your email address (mailbox).'}</li>
                 </ul>
                 
                 <p className="text-xs bg-blue-100 p-2 rounded">
-                  ⚠️ Not: Bilgileriniz yalnızca e-postalarınızı okuyup veritabanına kaydetmek için kullanılacaktır. Hiçbir şekilde şifre bilgisi istenmez.
+                  ⚠️ {t('connect.authWarning')}
                 </p>
               </div>
               
-              <Button className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white">
+              <Button 
+                onClick={handleConnectOutlook}
+                disabled={loading}
+                className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white"
+              >
                 <Zap className="w-4 h-4 mr-2" />
-                Outlook Hesabı Bağla
+                {t('connect.connectOutlook')}
               </Button>
             </div>
 
@@ -773,29 +889,33 @@ const Dashboard = ({ user, onLogout }) => {
                   <Mail className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-red-800">Gmail Hesabınızı Bağlayın</h3>
-                  <p className="text-sm text-red-600">Google Workspace / Gmail</p>
+                  <h3 className="font-semibold text-red-800">{t('connect.gmailTitle')}</h3>
+                  <p className="text-sm text-red-600">{t('connect.gmailSubtitle')}</p>
                 </div>
               </div>
               
               <div className="space-y-4 text-sm text-red-700">
-                <p>Gmail hesabınızı sistemimize bağlayabilmemiz için aşağıdaki bilgilere ihtiyaç vardır:</p>
+                <p>{language === 'tr' ? 'Gmail hesabınızı sistemimize bağlayabilmemiz için aşağıdaki bilgilere ihtiyaç vardır:' : 'We need the following information to connect your Gmail account to our system:'}</p>
                 <ul className="list-disc list-inside space-y-1 ml-4 text-red-600">
-                  <li><span className="font-medium">Client ID</span> – Google Cloud Console &gt; API & Services &gt; Credentials kısmından alınır.</li>
-                  <li><span className="font-medium">Client Secret</span> – Yine aynı bölümde oluşturulur.</li>
-                  <li><span className="font-medium">Redirect URI</span> – Uygulamanızın OAuth dönüş adresi.</li>
-                  <li><span className="font-medium">Gerekli izin (scope)</span> – https://www.googleapis.com/auth/gmail.readonly (sadece okuma için yeterli).</li>
-                  <li><span className="font-medium">Mailbox adresi</span> (Gmail adresiniz)</li>
+                  <li><span className="font-medium">Client ID</span> – Google Cloud Console &gt; API & Services &gt; Credentials {language === 'tr' ? 'kısmından alınır.' : 'section.'}</li>
+                  <li><span className="font-medium">Client Secret</span> – {language === 'tr' ? 'Yine aynı bölümde oluşturulur.' : 'Created in the same section.'}</li>
+                  <li><span className="font-medium">Redirect URI</span> – {language === 'tr' ? 'Uygulamanızın OAuth dönüş adresi.' : 'Your application OAuth return address.'}</li>
+                  <li><span className="font-medium">{language === 'tr' ? 'Gerekli izin (scope)' : 'Required permission (scope)'}</span> – https://www.googleapis.com/auth/gmail.readonly ({language === 'tr' ? 'sadece okuma için yeterli' : 'sufficient for read-only'}).</li>
+                  <li><span className="font-medium">Mailbox {language === 'tr' ? 'adresi' : 'address'}</span> (Gmail {language === 'tr' ? 'adresiniz' : 'address'})</li>
                 </ul>
                 
                 <p className="text-xs bg-red-100 p-2 rounded">
-                  ⚠️ Bilgileriniz yalnızca e-postalarınızı okuyup veritabanına kaydetmek için kullanılacaktır. Şifre istenmez.
+                  ⚠️ {t('connect.authWarning')}
                 </p>
               </div>
               
-              <Button className="w-full mt-4 bg-red-600 hover:bg-red-700 text-white">
+              <Button 
+                onClick={handleConnectGmail}
+                disabled={loading}
+                className="w-full mt-4 bg-red-600 hover:bg-red-700 text-white"
+              >
                 <Zap className="w-4 h-4 mr-2" />
-                Gmail Hesabı Bağla
+                {t('connect.connectGmail')}
               </Button>
             </div>
           </div>
@@ -806,11 +926,11 @@ const Dashboard = ({ user, onLogout }) => {
       <Dialog open={importOpen} onOpenChange={setImportOpen}>
         <DialogContent className="sm:max-w-md backdrop-blur-md bg-white/95">
           <DialogHeader>
-            <DialogTitle className="text-center text-slate-800">E-posta İçe Aktarma</DialogTitle>
+            <DialogTitle className="text-center text-slate-800">{t('dashboard.import')} {t('common.email')}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 pt-4">
             <p className="text-sm text-slate-600 text-center">
-              .pst, .ost veya .eml dosyalarını seçin
+              .pst, .ost {language === 'tr' ? 've' : 'or'} .eml {language === 'tr' ? 'dosyalarını seçin' : 'files'}
             </p>
             <div className="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center hover:border-[#2c5282] transition-colors">
               <Upload className="w-8 h-8 text-slate-400 mx-auto mb-2" />
@@ -825,7 +945,7 @@ const Dashboard = ({ user, onLogout }) => {
             {loading && (
               <div className="flex items-center justify-center py-4">
                 <RefreshCw className="w-6 h-6 animate-spin text-[#2c5282] mr-2" />
-                <span className="text-slate-600">İçe aktarılıyor...</span>
+                <span className="text-slate-600">{t('common.loading')}</span>
               </div>
             )}
           </div>
@@ -836,11 +956,11 @@ const Dashboard = ({ user, onLogout }) => {
       <Dialog open={exportOpen} onOpenChange={setExportOpen}>
         <DialogContent className="sm:max-w-md backdrop-blur-md bg-white/95">
           <DialogHeader>
-            <DialogTitle className="text-center text-slate-800">E-posta Dışa Aktarma</DialogTitle>
+            <DialogTitle className="text-center text-slate-800">{t('dashboard.export')} {t('common.email')}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 pt-4">
             <p className="text-sm text-slate-600 text-center">
-              "{folders[selectedFolder]?.name}" klasörü için dışa aktarma formatını seçin
+              "{folders[selectedFolder]?.name}" {language === 'tr' ? 'klasörü için dışa aktarma formatını seçin' : 'folder export format'}
             </p>
             <div className="space-y-2">
               <Button 
@@ -873,7 +993,7 @@ const Dashboard = ({ user, onLogout }) => {
             {loading && (
               <div className="flex items-center justify-center py-4">
                 <RefreshCw className="w-6 h-6 animate-spin text-[#2c5282] mr-2" />
-                <span className="text-slate-600">Dışa aktarılıyor...</span>
+                <span className="text-slate-600">{t('common.loading')}</span>
               </div>
             )}
           </div>
