@@ -17,6 +17,7 @@ import json
 import zipfile
 import io
 import random
+import httpx
 
 
 ROOT_DIR = Path(__file__).parent
