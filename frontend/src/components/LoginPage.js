@@ -221,14 +221,14 @@ const LoginPage = ({ onLogin }) => {
                   <DialogHeader>
                     <DialogTitle className="text-center text-slate-800 flex items-center justify-center gap-2">
                       <UserPlus className="w-5 h-5" />
-                      Kayıt Ol
+                      {t('auth.registerTitle')}
                     </DialogTitle>
                   </DialogHeader>
                   <div className="space-y-4 pt-4">
                     <div className="relative">
                       <Input
                         type="text"
-                        placeholder="Adınız Soyadınız"
+                        placeholder={t('auth.namePlaceholder')}
                         value={registerData.name}
                         onChange={(e) => setRegisterData({...registerData, name: e.target.value})}
                         className="h-12 bg-white/70 border-slate-200 focus:border-[#2c5282] focus:ring-[#2c5282] rounded-lg"
@@ -238,7 +238,7 @@ const LoginPage = ({ onLogin }) => {
                       <Mail className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
                       <Input
                         type="email"
-                        placeholder="E-posta adresiniz"
+                        placeholder={t('auth.emailPlaceholder')}
                         value={registerData.email}
                         onChange={(e) => setRegisterData({...registerData, email: e.target.value})}
                         className="pl-10 h-12 bg-white/70 border-slate-200 focus:border-[#2c5282] focus:ring-[#2c5282] rounded-lg"
@@ -248,7 +248,7 @@ const LoginPage = ({ onLogin }) => {
                       <Lock className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
                       <Input
                         type="password"
-                        placeholder="Şifreniz (min. 6 karakter)"
+                        placeholder={t('auth.passwordPlaceholder') + " (min. 6)"}
                         value={registerData.password}
                         onChange={(e) => setRegisterData({...registerData, password: e.target.value})}
                         className="pl-10 h-12 bg-white/70 border-slate-200 focus:border-[#2c5282] focus:ring-[#2c5282] rounded-lg"
@@ -258,7 +258,7 @@ const LoginPage = ({ onLogin }) => {
                       <Lock className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
                       <Input
                         type="password"
-                        placeholder="Şifrenizi tekrar girin"
+                        placeholder={t('auth.confirmPasswordPlaceholder')}
                         value={registerData.confirmPassword}
                         onChange={(e) => setRegisterData({...registerData, confirmPassword: e.target.value})}
                         className="pl-10 h-12 bg-white/70 border-slate-200 focus:border-[#2c5282] focus:ring-[#2c5282] rounded-lg"
@@ -268,7 +268,7 @@ const LoginPage = ({ onLogin }) => {
                       onClick={handleRegister}
                       className="w-full h-12 bg-[#2c5282] hover:bg-[#1a365d] text-white rounded-lg"
                     >
-                      Kayıt Ol
+                      {t('auth.registerTitle')}
                     </Button>
                   </div>
                 </DialogContent>
