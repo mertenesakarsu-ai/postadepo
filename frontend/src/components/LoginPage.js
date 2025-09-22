@@ -63,17 +63,17 @@ const LoginPage = ({ onLogin }) => {
 
   const handleRegister = async () => {
     if (!registerData.name || !registerData.email || !registerData.password || !registerData.confirmPassword) {
-      toast.error('Lütfen tüm alanları doldurun');
+      toast.error(t('auth.fillAllFields'));
       return;
     }
 
     if (registerData.password !== registerData.confirmPassword) {
-      toast.error('Şifreler eşleşmiyor');
+      toast.error(t('auth.passwordMismatch'));
       return;
     }
 
     if (registerData.password.length < 6) {
-      toast.error('Şifre en az 6 karakter olmalıdır');
+      toast.error(t('auth.passwordTooShort'));
       return;
     }
 
@@ -84,12 +84,12 @@ const LoginPage = ({ onLogin }) => {
         password: registerData.password
       });
       
-      toast.success('Kayıt başarılı! Şimdi giriş yapabilirsiniz.');
+      toast.success(t('auth.registerSuccess'));
       setRegisterOpen(false);
       setRegisterData({ name: '', email: '', password: '', confirmPassword: '' });
       setEmail(registerData.email);
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Kayıt sırasında hata oluştu');
+      toast.error(error.response?.data?.detail || t('common.error'));
     }
   };
 
