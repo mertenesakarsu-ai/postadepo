@@ -197,21 +197,23 @@ const LoginPage = ({ onLogin }) => {
 
             {/* Demo Login Info */}
             <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-              <p className="text-sm font-medium text-blue-800 mb-2">{t('auth.demoLogin')}:</p>
-              <p className="text-sm text-blue-700">{t('common.email')}: demo@postadepo.com</p>
-              <p className="text-sm text-blue-700">{t('common.password')}: demo123</p>
+              <p className="text-sm font-medium text-blue-800 mb-2 text-center">{t('auth.demoLogin')}:</p>
+              <div className="text-center space-y-1">
+                <p className="text-sm text-blue-700">{t('common.email')}: demo@postadepo.com</p>
+                <p className="text-sm text-blue-700">{t('common.password')}: demo123</p>
+              </div>
               <Button 
                 type="button"
                 variant="outline"
                 onClick={handleDemoLogin}
-                className="w-full mt-2 border-blue-300 text-blue-700 hover:bg-blue-100 rounded-lg"
+                className="w-full mt-3 border-blue-300 text-blue-700 hover:bg-blue-100 rounded-lg h-10"
               >
                 {t('auth.demoUse')}
               </Button>
             </div>
 
             {/* Links */}
-            <div className="flex flex-col space-y-2 pt-4">
+            <div className="flex flex-col items-center space-y-3 pt-6">
               <Dialog open={forgotPasswordOpen} onOpenChange={setForgotPasswordOpen}>
                 <DialogTrigger asChild>
                   <button className="text-sm text-[#2c5282] hover:underline text-center">
