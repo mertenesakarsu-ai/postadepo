@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "websitem github repomda var senden istediğim web sitemin frontend tarafında birkaç hatası var onları düzeltmen başlangıç olarak kayıt ol kısmına bir rechaptcha ekle o yapılmadan kayıt gönderilemesin ve bu kayıtlar a izin verme işi sadece admin el ile veritabanına eklerse white list gibi düşüne bilirsin o zaman giriş yapa bilecek bir website olmalı bu whitelist durumunu ekle ama bu backend tarafında olmalı fronted tarafında gözükmemeli bu durum"
+user_problem_statement: "ŞİMDİ githubumda websitem var oradan repomdaki dosyalarımı al ve senden istediğim şu logom png formatında bir görsel ama yerleştirme şekli çok kötü ben logolarımı daha okuna bilir boyutlarda olması ve bir çerçeve veya bir sınır içinde olmamasını istiyorum"
 
 backend:
   - task: "Whitelist sistemi ve kullanıcı onay mekanizması"
