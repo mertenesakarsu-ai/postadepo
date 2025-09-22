@@ -180,7 +180,7 @@ const LoginPage = ({ onLogin }) => {
               <Dialog open={forgotPasswordOpen} onOpenChange={setForgotPasswordOpen}>
                 <DialogTrigger asChild>
                   <button className="text-sm text-[#2c5282] hover:underline text-center">
-                    Şifremi Unuttum
+                    {t('auth.forgotPassword')}
                   </button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-md backdrop-blur-md bg-white/90">
