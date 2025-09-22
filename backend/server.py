@@ -169,6 +169,41 @@ def generate_demo_emails(user_id: str) -> List[Dict[str, Any]]:
     
     return emails
 
+# reCAPTCHA doğrulama fonksiyonu
+async def verify_recaptcha_token(token: str) -> dict:
+    """
+    Google reCAPTCHA token'ını doğrular
+    """
+    recaptcha_secret = os.environ.get('RECAPTCHA_SECRET_KEY')
+    if not recaptcha_secret:
+        logging.error("RECAPTCHA_SECRET_KEY environment variable not found")
+        return {"success": False, "error": "server_configuration_error"}
+    
+    verify_url = "https://www.google.com/recaptcha/api/siteverify"
+    
+    async with httpx.AsyncClient() as client:
+        try:
+            payload = {
+                "secret": recaptcha_secret,
+                "response": token
+            }
+            
+            response = await client.post(verify_url, data=payload, timeout=10.0)
+            
+            if response.status_code == 200:
+                result = response.json()
+                return result
+            else:
+                logging.error(f"reCAPTCHA API returned status {response.status_code}")
+                return {"success": False, "error": "api_error"}
+                
+        except httpx.TimeoutException:
+            logging.error("reCAPTCHA verification timeout")
+            return {"success": False, "error": "timeout"}
+        except Exception as e:
+            logging.error(f"reCAPTCHA verification error: {str(e)}")
+            return {"success": False, "error": "network_error"}
+
 # Routes
 @api_router.post("/auth/register")
 async def register(user_data: UserCreate):
