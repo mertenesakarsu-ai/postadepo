@@ -121,6 +121,8 @@
     "outlookError": "Outlook bağlantı hatası",
     "gmailConnecting": "Gmail hesabı bağlanıyor...",
     "gmailConnected": "Gmail hesabı başarıyla bağlandı!",
-    "gmailError": "Gmail bağlantı hatası"
+    "gmailError": "Gmail bağlantı hatası",
+    "noAccountsConnected": "Senkronizasyon için önce bir e-posta hesabı bağlamanız gerekiyor",
+    "accountDisconnected": "{type} hesabı bağlantısı kesildi"
   }
 }
