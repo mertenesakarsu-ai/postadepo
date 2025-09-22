@@ -637,18 +637,7 @@ const Dashboard = ({ user, onLogout }) => {
       <Dialog open={emailDetailOpen} onOpenChange={setEmailDetailOpen}>
         <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto backdrop-blur-md bg-white/95">
           <DialogHeader>
-            <div className="flex items-center justify-between">
-              <DialogTitle className="text-xl text-slate-800">{selectedEmail?.subject}</DialogTitle>
-              <Button
-                onClick={() => setDeleteConfirmOpen(true)}
-                variant="outline"
-                size="sm"
-                className="border-red-300 text-red-600 hover:bg-red-50"
-              >
-                <Trash className="w-4 h-4 mr-2" />
-                {t('email.permanentlyDelete')}
-              </Button>
-            </div>
+            <DialogTitle className="text-xl text-slate-800">{selectedEmail?.subject}</DialogTitle>
           </DialogHeader>
           {selectedEmail && (
             <div className="space-y-4">
