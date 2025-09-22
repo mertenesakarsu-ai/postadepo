@@ -177,7 +177,13 @@ const Dashboard = ({ user, onLogout }) => {
   const handleSync = async () => {
     // Check if any accounts are connected
     if (connectedAccounts.length === 0) {
-      toast.error(t('notifications.noAccountsConnected'));
+      toast.error(t('notifications.noAccountsConnected'), {
+        duration: 4000,
+        action: {
+          label: t('dashboard.connectAccount'),
+          onClick: () => setAccountConnectOpen(true)
+        }
+      });
       return;
     }
 
@@ -192,7 +198,9 @@ const Dashboard = ({ user, onLogout }) => {
       setLastSync(now);
       localStorage.setItem('lastSync', now.toISOString());
       
-      toast.success(t('notifications.syncSuccess'));
+      toast.success(t('notifications.syncSuccess'), {
+        description: `${connectedAccounts.length} hesaptan senkronizasyon yapıldı`
+      });
       loadEmails();
       loadStorageInfo();
     } catch (error) {
