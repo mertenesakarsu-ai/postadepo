@@ -30,6 +30,7 @@
     "import": "İçe Aktar",
     "export": "Dışa Aktar",
     "connectAccount": "Hesabı Bağla",
+    "connectedAccounts": "Bağlı Hesaplar",
     "searchPlaceholder": "E-posta ara...",
     "searchDisabled": "Arama sadece 'Tüm Mailler' bölümünde çalışır",
     "noEmails": "Bu klasörde henüz e-posta yok"
