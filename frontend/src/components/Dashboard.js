@@ -316,33 +316,31 @@ const Dashboard = ({ user, onLogout }) => {
     try {
       const token = localStorage.getItem('token');
       
-      // Simulate OAuth flow - in real implementation, this would redirect to Microsoft OAuth
-      const outlookAuthUrl = `https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=your_client_id&response_type=code&redirect_uri=${encodeURIComponent(window.location.origin + '/auth/outlook/callback')}&scope=https://graph.microsoft.com/Mail.Read&state=${user.id}`;
-      
       // For demo purposes, we'll simulate a successful connection
       setTimeout(async () => {
         try {
           const newAccount = {
             id: Date.now().toString(),
             user_id: user.id,
-            type: 'outlook',
+            type: 'Outlook',
             email: user.email.replace('@postadepo.com', '@outlook.com'),
             connected_at: new Date().toISOString()
           };
           
-          // In real implementation, this would be handled by the backend after OAuth callback
-          setConnectedAccounts(prev => [...prev, newAccount]);
+          // Save to backend and update local state
+          setConnectedAccounts(prev => {
+            const updated = [...prev, newAccount];
+            localStorage.setItem('connectedAccounts', JSON.stringify(updated));
+            return updated;
+          });
+          
           toast.success(t('notifications.outlookConnected'));
           setLoading(false);
-          setAccountConnectOpen(false);
         } catch (error) {
           toast.error(t('notifications.outlookError'));
           setLoading(false);
         }
       }, 2000);
-      
-      // Uncomment this for real OAuth flow
-      // window.location.href = outlookAuthUrl;
       
     } catch (error) {
       toast.error(t('notifications.outlookError'));
