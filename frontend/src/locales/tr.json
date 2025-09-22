@@ -74,8 +74,9 @@
     "deleteWarning": "Bu işlem geri alınamaz."
   },
   "connect": {
-    "title": "Veri Yönetimi Paneli",
+    "title": "Hesap Bağlantı Paneli",
     "connectedAccounts": "Bağlı Hesaplar",
+    "connected": "Bağlandı",
     "connectDate": "Bağlantı tarihi",
     "outlookTitle": "Outlook Mail Hesabınızı Bağlayın",
     "outlookSubtitle": "Microsoft 365 / Exchange Online / Hotmail",
