@@ -185,17 +185,17 @@ const LoginPage = ({ onLogin }) => {
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-md backdrop-blur-md bg-white/90">
                   <DialogHeader>
-                    <DialogTitle className="text-center text-slate-800">Şifre Sıfırlama</DialogTitle>
+                    <DialogTitle className="text-center text-slate-800">{t('auth.forgotPassword')}</DialogTitle>
                   </DialogHeader>
                   <div className="space-y-4 pt-4">
                     <p className="text-sm text-slate-600 text-center">
-                      E-posta adresinizi girin, size şifre sıfırlama bağlantısı göndereceğiz.
+                      {t('auth.resetPasswordText')}
                     </p>
                     <div className="relative">
                       <Mail className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
                       <Input
                         type="email"
-                        placeholder="E-posta adresiniz"
+                        placeholder={t('auth.emailPlaceholder')}
                         value={forgotEmail}
                         onChange={(e) => setForgotEmail(e.target.value)}
                         className="pl-10 h-12 bg-white/70 border-slate-200 focus:border-[#2c5282] focus:ring-[#2c5282] rounded-lg"
@@ -205,7 +205,7 @@ const LoginPage = ({ onLogin }) => {
                       onClick={handleForgotPassword}
                       className="w-full h-12 bg-[#2c5282] hover:bg-[#1a365d] text-white rounded-lg"
                     >
-                      Şifre Sıfırlama Bağlantısı Gönder
+                      {t('auth.sendResetLink')}
                     </Button>
                   </div>
                 </DialogContent>
