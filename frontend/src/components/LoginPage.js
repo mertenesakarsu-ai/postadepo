@@ -28,6 +28,9 @@ const LoginPage = ({ onLogin }) => {
     password: '',
     confirmPassword: ''
   });
+  const [isRecaptchaVerified, setIsRecaptchaVerified] = useState(false);
+  const [isRegistering, setIsRegistering] = useState(false);
+  const recaptchaRef = useRef(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
