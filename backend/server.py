@@ -302,6 +302,13 @@ async def login(user_data: UserLogin):
     if user["password"] != hashed_password:
         raise HTTPException(status_code=401, detail="Geçersiz e-posta veya şifre")
     
+    # Whitelist kontrolü - sadece onaylanmış kullanıcılar giriş yapabilir
+    if not user.get("approved", False):
+        raise HTTPException(
+            status_code=403, 
+            detail="Hesabınız henüz onaylanmamış. Admin onayı bekleniyor."
+        )
+    
     # Handle existing user without name field
     if 'name' not in user:
         user['name'] = user['email'].split('@')[0].title()
