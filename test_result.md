@@ -101,3 +101,86 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: "Git hubdaki web site dosyalarımı al ve bu değişiklikleri ekle eposta detay kısmında kalıcı sil butonunun yerini değiştir outlook ve gmail hesabı bağla butonunu işlevsel yap hesap bağlanırsa hesap bağlandı hesap epostası yazsın butonda ve hesap tan çıkış için buttona simgede eklene bilir senden senkronize et butonunu düzeltmeni istiyorum eğer hesap bağlı değil ise uyar"
+
+backend:
+  - task: "Hesap bağlama API endpoint'leri zaten mevcut - demo modda çalışıyor"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "low"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "API endpoints already exist and working in demo mode"
+
+frontend:
+  - task: "E-posta detay modal'ında kalıcı sil butonunun konumunu değiştir"
+    implemented: false
+    working: false
+    file: "/app/frontend/src/components/Dashboard.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "main"
+        comment: "Need to move delete button position in email detail modal"
+
+  - task: "Outlook ve Gmail bağlama butonlarının görünümünü iyileştir"
+    implemented: false
+    working: false
+    file: "/app/frontend/src/components/Dashboard.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "main"
+        comment: "Improve button appearance and functionality feedback"
+
+  - task: "Hesap bağlama durumu göstergelerini iyileştir"
+    implemented: false
+    working: false
+    file: "/app/frontend/src/components/Dashboard.js"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "main"
+        comment: "Enhance account connection status display"
+
+  - task: "Senkronize et butonu uyarı mesajlarını iyileştir"
+    implemented: false
+    working: false
+    file: "/app/frontend/src/components/Dashboard.js"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "main"
+        comment: "Better warning messages for sync when no accounts connected"
+
+metadata:
+  created_by: "main_agent"
+  version: "1.0"
+  test_sequence: 0
+  run_ui: false
+
+test_plan:
+  current_focus:
+    - "E-posta detay modal'ında kalıcı sil butonunun konumunu değiştir"
+    - "Outlook ve Gmail bağlama butonlarının görünümünü iyileştir"
+    - "Hesap bağlama durumu göstergelerini iyileştir"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+  - agent: "main"
+    message: "Starting implementation of email UI improvements and account connection enhancements in demo mode"
