@@ -233,16 +233,20 @@ async def register(user_data: UserCreate):
     if existing_user:
         raise HTTPException(status_code=400, detail="Bu e-posta adresi zaten kayıtlı")
     
-    # Create new user
+    # Create new user with approved=False (whitelist sistemi)
     hashed_password = hash_password(user_data.password)
-    new_user = User(name=user_data.name, email=user_data.email)
+    new_user = User(name=user_data.name, email=user_data.email, approved=False)
     
     # Save user to database
     user_dict = new_user.dict()
     user_dict["password"] = hashed_password
     await db.users.insert_one(user_dict)
     
-    return {"message": "Kullanıcı başarıyla oluşturuldu", "user_id": new_user.id}
+    return {
+        "message": "Kullanıcı kaydı oluşturuldu. Admin onayı bekleniyor.", 
+        "user_id": new_user.id,
+        "approved": False
+    }
 
 @api_router.post("/auth/login")
 async def login(user_data: UserLogin):
