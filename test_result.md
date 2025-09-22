@@ -111,11 +111,14 @@ backend:
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "low"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: true
         agent: "main"
         comment: "Added POST /connect-account and DELETE /connected-accounts/{id} endpoints for better demo functionality"
+      - working: true
+        agent: "testing"
+        comment: "✅ COMPREHENSIVE TESTING COMPLETED - All account connection APIs working perfectly. Tested: POST /api/connect-account (Outlook & Gmail), DELETE /api/connected-accounts/{id}, GET /api/connected-accounts, POST /api/sync-emails. All scenarios passed: demo login, account connection, listing, sync with/without accounts, disconnection, duplicate prevention, invalid type rejection. 14/14 API calls successful."
 
 frontend:
   - task: "E-posta detay modal'ında kalıcı sil butonunun konumunu değiştir"
