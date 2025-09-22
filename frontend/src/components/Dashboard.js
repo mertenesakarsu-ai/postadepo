@@ -544,7 +544,10 @@ const Dashboard = ({ user, onLogout }) => {
             className="w-full h-10 bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 text-white rounded-lg shadow-lg"
           >
             <Link2 className="w-4 h-4 mr-2" />
-            {t('dashboard.connectAccount')}
+            {connectedAccounts.length > 0 
+              ? `${t('dashboard.connectedAccounts')} (${connectedAccounts.length})`
+              : t('dashboard.connectAccount')
+            }
           </Button>
           
           <Button 
