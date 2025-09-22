@@ -145,7 +145,6 @@ const LoginPage = ({ onLogin }) => {
               className="h-56 w-auto"
             />
           </div>
-          <p className="text-slate-600 text-lg">E-posta Yönetim Sistemi</p>
         </div>
 
         {/* Login Card */}
