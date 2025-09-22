@@ -183,6 +183,7 @@ metadata:
 
 test_plan:
   current_focus:
+    - "Logo boyutlandırma ve çerçeve/gölge efektlerini kaldırma"
     - "Whitelist sistemi ve kullanıcı onay mekanizması"
     - "reCAPTCHA doğrulama API endpoint'i"
     - "Kayıt formuna reCAPTCHA entegrasyonu"
