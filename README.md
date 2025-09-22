@@ -5,7 +5,7 @@ PostaDepo, kullanıcıların Outlook maillerini kolayca yedeklemelerine ve gerek
 💡 Gerçek sahibi:<a href="https://github.com/mertenesakarsu"> @mertenesakarsu</a><br>
 
 ✨ Özellikler<br>
-Özellik	Açıklama<br>
+<br>
 📧 Mail Yedekleme	Outlook maillerinizi .pst ve .ost olarak yedekleyin<br>
 🔄 İçe Aktar	Yedeklerinizi kolayca geri yükleyin<br>
 🔒 Güvenli Saklama	Tüm mail verileri güvenli bir şekilde saklanır<br>
