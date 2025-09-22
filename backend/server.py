@@ -517,6 +517,10 @@ async def connect_account(account_data: dict, current_user: dict = Depends(get_c
     account_dict = new_account.dict()
     await db.connected_accounts.insert_one(account_dict)
     
+    # Clean up the account dict for response
+    if "_id" in account_dict:
+        del account_dict["_id"]
+    
     return {"success": True, "account": account_dict}
 
 @api_router.delete("/connected-accounts/{account_id}")
