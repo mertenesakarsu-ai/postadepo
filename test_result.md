@@ -151,13 +151,25 @@ backend:
         comment: "✅ KAPSAMLI TEST TAMAMLANDI: Admin endpoint'leri mükemmel çalışıyor. GET /api/admin/pending-users onay bekleyen kullanıcıları listeler, POST /api/admin/approve-user/{user_id} kullanıcı onaylar, sadece demo@postadepo.com admin yetkisine sahip, admin olmayan kullanıcılar 403 hatası alıyor."
 
 frontend:
+  - task: "Logo boyutlandırma ve çerçeve/gölge efektlerini kaldırma"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/LoginPage.js, /app/frontend/src/components/Dashboard.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Login sayfasında logo h-20'den h-28'e büyütüldü, Dashboard sidebar'da w-12 h-12'den w-16 h-16'ya çıkarıldı ve rounded-xl/shadow-lg kaldırıldı, Settings dialog'da w-16 h-16'dan w-20 h-20'ye çıkarıldı ve çerçeve/gölge efektleri kaldırıldı"
+        
   - task: "Kayıt formuna reCAPTCHA entegrasyonu"
     implemented: true
     working: true
     file: "/app/frontend/src/components/LoginPage.js"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: true
         agent: "main"
