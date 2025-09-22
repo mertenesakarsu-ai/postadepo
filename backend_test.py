@@ -220,6 +220,170 @@ class PostaDepoAPITester:
         self.token = original_token
         return success
 
+    def test_get_connected_accounts_empty(self):
+        """Test getting connected accounts when none exist"""
+        success, response = self.run_test(
+            "Get Connected Accounts (Empty)",
+            "GET",
+            "connected-accounts",
+            200
+        )
+        
+        if success:
+            accounts = response.get('accounts', [])
+            print(f"   Found {len(accounts)} connected accounts")
+        
+        return success
+
+    def test_connect_outlook_account(self):
+        """Test connecting Outlook account (demo mode)"""
+        success, response = self.run_test(
+            "Connect Outlook Account",
+            "POST",
+            "connect-account",
+            200,
+            data={"type": "outlook"}
+        )
+        
+        if success:
+            account = response.get('account', {})
+            print(f"   Connected account: {account.get('email')} ({account.get('type')})")
+            # Store account ID for later tests
+            self.outlook_account_id = account.get('id')
+        
+        return success
+
+    def test_connect_gmail_account(self):
+        """Test connecting Gmail account (demo mode)"""
+        success, response = self.run_test(
+            "Connect Gmail Account",
+            "POST",
+            "connect-account",
+            200,
+            data={"type": "gmail"}
+        )
+        
+        if success:
+            account = response.get('account', {})
+            print(f"   Connected account: {account.get('email')} ({account.get('type')})")
+            # Store account ID for later tests
+            self.gmail_account_id = account.get('id')
+        
+        return success
+
+    def test_connect_duplicate_account(self):
+        """Test connecting duplicate account (should fail)"""
+        success, response = self.run_test(
+            "Connect Duplicate Outlook Account",
+            "POST",
+            "connect-account",
+            400,
+            data={"type": "outlook"}
+        )
+        
+        return success
+
+    def test_connect_invalid_account_type(self):
+        """Test connecting invalid account type"""
+        success, response = self.run_test(
+            "Connect Invalid Account Type",
+            "POST",
+            "connect-account",
+            400,
+            data={"type": "yahoo"}
+        )
+        
+        return success
+
+    def test_get_connected_accounts_with_data(self):
+        """Test getting connected accounts when they exist"""
+        success, response = self.run_test(
+            "Get Connected Accounts (With Data)",
+            "GET",
+            "connected-accounts",
+            200
+        )
+        
+        if success:
+            accounts = response.get('accounts', [])
+            print(f"   Found {len(accounts)} connected accounts")
+            for account in accounts:
+                print(f"     - {account.get('email')} ({account.get('type')})")
+        
+        return success
+
+    def test_sync_emails_with_accounts(self):
+        """Test email synchronization with connected accounts"""
+        success, response = self.run_test(
+            "Sync Emails (With Connected Accounts)",
+            "POST",
+            "sync-emails",
+            200
+        )
+        
+        if success:
+            new_emails = response.get('new_emails', 0)
+            print(f"   Added {new_emails} new emails during sync")
+        
+        return success
+
+    def test_disconnect_outlook_account(self):
+        """Test disconnecting Outlook account"""
+        if not hasattr(self, 'outlook_account_id'):
+            print("❌ No Outlook account ID available for disconnect test")
+            return False
+            
+        success, response = self.run_test(
+            "Disconnect Outlook Account",
+            "DELETE",
+            f"connected-accounts/{self.outlook_account_id}",
+            200
+        )
+        
+        return success
+
+    def test_disconnect_gmail_account(self):
+        """Test disconnecting Gmail account"""
+        if not hasattr(self, 'gmail_account_id'):
+            print("❌ No Gmail account ID available for disconnect test")
+            return False
+            
+        success, response = self.run_test(
+            "Disconnect Gmail Account",
+            "DELETE",
+            f"connected-accounts/{self.gmail_account_id}",
+            200
+        )
+        
+        return success
+
+    def test_disconnect_nonexistent_account(self):
+        """Test disconnecting non-existent account"""
+        fake_id = "non-existent-account-id"
+        success, response = self.run_test(
+            "Disconnect Non-existent Account",
+            "DELETE",
+            f"connected-accounts/{fake_id}",
+            404
+        )
+        
+        return success
+
+    def test_sync_emails_without_accounts(self):
+        """Test email synchronization without connected accounts"""
+        success, response = self.run_test(
+            "Sync Emails (No Connected Accounts)",
+            "POST",
+            "sync-emails",
+            200
+        )
+        
+        if success:
+            new_emails = response.get('new_emails', 0)
+            print(f"   Added {new_emails} new emails during sync (should still work in demo mode)")
+        
+        return success
+
 def main():
     print("🚀 Starting PostaDepo API Tests")
     print("=" * 50)
