@@ -158,6 +158,12 @@ const Dashboard = ({ user, onLogout }) => {
   };
 
   const handleSync = async () => {
+    // Check if any accounts are connected
+    if (connectedAccounts.length === 0) {
+      toast.error(t('notifications.noAccountsConnected'));
+      return;
+    }
+
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
