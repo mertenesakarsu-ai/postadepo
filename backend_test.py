@@ -400,7 +400,25 @@ def main():
         ("Get All Folder Emails", tester.test_get_emails_all_folders),
         ("Storage Information", tester.test_storage_info),
         ("Mark Email Read", tester.test_mark_email_read),
-        ("Sync Emails", tester.test_sync_emails),
+        
+        # Account Connection Tests
+        ("Get Connected Accounts (Empty)", tester.test_get_connected_accounts_empty),
+        ("Connect Outlook Account", tester.test_connect_outlook_account),
+        ("Connect Gmail Account", tester.test_connect_gmail_account),
+        ("Connect Duplicate Account", tester.test_connect_duplicate_account),
+        ("Connect Invalid Account Type", tester.test_connect_invalid_account_type),
+        ("Get Connected Accounts (With Data)", tester.test_get_connected_accounts_with_data),
+        
+        # Sync Tests
+        ("Sync Emails (With Connected Accounts)", tester.test_sync_emails_with_accounts),
+        
+        # Disconnect Tests
+        ("Disconnect Outlook Account", tester.test_disconnect_outlook_account),
+        ("Disconnect Gmail Account", tester.test_disconnect_gmail_account),
+        ("Disconnect Non-existent Account", tester.test_disconnect_nonexistent_account),
+        
+        # Final Tests
+        ("Sync Emails (No Connected Accounts)", tester.test_sync_emails_without_accounts),
         ("Export Emails", tester.test_export_emails),
     ]
     
