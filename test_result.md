@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Git hubdaki web site dosyalarımı al ve bu değişiklikleri ekle eposta detay kısmında kalıcı sil butonunun yerini değiştir outlook ve gmail hesabı bağla butonunu işlevsel yap hesap bağlanırsa hesap bağlandı hesap epostası yazsın butonda ve hesap tan çıkış için buttona simgede eklene bilir senden senkronize et butonunu düzeltmeni istiyorum eğer hesap bağlı değil ise uyar"
+user_problem_statement: "websitem github repomda var senden istediğim web sitemin frontend tarafında birkaç hatası var onları düzeltmen başlangıç olarak kayıt ol kısmına bir rechaptcha ekle o yapılmadan kayıt gönderilemesin ve bu kayıtlar a izin verme işi sadece admin el ile veritabanına eklerse white list gibi düşüne bilirsin o zaman giriş yapa bilecek bir website olmalı bu whitelist durumunu ekle ama bu backend tarafında olmalı fronted tarafında gözükmemeli bu durum"
 
 backend:
   - task: "Hesap bağlama API endpoint'leri - demo modda çalışıyor"
