@@ -490,6 +490,48 @@ async def get_connected_accounts(current_user: dict = Depends(get_current_user))
     
     return {"accounts": cleaned_accounts}
 
+@api_router.post("/connect-account")
+async def connect_account(account_data: dict, current_user: dict = Depends(get_current_user)):
+    """Demo endpoint for connecting email accounts"""
+    account_type = account_data.get("type")  # 'outlook' or 'gmail'
+    
+    if account_type not in ['outlook', 'gmail']:
+        raise HTTPException(status_code=400, detail="Unsupported account type")
+    
+    # Check if account is already connected
+    existing_account = await db.connected_accounts.find_one({
+        "user_id": current_user["id"],
+        "type": account_type.capitalize()
+    })
+    
+    if existing_account:
+        raise HTTPException(status_code=400, detail="Account already connected")
+    
+    # Create new connected account (demo)
+    new_account = ConnectedAccount(
+        user_id=current_user["id"],
+        type=account_type.capitalize(),
+        email=current_user["email"].replace("@postadepo.com", f"@{account_type}.com")
+    )
+    
+    account_dict = new_account.dict()
+    await db.connected_accounts.insert_one(account_dict)
+    
+    return {"success": True, "account": account_dict}
+
+@api_router.delete("/connected-accounts/{account_id}")
+async def disconnect_account(account_id: str, current_user: dict = Depends(get_current_user)):
+    """Remove connected account"""
+    result = await db.connected_accounts.delete_one({
+        "id": account_id,
+        "user_id": current_user["id"]
+    })
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Account not found")
+    
+    return {"success": True, "message": "Account disconnected"}
+
 # Include the router in the main app
 app.include_router(api_router)
 
