@@ -138,9 +138,9 @@ const LoginPage = ({ onLogin }) => {
       <div className="w-full max-w-md">
         {/* Login Card */}
         <Card className="backdrop-blur-sm bg-white/90 border-0 shadow-2xl">
-          <CardHeader className="space-y-1 pb-4">
-            {/* Logo Section - moved here above the title */}
-            <div className="text-center mb-2">
+          <CardHeader className="text-center pt-6 pb-2">
+            {/* Logo Section - centered and properly spaced */}
+            <div className="mb-3">
               <div className="inline-flex items-center justify-center">
                 <img 
                   src="https://customer-assets.emergentagent.com/job_4338b971-040d-400e-9544-183651a406e5/artifacts/g6inru6i_postadepo_logo_transparent.png" 
@@ -149,11 +149,11 @@ const LoginPage = ({ onLogin }) => {
                 />
               </div>
             </div>
-            <CardTitle className="text-2xl text-center text-slate-800">{t('auth.loginTitle')}</CardTitle>
+            <CardTitle className="text-2xl text-slate-800 mb-0">{t('auth.loginTitle')}</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
+          <CardContent className="px-6 pb-6">
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div className="space-y-4">
                 <div className="relative">
                   <Mail className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
                   <Input
@@ -165,9 +165,7 @@ const LoginPage = ({ onLogin }) => {
                     required
                   />
                 </div>
-              </div>
               
-              <div className="space-y-2">
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
                   <Input
@@ -190,7 +188,7 @@ const LoginPage = ({ onLogin }) => {
 
               <Button 
                 type="submit" 
-                className="w-full h-12 bg-[#2c5282] hover:bg-[#1a365d] text-white font-semibold rounded-lg shadow-lg transition-all duration-200 transform hover:scale-[1.02]"
+                className="w-full h-12 bg-[#2c5282] hover:bg-[#1a365d] text-white font-semibold rounded-lg shadow-lg transition-all duration-200 transform hover:scale-[1.02] mt-6"
                 disabled={loading}
               >
                 {loading ? t('common.loading') : t('common.login')}
