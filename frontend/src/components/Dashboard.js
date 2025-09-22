@@ -165,13 +165,22 @@ const Dashboard = ({ user, onLogout }) => {
     }
   };
 
-  const handleDisconnectAccount = (accountId, accountType) => {
-    setConnectedAccounts(prev => {
-      const updated = prev.filter(acc => acc.id !== accountId);
-      localStorage.setItem('connectedAccounts', JSON.stringify(updated));
-      return updated;
-    });
-    toast.success(t('notifications.accountDisconnected').replace('{type}', accountType));
+  const handleDisconnectAccount = async (accountId, accountType) => {
+    try {
+      const token = localStorage.getItem('token');
+      await axios.delete(`${API}/connected-accounts/${accountId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      setConnectedAccounts(prev => {
+        const updated = prev.filter(acc => acc.id !== accountId);
+        localStorage.setItem('connectedAccounts', JSON.stringify(updated));
+        return updated;
+      });
+      toast.success(t('notifications.accountDisconnected').replace('{type}', accountType));
+    } catch (error) {
+      toast.error(`${accountType} hesabı bağlantısı kesilemedi`);
+    }
   };
 
   const handleSync = async () => {
