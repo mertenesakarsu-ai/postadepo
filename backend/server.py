@@ -256,8 +256,8 @@ async def login(user_data: UserLogin):
         existing_user = await db.users.find_one({"email": user_data.email})
         
         if not existing_user:
-            # Create demo user
-            demo_user = User(name="Demo Kullanıcı", email=user_data.email)
+            # Create demo user (approved by default)
+            demo_user = User(name="Demo Kullanıcı", email=user_data.email, approved=True)
             user_dict = demo_user.dict()
             user_dict["password"] = hash_password(user_data.password)
             await db.users.insert_one(user_dict)
