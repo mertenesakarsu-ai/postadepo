@@ -52,6 +52,6 @@ Pull request açın
 
 📄 Lisans
 
-Bu proje MIT Lisansı
+Bu proje <a href="LICENSE">MIT Lisansı</a>
  ile lisanslanmıştır.
 
