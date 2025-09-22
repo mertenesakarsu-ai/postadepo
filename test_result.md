@@ -162,9 +162,10 @@ metadata:
 
 test_plan:
   current_focus:
-    - "E-posta detay modal'ında kalıcı sil butonunun konumunu değiştir"
-    - "Outlook ve Gmail bağlama butonlarının görünümünü iyileştir"
-    - "Hesap bağlama durumu göstergelerini iyileştir"
+    - "Whitelist sistemi ve kullanıcı onay mekanizması"
+    - "reCAPTCHA doğrulama API endpoint'i"
+    - "Kayıt formuna reCAPTCHA entegrasyonu"
+    - "Admin endpoint'leri - kullanıcı onaylama"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
