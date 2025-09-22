@@ -111,11 +111,14 @@ backend:
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: true
         agent: "main"
         comment: "Whitelist sistemi eklendi - yeni kullanıcılar approved=false ile kaydoluyor, sadece approved=true olanlar giriş yapabiliyor"
+      - working: true
+        agent: "testing"
+        comment: "✅ KAPSAMLI TEST TAMAMLANDI: Yeni kullanıcı kaydı approved=false ile oluşturuluyor, onaylanmamış kullanıcılar 403 hatası alıyor, demo kullanıcısı otomatik onaylı, admin onayından sonra başarılı giriş yapılabiliyor. Tüm whitelist akışı mükemmel çalışıyor."
   
   - task: "reCAPTCHA doğrulama API endpoint'i"
     implemented: true
@@ -123,11 +126,14 @@ backend:
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: true
         agent: "main"
         comment: "POST /api/verify-recaptcha endpoint'i eklendi, Google reCAPTCHA v2 ile token doğrulaması yapıyor"
+      - working: true
+        agent: "testing"
+        comment: "✅ KAPSAMLI TEST TAMAMLANDI: reCAPTCHA API endpoint'i çalışıyor, Google API ile iletişim kuruyor, geçersiz/boş token'ları doğru şekilde reddediyor, geçerli token doğrulaması yapıyor. Backend loglarında Google API çağrıları görülüyor."
   
   - task: "Admin endpoint'leri - kullanıcı onaylama"
     implemented: true
@@ -135,11 +141,14 @@ backend:
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "medium"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: true
         agent: "main"
         comment: "POST /api/admin/approve-user/{user_id} ve GET /api/admin/pending-users admin endpoint'leri eklendi"
+      - working: true
+        agent: "testing"
+        comment: "✅ KAPSAMLI TEST TAMAMLANDI: Admin endpoint'leri mükemmel çalışıyor. GET /api/admin/pending-users onay bekleyen kullanıcıları listeler, POST /api/admin/approve-user/{user_id} kullanıcı onaylar, sadece demo@postadepo.com admin yetkisine sahip, admin olmayan kullanıcılar 403 hatası alıyor."
 
 frontend:
   - task: "Kayıt formuna reCAPTCHA entegrasyonu"
