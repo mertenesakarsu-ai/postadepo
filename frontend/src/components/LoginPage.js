@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { useLanguage } from '../contexts/LanguageContext';
 import { Mail, Lock, Eye, EyeOff, UserPlus } from 'lucide-react';
 import axios from 'axios';
+import ReCAPTCHA from 'react-google-recaptcha';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
