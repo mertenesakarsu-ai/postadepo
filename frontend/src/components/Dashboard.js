@@ -923,35 +923,55 @@ const Dashboard = ({ user, onLogout }) => {
                 <div className="w-12 h-12 bg-red-600 rounded-lg flex items-center justify-center">
                   <Mail className="w-6 h-6 text-white" />
                 </div>
-                <div>
+                <div className="flex-1">
                   <h3 className="font-semibold text-red-800">{t('connect.gmailTitle')}</h3>
                   <p className="text-sm text-red-600">{t('connect.gmailSubtitle')}</p>
                 </div>
+                {connectedAccounts.some(acc => acc.type === 'Gmail') && (
+                  <Button
+                    onClick={() => {
+                      const gmailAccount = connectedAccounts.find(acc => acc.type === 'Gmail');
+                      handleDisconnectAccount(gmailAccount.id, 'Gmail');
+                    }}
+                    variant="outline"
+                    size="sm"
+                    className="border-red-300 text-red-600 hover:bg-red-50"
+                  >
+                    <LogOut className="w-4 h-4" />
+                  </Button>
+                )}
               </div>
               
-              <div className="space-y-4 text-sm text-red-700">
-                <p>{language === 'tr' ? 'Gmail hesabınızı sistemimize bağlayabilmemiz için aşağıdaki bilgilere ihtiyaç vardır:' : 'We need the following information to connect your Gmail account to our system:'}</p>
-                <ul className="list-disc list-inside space-y-1 ml-4 text-red-600">
-                  <li><span className="font-medium">Client ID</span> – Google Cloud Console &gt; API & Services &gt; Credentials {language === 'tr' ? 'kısmından alınır.' : 'section.'}</li>
-                  <li><span className="font-medium">Client Secret</span> – {language === 'tr' ? 'Yine aynı bölümde oluşturulur.' : 'Created in the same section.'}</li>
-                  <li><span className="font-medium">Redirect URI</span> – {language === 'tr' ? 'Uygulamanızın OAuth dönüş adresi.' : 'Your application OAuth return address.'}</li>
-                  <li><span className="font-medium">{language === 'tr' ? 'Gerekli izin (scope)' : 'Required permission (scope)'}</span> – https://www.googleapis.com/auth/gmail.readonly ({language === 'tr' ? 'sadece okuma için yeterli' : 'sufficient for read-only'}).</li>
-                  <li><span className="font-medium">Mailbox {language === 'tr' ? 'adresi' : 'address'}</span> (Gmail {language === 'tr' ? 'adresiniz' : 'address'})</li>
-                </ul>
-                
-                <p className="text-xs bg-red-100 p-2 rounded">
-                  ⚠️ {t('connect.authWarning')}
-                </p>
-              </div>
-              
-              <Button 
-                onClick={handleConnectGmail}
-                disabled={loading}
-                className="w-full mt-4 bg-red-600 hover:bg-red-700 text-white"
-              >
-                <Zap className="w-4 h-4 mr-2" />
-                {t('connect.connectGmail')}
-              </Button>
+              {connectedAccounts.some(acc => acc.type === 'Gmail') ? (
+                <div className="bg-green-100 border border-green-300 p-4 rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    <CheckCircle className="w-5 h-5 text-green-600" />
+                    <div>
+                      <p className="font-medium text-green-800">{t('connect.connected')}</p>
+                      <p className="text-sm text-green-700">
+                        {connectedAccounts.find(acc => acc.type === 'Gmail')?.email}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="space-y-4 text-sm text-red-700 mb-4">
+                    <p className="text-xs bg-red-100 p-2 rounded">
+                      ⚠️ {t('connect.authWarning')}
+                    </p>
+                  </div>
+                  
+                  <Button 
+                    onClick={handleConnectGmail}
+                    disabled={loading}
+                    className="w-full bg-red-600 hover:bg-red-700 text-white"
+                  >
+                    <Zap className="w-4 h-4 mr-2" />
+                    {t('connect.connectGmail')}
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </DialogContent>
