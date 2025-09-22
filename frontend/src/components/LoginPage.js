@@ -156,7 +156,7 @@ const LoginPage = ({ onLogin }) => {
                 className="w-full h-12 bg-[#2c5282] hover:bg-[#1a365d] text-white font-semibold rounded-lg shadow-lg transition-all duration-200 transform hover:scale-[1.02]"
                 disabled={loading}
               >
-                {loading ? 'Giriş yapılıyor...' : 'Giriş Yap'}
+                {loading ? t('common.loading') : t('common.login')}
               </Button>
             </form>
 
