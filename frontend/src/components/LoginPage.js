@@ -105,6 +105,12 @@ const LoginPage = ({ onLogin }) => {
       return;
     }
 
+    if (!isRecaptchaVerified) {
+      toast.error('Lütfen reCAPTCHA doğrulamasını tamamlayın');
+      return;
+    }
+
+    setIsRegistering(true);
     try {
       const response = await axios.post(`${API}/auth/register`, {
         name: registerData.name,
@@ -112,12 +118,18 @@ const LoginPage = ({ onLogin }) => {
         password: registerData.password
       });
       
-      toast.success(t('auth.registerSuccess'));
+      toast.success('Kayıt başarılı! Admin onayı bekleniyor.');
       setRegisterOpen(false);
       setRegisterData({ name: '', email: '', password: '', confirmPassword: '' });
+      setIsRecaptchaVerified(false);
+      if (recaptchaRef.current) {
+        recaptchaRef.current.reset();
+      }
       setEmail(registerData.email);
     } catch (error) {
       toast.error(error.response?.data?.detail || t('common.error'));
+    } finally {
+      setIsRegistering(false);
     }
   };
 
