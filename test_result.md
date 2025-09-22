@@ -105,20 +105,41 @@
 user_problem_statement: "websitem github repomda var senden istediğim web sitemin frontend tarafında birkaç hatası var onları düzeltmen başlangıç olarak kayıt ol kısmına bir rechaptcha ekle o yapılmadan kayıt gönderilemesin ve bu kayıtlar a izin verme işi sadece admin el ile veritabanına eklerse white list gibi düşüne bilirsin o zaman giriş yapa bilecek bir website olmalı bu whitelist durumunu ekle ama bu backend tarafında olmalı fronted tarafında gözükmemeli bu durum"
 
 backend:
-  - task: "Hesap bağlama API endpoint'leri - demo modda çalışıyor"
+  - task: "Whitelist sistemi ve kullanıcı onay mekanizması"
     implemented: true
     working: true
     file: "/app/backend/server.py"
     stuck_count: 0
-    priority: "low"
-    needs_retesting: false
+    priority: "high"
+    needs_retesting: true
     status_history:
       - working: true
         agent: "main"
-        comment: "Added POST /connect-account and DELETE /connected-accounts/{id} endpoints for better demo functionality"
+        comment: "Whitelist sistemi eklendi - yeni kullanıcılar approved=false ile kaydoluyor, sadece approved=true olanlar giriş yapabiliyor"
+  
+  - task: "reCAPTCHA doğrulama API endpoint'i"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
       - working: true
-        agent: "testing"
-        comment: "✅ COMPREHENSIVE TESTING COMPLETED - All account connection APIs working perfectly. Tested: POST /api/connect-account (Outlook & Gmail), DELETE /api/connected-accounts/{id}, GET /api/connected-accounts, POST /api/sync-emails. All scenarios passed: demo login, account connection, listing, sync with/without accounts, disconnection, duplicate prevention, invalid type rejection. 14/14 API calls successful."
+        agent: "main"
+        comment: "POST /api/verify-recaptcha endpoint'i eklendi, Google reCAPTCHA v2 ile token doğrulaması yapıyor"
+  
+  - task: "Admin endpoint'leri - kullanıcı onaylama"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "POST /api/admin/approve-user/{user_id} ve GET /api/admin/pending-users admin endpoint'leri eklendi"
 
 frontend:
   - task: "E-posta detay modal'ında kalıcı sil butonunun konumunu değiştir"
