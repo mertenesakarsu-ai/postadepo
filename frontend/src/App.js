@@ -66,39 +66,43 @@ function App() {
   }
 
   return (
-    <div className="App">
-      <Router>
-        <Routes>
-          <Route 
-            path="/login" 
-            element={
-              !isAuthenticated ? (
-                <LoginPage onLogin={handleLogin} />
-              ) : (
-                <Navigate to="/dashboard" replace />
-              )
-            } 
-          />
-          <Route 
-            path="/dashboard" 
-            element={
-              isAuthenticated ? (
-                <Dashboard user={user} onLogout={handleLogout} />
-              ) : (
-                <Navigate to="/login" replace />
-              )
-            } 
-          />
-          <Route 
-            path="/" 
-            element={
-              <Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />
-            } 
-          />
-        </Routes>
-      </Router>
-      <Toaster />
-    </div>
+    <ThemeProvider>
+      <LanguageProvider>
+        <div className="App">
+          <Router>
+            <Routes>
+              <Route 
+                path="/login" 
+                element={
+                  !isAuthenticated ? (
+                    <LoginPage onLogin={handleLogin} />
+                  ) : (
+                    <Navigate to="/dashboard" replace />
+                  )
+                } 
+              />
+              <Route 
+                path="/dashboard" 
+                element={
+                  isAuthenticated ? (
+                    <Dashboard user={user} onLogout={handleLogout} />
+                  ) : (
+                    <Navigate to="/login" replace />
+                  )
+                } 
+              />
+              <Route 
+                path="/" 
+                element={
+                  <Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />
+                } 
+              />
+            </Routes>
+          </Router>
+          <Toaster />
+        </div>
+      </LanguageProvider>
+    </ThemeProvider>
   );
 }
 
