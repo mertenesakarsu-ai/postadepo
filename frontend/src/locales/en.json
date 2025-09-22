@@ -30,6 +30,7 @@
     "import": "Import",
     "export": "Export",
     "connectAccount": "Connect Account",
+    "connectedAccounts": "Connected Accounts",
     "searchPlaceholder": "Search emails...",
     "searchDisabled": "Search only works in 'All Mails' section",
     "noEmails": "No emails in this folder yet"
