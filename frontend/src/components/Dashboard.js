@@ -440,7 +440,7 @@ const Dashboard = ({ user, onLogout }) => {
             <img 
               src="https://customer-assets.emergentagent.com/job_240f2e1c-9c13-45be-8f51-23631a027e43/artifacts/kpwl9rr8_postadepo_logo_transparent.png"
               alt="PostaDepo"
-              className="w-16 h-16"
+              className="w-24 h-24"
             />
             <div>
               <h1 className="text-xl font-bold text-[#2c5282]">PostaDepo</h1>
