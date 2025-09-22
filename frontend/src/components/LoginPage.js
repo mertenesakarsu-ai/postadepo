@@ -216,7 +216,7 @@ const LoginPage = ({ onLogin }) => {
             <div className="flex flex-col items-center space-y-3 pt-6">
               <Dialog open={forgotPasswordOpen} onOpenChange={setForgotPasswordOpen}>
                 <DialogTrigger asChild>
-                  <button className="text-sm text-[#2c5282] hover:underline text-center">
+                  <button className="text-sm text-[#2c5282] hover:underline">
                     {t('auth.forgotPassword')}
                   </button>
                 </DialogTrigger>
