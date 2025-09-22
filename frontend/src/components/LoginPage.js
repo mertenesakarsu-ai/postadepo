@@ -65,6 +65,30 @@ const LoginPage = ({ onLogin }) => {
     setForgotEmail('');
   };
 
+  const handleRecaptchaChange = async (token) => {
+    if (token) {
+      try {
+        const response = await axios.post(`${API}/verify-recaptcha`, {
+          recaptcha_token: token
+        });
+        
+        if (response.data.success) {
+          setIsRecaptchaVerified(true);
+          toast.success('reCAPTCHA doğrulaması başarılı');
+        } else {
+          setIsRecaptchaVerified(false);
+          toast.error('reCAPTCHA doğrulaması başarısız');
+        }
+      } catch (error) {
+        console.error('reCAPTCHA verification error:', error);
+        setIsRecaptchaVerified(false);
+        toast.error('reCAPTCHA doğrulaması sırasında hata oluştu');
+      }
+    } else {
+      setIsRecaptchaVerified(false);
+    }
+  };
+
   const handleRegister = async () => {
     if (!registerData.name || !registerData.email || !registerData.password || !registerData.confirmPassword) {
       toast.error(t('auth.fillAllFields'));
