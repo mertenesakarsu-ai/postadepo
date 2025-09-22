@@ -214,7 +214,7 @@ const LoginPage = ({ onLogin }) => {
               <Dialog open={registerOpen} onOpenChange={setRegisterOpen}>
                 <DialogTrigger asChild>
                   <button className="text-sm text-slate-600 hover:text-[#2c5282] text-center">
-                    Hesabınız yok mu? Kayıt olun
+                    {t('auth.noAccount')}
                   </button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-md backdrop-blur-md bg-white/90">
