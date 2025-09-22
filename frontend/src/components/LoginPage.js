@@ -162,16 +162,16 @@ const LoginPage = ({ onLogin }) => {
 
             {/* Demo Login Info */}
             <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-              <p className="text-sm font-medium text-blue-800 mb-2">Demo Giriş Bilgileri:</p>
-              <p className="text-sm text-blue-700">E-posta: demo@postadepo.com</p>
-              <p className="text-sm text-blue-700">Şifre: demo123</p>
+              <p className="text-sm font-medium text-blue-800 mb-2">{t('auth.demoLogin')}:</p>
+              <p className="text-sm text-blue-700">{t('common.email')}: demo@postadepo.com</p>
+              <p className="text-sm text-blue-700">{t('common.password')}: demo123</p>
               <Button 
                 type="button"
                 variant="outline"
                 onClick={handleDemoLogin}
                 className="w-full mt-2 border-blue-300 text-blue-700 hover:bg-blue-100 rounded-lg"
               >
-                Demo Bilgilerini Kullan
+                {t('auth.demoUse')}
               </Button>
             </div>
 
