@@ -250,7 +250,7 @@ const LoginPage = ({ onLogin }) => {
               
               <Dialog open={registerOpen} onOpenChange={setRegisterOpen}>
                 <DialogTrigger asChild>
-                  <button className="text-sm text-slate-600 hover:text-[#2c5282] text-center">
+                  <button className="text-sm text-slate-600 hover:text-[#2c5282]">
                     {t('auth.noAccount')}
                   </button>
                 </DialogTrigger>
