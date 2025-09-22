@@ -383,6 +383,51 @@ async def mark_email_read(email_id: str, current_user: dict = Depends(get_curren
     
     return {"success": True}
 
+@api_router.post("/admin/approve-user/{user_id}")
+async def approve_user(user_id: str, current_user: dict = Depends(get_current_user)):
+    """
+    Admin endpoint - Kullanıcıyı onaylar (whitelist'e ekler)
+    Not: Bu endpoint gerçek uygulamada admin authentication gerektirecek
+    """
+    # Demo amaçlı basit kontrol - gerçek uygulamada admin rolü kontrolü yapılmalı
+    if current_user["email"] != "demo@postadepo.com":
+        raise HTTPException(status_code=403, detail="Bu işlem için admin yetkisi gerekli")
+    
+    # Kullanıcıyı bul ve onayla
+    result = await db.users.update_one(
+        {"id": user_id},
+        {"$set": {"approved": True}}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Kullanıcı bulunamadı")
+    
+    return {"message": "Kullanıcı başarıyla onaylandı", "user_id": user_id}
+
+@api_router.get("/admin/pending-users")
+async def get_pending_users(current_user: dict = Depends(get_current_user)):
+    """
+    Admin endpoint - Onay bekleyen kullanıcıları listeler
+    """
+    if current_user["email"] != "demo@postadepo.com":
+        raise HTTPException(status_code=403, detail="Bu işlem için admin yetkisi gerekli")
+    
+    # Onay bekleyen kullanıcıları getir
+    users_cursor = db.users.find({"approved": False})
+    users = await users_cursor.to_list(length=None)
+    
+    # Şifreleri çıkar ve temizle
+    cleaned_users = []
+    for user in users:
+        user_dict = dict(user)
+        if "_id" in user_dict:
+            del user_dict["_id"]
+        if "password" in user_dict:
+            del user_dict["password"]
+        cleaned_users.append(user_dict)
+    
+    return {"pending_users": cleaned_users}
+
 @api_router.delete("/emails/{email_id}")
 async def delete_email(email_id: str, current_user: dict = Depends(get_current_user)):
     result = await db.emails.delete_one(
