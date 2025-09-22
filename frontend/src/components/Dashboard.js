@@ -666,6 +666,19 @@ const Dashboard = ({ user, onLogout }) => {
                   {selectedEmail.content}
                 </div>
               </div>
+              
+              {/* Move delete button to bottom */}
+              <div className="flex justify-end pt-4 border-t">
+                <Button
+                  onClick={() => setDeleteConfirmOpen(true)}
+                  variant="outline"
+                  size="sm"
+                  className="border-red-300 text-red-600 hover:bg-red-50"
+                >
+                  <Trash className="w-4 h-4 mr-2" />
+                  {t('email.permanentlyDelete')}
+                </Button>
+              </div>
             </div>
           )}
         </DialogContent>
