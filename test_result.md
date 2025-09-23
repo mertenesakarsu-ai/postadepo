@@ -178,6 +178,42 @@ backend:
         comment: "✅ KAPSAMLI TEST TAMAMLANDI: Admin endpoint'leri mükemmel çalışıyor. GET /api/admin/pending-users onay bekleyen kullanıcıları listeler, POST /api/admin/approve-user/{user_id} kullanıcı onaylar, sadece demo@postadepo.com admin yetkisine sahip, admin olmayan kullanıcılar 403 hatası alıyor."
 
 frontend:
+  - task: "Modern mavi-mor gradient UI tasarımı"
+    implemented: false
+    working: false
+    file: "/app/frontend/src/components/Dashboard.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "main"
+        comment: "E-posta detay modalını modern mavi-mor gradient teması ile yeniden tasarlayacak, daha canlı ve professional görünüm"
+
+  - task: "Kalıcı sil butonunu yerini değiştirme"
+    implemented: false
+    working: false
+    file: "/app/frontend/src/components/Dashboard.js"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "main"
+        comment: "Kalıcı sil butonunu modal header'ından footer'a taşıyacak (tehlike bölgesi olarak)"
+
+  - task: "İşlevsel attachment download butonları"
+    implemented: false
+    working: false
+    file: "/app/frontend/src/components/Dashboard.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "main"
+        comment: "Download butonlarını backend attachment API'sine bağlayacak ve gerçek indirme işlevi kazandıracak"
+
   - task: "Outlook benzeri e-posta detay modalı ve thread sistemi"
     implemented: true
     working: true
