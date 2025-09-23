@@ -210,10 +210,11 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Gmail UI'ını kaldırma ve Outlook çoklu hesap UI'ı"
+    - "E-posta model güncellemeleri ve hesap entegrasyonu"
+    - "Outlook benzeri e-posta detay modalı ve thread sistemi"
   stuck_tasks: []
   test_all: false
-  test_priority: "high_first"
+  test_priority: "completed"
 
 agent_communication:
   - agent: "main"
