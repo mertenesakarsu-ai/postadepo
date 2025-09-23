@@ -375,37 +375,7 @@ const Dashboard = ({ user, onLogout }) => {
     }
   };
 
-  const handleConnectGmail = async () => {
-    setLoading(true);
-    toast.info(t('notifications.gmailConnecting'));
-    
-    try {
-      const token = localStorage.getItem('token');
-      
-      // Call backend API to connect Gmail
-      const response = await axios.post(`${API}/connect-account`, 
-        { type: 'gmail' },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      
-      // Update local state
-      setConnectedAccounts(prev => {
-        const updated = [...prev, response.data.account];
-        localStorage.setItem('connectedAccounts', JSON.stringify(updated));
-        return updated;
-      });
-      
-      toast.success(t('notifications.gmailConnected'));
-      setLoading(false);
-    } catch (error) {
-      if (error.response?.status === 400) {
-        toast.error('Gmail hesabı zaten bağlı');
-      } else {
-        toast.error(t('notifications.gmailError'));
-      }
-      setLoading(false);
-    }
-  };
+  // Gmail fonksiyonu kaldırıldı - sadece Outlook desteği
 
   const filteredEmails = emails.filter(email => {
     if (selectedFolder !== 'all' || !searchTerm) return true;
