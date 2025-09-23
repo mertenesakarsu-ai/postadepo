@@ -279,7 +279,70 @@ async def generate_demo_emails(user_id: str) -> List[Dict[str, Any]]:
             thread_id = str(uuid.uuid4())
             thread_subjects[base_subject] = thread_id
         
-        content = f"Bu bir demo e-posta içeriğidir. {subject} konusunda detaylı bilgi için lütfen eki kontrol ediniz.\n\nSaygılarımla,\n{sender.split('@')[0].replace('.', ' ').title()}"
+        # Daha gerçekçi ve uzun e-posta içerikleri
+        content_templates = [
+            f"""Merhaba,
+
+{subject} ile ilgili detayları sizinle paylaşmak istiyorum. Bu konuda yapılan son çalışmalar oldukça önemli gelişmeler içeriyor ve dikkatinizi çekmesi gereken birkaç nokta bulunuyor.
+
+Yapılan analiz sonucunda aşağıdaki hususlar öne çıkmaktadır:
+
+• Mevcut durum değerlendirmesi tamamlanmış ve sonuçlar olumlu
+• Planlanan adımlar için gerekli kaynaklar belirlendi
+• Timeline ve mile stone'lar netleştirildi
+• Risk analizi yapıldı ve önlemler alındı
+
+Detaylı bilgiler için ekte bulunan dokümanları incelemenizi rica ederim. Herhangi bir sorunuz olursa lütfen benimle iletişime geçmekten çekinmeyin.
+
+En kısa zamanda geri dönüşünüzü bekliyorum.
+
+Saygılarımla,
+{sender.split('@')[0].replace('.', ' ').title()}
+{sender.split('@')[1]} | Proje Koordinatörü""",
+
+            f"""Sayın İlgili,
+
+{subject} kapsamında sizlere bilgi vermek istiyorum. Bugünkü toplantıda alınan kararlar doğrultusunda, önümüzdeki dönemde hayata geçireceğimiz stratejiler hakkında detayları aşağıda bulabilirsiniz.
+
+## Ana Hedefler:
+1. Operasyonel verimliliğin artırılması
+2. Müşteri memnuniyetinin yükseltilmesi  
+3. Teknolojik altyapının güçlendirilmesi
+4. İnsan kaynakları geliştirme programları
+
+Planladığımız bu değişikliklerin hem kısa vadeli hem de uzun vadeli etkilerini değerlendirdik. İlk aşamada pilot uygulama ile başlayarak, başarılı olan alanları genişletmeyi planlıyoruz.
+
+Bu süreçte sizlerin görüş ve önerileriniz bizim için çok değerli. Ekte bulacağınız sunum dosyası ile daha detaylı bilgilere ulaşabilirsiniz.
+
+Görüşlerinizi bekliyorum.
+
+İyi çalışmalar,
+{sender.split('@')[0].replace('.', ' ').title()}""",
+
+            f"""Merhabalar,
+
+Size {subject} hakkında güncel bilgileri iletmek istiyorum. Son dönemde yaşanan gelişmeler ışığında bazı önemli kararlar alındı ve bunları sizlerle paylaşmam gerekiyor.
+
+**Mevcut Durum:**
+Projemizin şu anki durumu oldukça olumlu. Belirlenen milestone'ların %87'si başarıyla tamamlandı ve hedeflenen tarihlerin oldukça önündeyiz. Bu başarıda tüm ekibin gösterdiği performans çok önemli rol oynadı.
+
+**Sonraki Adımlar:**
+- 1. Hafta: Kalite kontrol testleri
+- 2. Hafta: Kullanıcı kabul testleri  
+- 3. Hafta: Sistem entegrasyonu
+- 4. Hafta: Canlı ortama geçiş
+
+**Dikkat Edilmesi Gerekenler:**
+Canlı ortama geçiş sırasında olası aksaklıkları minimize etmek için backup planlarımızı hazırladık. Ayrıca 7/24 destek ekibi de hazır durumda bekliyor.
+
+Ek dosyalarda daha teknik detayları bulabilirsiniz. Herhangi bir soru veya öneriniz varsa lütfen çekinmeyin.
+
+Başarılar dilerim,
+{sender.split('@')[0].replace('.', ' ').title()}
+Teknik Proje Lideri"""
+        ]
+        
+        content = random.choice(content_templates)
         
         # Demo attachments ekle
         attachments = generate_demo_attachments()
