@@ -752,68 +752,139 @@ const Dashboard = ({ user, onLogout }) => {
                 </div>
               </div>
 
-              {/* Main Content Area */}
-              <div className="flex flex-1 overflow-hidden bg-slate-50">
-                {/* Thread Sidebar - Clean Design */}
-                {emailThread.length > 1 && (
-                  <div className="w-80 border-r border-slate-200 overflow-y-auto bg-white">
-                    <div className="p-5">
-                      <h3 className="font-semibold text-slate-700 mb-4 flex items-center text-lg">
-                        <MessageSquare className="w-5 h-5 mr-2 text-blue-600" />
-                        Konuşma ({emailThread.length})
-                      </h3>
-                      
-                      <div className="space-y-3">
-                        {emailThread.map((threadEmail, index) => (
+              {/* Main Content Area - Outlook Style Thread */}
+              <div className="flex-1 overflow-y-auto bg-slate-50">
+                {emailThread.length > 1 ? (
+                  /* Multiple Messages - Outlook Thread Style */
+                  <div className="p-6">
+                    <div className="mb-4">
+                      <div className="flex items-center gap-2 text-slate-600">
+                        <MessageSquare className="w-5 h-5" />
+                        <span className="font-medium">Konuşma: {emailThread.length} mesaj</span>
+                        <span className="text-sm bg-slate-200 px-2 py-1 rounded-full">Sadece Okuma</span>
+                      </div>
+                    </div>
+
+                    {/* Thread Messages - Outlook Style */}
+                    <div className="space-y-4">
+                      {emailThread.map((threadEmail, index) => {
+                        const isReply = index > 0;
+                        const isSelected = threadEmail.id === selectedEmail.id;
+                        
+                        return (
                           <div 
                             key={threadEmail.id}
-                            className={`p-4 rounded-lg cursor-pointer transition-all ${
-                              threadEmail.id === selectedEmail.id 
-                                ? 'bg-blue-600 text-white shadow-md' 
-                                : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                            className={`${isReply ? 'ml-8 border-l-4 border-blue-200 pl-4' : ''} ${
+                              isSelected ? 'ring-2 ring-blue-500' : ''
                             }`}
-                            onClick={() => setSelectedEmail(threadEmail)}
                           >
-                            <div className="flex items-center justify-between mb-2">
-                              <div className="flex items-center min-w-0">
-                                {threadEmail.account_info && (
-                                  <div className={`w-3 h-3 rounded-full mr-2 flex-shrink-0 ${
-                                    threadEmail.id === selectedEmail.id ? 'bg-white' : getAccountColor(threadEmail.account_id)
+                            {/* Message Header */}
+                            <div 
+                              className={`bg-white rounded-t-xl p-4 border border-slate-200 cursor-pointer hover:bg-slate-50 ${
+                                isSelected ? 'bg-blue-50 border-blue-300' : ''
+                              }`}
+                              onClick={() => setSelectedEmail(threadEmail)}
+                            >
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                  {/* Avatar */}
+                                  <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm ${
+                                    getAccountColor(threadEmail.account_id)
+                                  }`}>
+                                    {threadEmail.sender.charAt(0).toUpperCase()}
+                                  </div>
+                                  
+                                  <div className="flex flex-col">
+                                    <div className="flex items-center gap-2">
+                                      <span className="font-semibold text-slate-800">
+                                        {threadEmail.sender.split(' (')[0]}
+                                      </span>
+                                      {isReply && (
+                                        <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+                                          Yanıt
+                                        </span>
+                                      )}
+                                      {threadEmail.important && (
+                                        <Flag className="w-4 h-4 text-red-500" />
+                                      )}
+                                    </div>
+                                    <div className="flex items-center gap-4 text-sm text-slate-600">
+                                      <span>Kime: {threadEmail.recipient}</span>
+                                      <span>{formatDate(threadEmail.date)}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                                
+                                <div className="flex items-center gap-2">
+                                  {threadEmail.attachments && threadEmail.attachments.length > 0 && (
+                                    <div className="flex items-center text-slate-500">
+                                      <Paperclip className="w-4 h-4 mr-1" />
+                                      <span className="text-xs">{threadEmail.attachments.length}</span>
+                                    </div>
+                                  )}
+                                  <span className="text-xs text-slate-500">
+                                    {formatSize(threadEmail.size || 1024)}
+                                  </span>
+                                  <ChevronRight className={`w-4 h-4 text-slate-400 transform transition-transform ${
+                                    isSelected ? 'rotate-90' : ''
                                   }`} />
-                                )}
-                                <span className="text-sm font-semibold truncate">
-                                  {threadEmail.sender.split(' (')[0]}
-                                </span>
+                                </div>
                               </div>
-                              <span className={`text-xs ${threadEmail.id === selectedEmail.id ? 'text-blue-100' : 'text-slate-500'}`}>
-                                {formatDate(threadEmail.date).split(' ')[0]}
-                              </span>
                             </div>
-                            <p className={`text-sm truncate ${threadEmail.id === selectedEmail.id ? 'text-blue-100' : 'text-slate-600'}`}>
-                              {threadEmail.preview}
-                            </p>
-                            {threadEmail.attachments && threadEmail.attachments.length > 0 && (
-                              <div className="flex items-center mt-2">
-                                <Paperclip className={`w-3 h-3 mr-1 ${threadEmail.id === selectedEmail.id ? 'text-blue-200' : 'text-slate-400'}`} />
-                                <span className={`text-xs ${threadEmail.id === selectedEmail.id ? 'text-blue-200' : 'text-slate-500'}`}>
-                                  {threadEmail.attachments.length} ek dosya
-                                </span>
+
+                            {/* Message Content - Expanded when selected */}
+                            {isSelected && (
+                              <div className="bg-white rounded-b-xl border-x border-b border-slate-200 p-6 border-t-0">
+                                {/* Attachments */}
+                                {threadEmail.attachments && threadEmail.attachments.length > 0 && (
+                                  <div className="mb-6 p-4 bg-slate-50 rounded-lg border">
+                                    <div className="flex items-center mb-3">
+                                      <Paperclip className="w-4 h-4 text-slate-600 mr-2" />
+                                      <span className="font-semibold text-slate-700">Ek Dosyalar ({threadEmail.attachments.length})</span>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                      {threadEmail.attachments.map((attachment, attIndex) => (
+                                        <div key={attIndex} className="flex items-center justify-between bg-white p-3 rounded-lg border border-slate-200">
+                                          <div className="flex items-center gap-3">
+                                            {getAttachmentIcon(attachment.type)}
+                                            <div>
+                                              <p className="text-sm font-medium text-slate-800">{attachment.name}</p>
+                                              <p className="text-xs text-slate-500">{formatSize(attachment.size)}</p>
+                                            </div>
+                                          </div>
+                                          <Button 
+                                            onClick={() => downloadAttachment(attachment)}
+                                            variant="ghost" 
+                                            size="sm" 
+                                            className="text-blue-600 hover:bg-blue-50"
+                                          >
+                                            <Download className="w-4 h-4" />
+                                          </Button>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+
+                                {/* Message Content */}
+                                <div className="prose max-w-none">
+                                  <div className="whitespace-pre-wrap text-slate-700 leading-relaxed">
+                                    {threadEmail.content}
+                                  </div>
+                                </div>
                               </div>
                             )}
                           </div>
-                        ))}
-                      </div>
+                        );
+                      })}
                     </div>
                   </div>
-                )}
-                
-                {/* Email Content - Clean Layout */}
-                <div className="flex-1 overflow-y-auto">
-                  {/* Sender Info Card */}
+                ) : (
+                  /* Single Message */
                   <div className="p-6">
                     <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200 mb-6">
                       <div className="flex items-start space-x-4">
-                        {/* Clean Avatar */}
+                        {/* Avatar */}
                         <div className="flex-shrink-0">
                           {selectedEmail.account_info ? (
                             <div className={`w-14 h-14 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-sm ${getAccountColor(selectedEmail.account_id)}`}>
@@ -858,7 +929,7 @@ const Dashboard = ({ user, onLogout }) => {
                           </div>
                         </div>
                         
-                        {/* Date & Size Card */}
+                        {/* Date & Size */}
                         <div className="bg-slate-50 rounded-lg p-4 text-right border border-slate-200">
                           <div className="flex items-center mb-2 text-slate-600">
                             <Calendar className="w-4 h-4 mr-2" />
@@ -872,7 +943,7 @@ const Dashboard = ({ user, onLogout }) => {
                       </div>
                     </div>
 
-                    {/* Attachments - Clean Cards */}
+                    {/* Attachments */}
                     {selectedEmail.attachments && selectedEmail.attachments.length > 0 && (
                       <div className="mb-6">
                         <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
@@ -909,7 +980,7 @@ const Dashboard = ({ user, onLogout }) => {
                       </div>
                     )}
 
-                    {/* Email Content Card */}
+                    {/* Email Content */}
                     <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
                       <div className="prose max-w-none">
                         <div className="whitespace-pre-wrap text-slate-700 leading-relaxed text-base">
@@ -918,7 +989,7 @@ const Dashboard = ({ user, onLogout }) => {
                       </div>
                     </div>
                   </div>
-                </div>
+                )}
               </div>
               
               {/* Footer - Actions */}
