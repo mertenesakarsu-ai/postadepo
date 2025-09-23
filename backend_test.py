@@ -1175,7 +1175,7 @@ def main():
     
     tester = PostaDepoAPITester()
     
-    # Test sequence - Focus on Email Sender Format Testing
+    # Test sequence - Focus on New Email Features and Outlook Multi-Account System
     tests = [
         ("Health Check", tester.test_health_check),
         ("Demo Login", tester.test_login),
@@ -1183,6 +1183,11 @@ def main():
         ("Unauthorized Access", tester.test_unauthorized_access),
         ("Get Inbox Emails", tester.test_get_emails_inbox),
         ("Storage Information", tester.test_storage_info),
+        
+        # NEW EMAIL FEATURES TESTING - Primary Focus
+        ("Email Model New Fields (account_id, thread_id, attachments)", tester.test_email_model_new_fields),
+        ("Email Thread Endpoint", tester.test_email_thread_endpoint),
+        ("Demo Attachments Variety", tester.test_demo_attachments_variety),
         
         # Account Connection Tests - Multiple Outlook Accounts
         ("Get Connected Accounts (Empty)", tester.test_get_connected_accounts_empty),
@@ -1194,6 +1199,10 @@ def main():
         ("Connect Duplicate Outlook Account", tester.test_connect_duplicate_outlook_account),
         ("Connect Invalid Account Type", tester.test_connect_invalid_account_type),
         ("Get Connected Accounts (With Data)", tester.test_get_connected_accounts_with_data),
+        
+        # Account Integration Tests
+        ("Account-Email Matching", tester.test_account_email_matching),
+        ("Sync Emails with New Fields", tester.test_sync_emails_new_fields),
         
         # Email Sender Format Tests
         ("Check Email Sender Format After Connecting", tester.test_email_sender_format_after_connecting_accounts),
