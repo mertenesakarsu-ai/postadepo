@@ -210,7 +210,6 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Gmail desteğini kaldırma ve Outlook çoklu hesap desteği"
     - "Gmail UI'ını kaldırma ve Outlook çoklu hesap UI'ı"
   stuck_tasks: []
   test_all: false
