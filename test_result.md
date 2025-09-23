@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "E-posta detay kısmında hangi hesaptan gelen/giden mailler olduğu belli olmuyor. E-posta detay kısmını Outlook'taki gibi düzenle. Hangi e-postanın hangi hesaptan geldiği/gittiği detaylı belirtilmeli. Mesaj ve yanıtlar (conversation) da gösterilmeli. Demo için ekli mail da ekle nasıl göründüğünü göreyim."
+user_problem_statement: "E-posta detay bölümü çok karanlık ve okunmayacak halde, tasarımını daha modern bir UI yapmanı ve aynı zamanda kalıcı sil butonunu yerini değiştirmeni ve ekleri indirmek için butonları işlevsel yapmanı ve bu eklerinde veritabanına kayıt olması mühim"
 
 backend:
   - task: "E-posta model güncellemeleri ve hesap entegrasyonu"
