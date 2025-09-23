@@ -119,9 +119,6 @@
     "outlookConnecting": "Connecting Outlook account...",
     "outlookConnected": "Outlook account successfully connected!",
     "outlookError": "Outlook connection error",
-    "gmailConnecting": "Connecting Gmail account...",
-    "gmailConnected": "Gmail account successfully connected!",
-    "gmailError": "Gmail connection error",
     "noAccountsConnected": "You need to connect an email account first for synchronization",
     "accountDisconnected": "{type} account has been disconnected"
   }
