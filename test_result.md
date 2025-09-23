@@ -105,6 +105,18 @@
 user_problem_statement: "E-posta detay bölümü çok karanlık ve okunmayacak halde, tasarımını daha modern bir UI yapmanı ve aynı zamanda kalıcı sil butonunu yerini değiştirmeni ve ekleri indirmek için butonları işlevsel yapmanı ve bu eklerinde veritabanına kayıt olması mühim"
 
 backend:
+  - task: "Attachment download API endpoint'i"
+    implemented: false
+    working: false
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "main"
+        comment: "Ek dosya indirme için GET /api/attachments/download/{attachment_id} endpoint'i eklenecek"
+
   - task: "E-posta model güncellemeleri ve hesap entegrasyonu"
     implemented: true
     working: true
