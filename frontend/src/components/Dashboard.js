@@ -343,7 +343,12 @@ const Dashboard = ({ user, onLogout }) => {
     }
   };
 
-  const handleConnectOutlook = async () => {
+  const handleConnectOutlook = async (email, name) => {
+    if (!email || !email.includes('@')) {
+      toast.error('Geçerli bir email adresi girin');
+      return;
+    }
+    
     setLoading(true);
     toast.info(t('notifications.outlookConnecting'));
     
@@ -352,7 +357,11 @@ const Dashboard = ({ user, onLogout }) => {
       
       // Call backend API to connect Outlook
       const response = await axios.post(`${API}/connect-account`, 
-        { type: 'outlook' },
+        { 
+          type: 'outlook', 
+          email: email,
+          name: name || email.split('@')[0].replace('.', ' ')
+        },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       
@@ -365,13 +374,15 @@ const Dashboard = ({ user, onLogout }) => {
       
       toast.success(t('notifications.outlookConnected'));
       setLoading(false);
+      return true; // Başarılı
     } catch (error) {
       if (error.response?.status === 400) {
-        toast.error('Outlook hesabı zaten bağlı');
+        toast.error(error.response.data?.detail || 'Bu Outlook hesabı zaten bağlı');
       } else {
         toast.error(t('notifications.outlookError'));
       }
       setLoading(false);
+      return false; // Başarısız
     }
   };
 
