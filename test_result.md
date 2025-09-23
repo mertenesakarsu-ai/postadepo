@@ -163,12 +163,24 @@ backend:
         comment: "✅ KAPSAMLI TEST TAMAMLANDI: Admin endpoint'leri mükemmel çalışıyor. GET /api/admin/pending-users onay bekleyen kullanıcıları listeler, POST /api/admin/approve-user/{user_id} kullanıcı onaylar, sadece demo@postadepo.com admin yetkisine sahip, admin olmayan kullanıcılar 403 hatası alıyor."
 
 frontend:
+  - task: "Gmail UI'ını kaldırma ve Outlook çoklu hesap UI'ı"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/Dashboard.js, /app/frontend/src/locales/tr.json, /app/frontend/src/locales/en.json"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Gmail connect fonksiyonu ve tüm UI kısımlarını kaldırdı, Outlook kısmını birden fazla hesap destekleyecek şekilde güncelledi, + butonu ile yeni hesap ekleme formu ekledi, bağlı hesaplar listesinde isim-soyisim bilgisi gösterimi ekledi, translation dosyalarından Gmail referanslarını kaldırdı, Plus ikonunu import etti"
+
   - task: "Logo boyutlandırma ve çerçeve/gölge efektlerini kaldırma"
     implemented: true
     working: true
     file: "/app/frontend/src/components/LoginPage.js, /app/frontend/src/components/Dashboard.js"
     stuck_count: 0
-    priority: "high"
+    priority: "medium"
     needs_retesting: false
     status_history:
       - working: true
@@ -180,7 +192,7 @@ frontend:
     working: true
     file: "/app/frontend/src/components/LoginPage.js"
     stuck_count: 0
-    priority: "high"
+    priority: "medium"
     needs_retesting: false
     status_history:
       - working: true
