@@ -405,12 +405,27 @@ async def get_emails(folder: str = "inbox", current_user: dict = Depends(get_cur
     emails_cursor = db.emails.find(query).sort("date", -1)
     emails = await emails_cursor.to_list(length=None)
     
-    # Clean up emails for response
+    # Bağlı hesap bilgilerini al
+    connected_accounts = await db.connected_accounts.find({"user_id": current_user["id"]}).to_list(length=None)
+    accounts_dict = {acc["id"]: acc for acc in connected_accounts}
+    
+    # Clean up emails for response ve hesap bilgilerini ekle
     cleaned_emails = []
     for email in emails:
         email_dict = dict(email)
         if "_id" in email_dict:
             del email_dict["_id"]
+        
+        # Hesap bilgilerini ekle
+        if "account_id" in email_dict and email_dict["account_id"] in accounts_dict:
+            account = accounts_dict[email_dict["account_id"]]
+            email_dict["account_info"] = {
+                "id": account["id"],
+                "name": account.get("name", ""),
+                "email": account["email"],
+                "type": account["type"]
+            }
+        
         cleaned_emails.append(email_dict)
     
     # Get folder counts
