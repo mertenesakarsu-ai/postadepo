@@ -510,17 +510,32 @@ async def import_emails(file: UploadFile = File(...), current_user: dict = Depen
     # Generate demo emails based on file size (simulate parsing)
     email_count = min(max(file_size // 1000, 1), 20)  # 1-20 emails based on file size
     
+    # Bağlı hesaplardan sender bilgilerini al
+    connected_accounts = await db.connected_accounts.find({"user_id": current_user["id"]}).to_list(length=None)
+    
+    if not connected_accounts:
+        # Eğer bağlı hesap yoksa, demo sender'lar kullan
+        senders = ["imported@outlook.com (İçe Aktarılan)", "archive@outlook.com (Arşiv)", "backup@outlook.com (Yedek)"]
+    else:
+        senders = []
+        for account in connected_accounts:
+            email = account["email"]
+            name = account.get("name", email.split("@")[0].replace(".", " ").title())
+            sender_format = f"{email} ({name})" if name and name != email.split("@")[0].replace(".", " ").title() else email
+            senders.append(sender_format)
+    
     imported_emails = []
     for i in range(email_count):
+        sender = random.choice(senders)
         email_size = random.randint(1024, 8192)  # 1-8KB per email
         email = {
             "id": str(uuid.uuid4()),
             "user_id": current_user["id"],
             "folder": "inbox",
-            "sender": f"imported{i}@example.com",
+            "sender": sender,
             "recipient": current_user["email"],
             "subject": f"İçe Aktarılan E-posta {i+1} - {file.filename}",
-            "content": f"Bu e-posta {file.filename} dosyasından içe aktarılmıştır. Orijinal boyut: {file_size} bytes\n\nİçerik özeti: Dosyadan başarıyla içe aktarılan e-posta verisi.",
+            "content": f"Bu e-posta {file.filename} dosyasından içe aktarılmıştır. Gönderen: {sender}, Orijinal boyut: {file_size} bytes\n\nİçerik özeti: Dosyadan başarıyla içe aktarılan e-posta verisi.",
             "preview": f"Bu e-posta {file.filename} dosyasından içe aktarılmıştır...",
             "date": datetime.now(timezone.utc).isoformat(),
             "read": False,
