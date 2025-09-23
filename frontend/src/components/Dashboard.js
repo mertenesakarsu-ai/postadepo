@@ -739,14 +739,14 @@ const Dashboard = ({ user, onLogout }) => {
                       </div>
                     </div>
                     
-                    {/* Close Button - Prominent */}
+                    {/* Close Button - Prominent with X */}
                     <Button
                       onClick={() => setEmailDetailOpen(false)}
                       variant="outline"
                       size="sm"
                       className="text-slate-600 border-slate-300 hover:text-slate-800 hover:bg-slate-100 hover:border-slate-400 font-semibold px-4"
                     >
-                      Kapat
+                      ✕ Kapat
                     </Button>
                   </div>
                 </div>
