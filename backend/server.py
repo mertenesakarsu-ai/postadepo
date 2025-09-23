@@ -123,7 +123,7 @@ class RecaptchaVerificationResponse(BaseModel):
     message: Optional[str] = None
     
 # Demo data generation
-def generate_demo_emails(user_id: str) -> List[Dict[str, Any]]:
+async def generate_demo_emails(user_id: str) -> List[Dict[str, Any]]:
     senders = [
         "ali.kaya@outlook.com", "mehmet.demir@outlook.com", "fatma.yilmaz@hotmail.com",
         "ahmet.ozkan@outlook.com", "ayse.celik@hotmail.com", "mustafa.arslan@outlook.com",
