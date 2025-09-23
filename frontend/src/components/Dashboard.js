@@ -233,9 +233,25 @@ const Dashboard = ({ user, onLogout }) => {
     setLoading(false);
   };
 
-  const handleEmailClick = (email) => {
+  const handleEmailClick = async (email) => {
     setSelectedEmail(email);
     setEmailDetailOpen(true);
+    
+    // Thread bilgilerini al
+    if (email.thread_id) {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await axios.get(`${API}/emails/thread/${email.thread_id}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setEmailThread(response.data.emails || []);
+      } catch (error) {
+        console.error('Thread load error:', error);
+        setEmailThread([email]); // Fallback to single email
+      }
+    } else {
+      setEmailThread([email]); // Single email, no thread
+    }
     
     // Mark as read if unread
     if (!email.read) {
