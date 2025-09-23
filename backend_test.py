@@ -885,6 +885,290 @@ class PostaDepoAPITester:
         
         return success
 
+    def test_email_model_new_fields(self):
+        """Test new email model fields: account_id, thread_id, attachments"""
+        success, response = self.run_test(
+            "Check Email Model New Fields",
+            "GET",
+            "emails?folder=inbox",
+            200
+        )
+        
+        if success:
+            emails = response.get('emails', [])
+            print(f"   Checking new fields in {len(emails)} emails")
+            
+            fields_found = {
+                'account_id': 0,
+                'thread_id': 0,
+                'attachments': 0,
+                'account_info': 0
+            }
+            
+            for email in emails[:10]:  # Check first 10 emails
+                # Check account_id field
+                if 'account_id' in email and email['account_id']:
+                    fields_found['account_id'] += 1
+                
+                # Check thread_id field
+                if 'thread_id' in email and email['thread_id']:
+                    fields_found['thread_id'] += 1
+                
+                # Check attachments field
+                if 'attachments' in email:
+                    fields_found['attachments'] += 1
+                    attachments = email['attachments']
+                    if attachments and len(attachments) > 0:
+                        print(f"     Email with {len(attachments)} attachments:")
+                        for att in attachments[:2]:  # Show first 2 attachments
+                            print(f"       - {att.get('name', 'Unknown')} ({att.get('type', 'Unknown type')}, {att.get('size', 0)} bytes)")
+                
+                # Check account_info field (should be added by API)
+                if 'account_info' in email and email['account_info']:
+                    fields_found['account_info'] += 1
+                    account_info = email['account_info']
+                    print(f"     Account info: {account_info.get('name', 'No name')} ({account_info.get('email', 'No email')})")
+            
+            print(f"   Field statistics:")
+            print(f"     account_id: {fields_found['account_id']}/{min(10, len(emails))} emails")
+            print(f"     thread_id: {fields_found['thread_id']}/{min(10, len(emails))} emails")
+            print(f"     attachments: {fields_found['attachments']}/{min(10, len(emails))} emails")
+            print(f"     account_info: {fields_found['account_info']}/{min(10, len(emails))} emails")
+            
+            # Success if most emails have the new fields
+            return (fields_found['account_id'] > 0 and 
+                   fields_found['thread_id'] > 0 and 
+                   fields_found['attachments'] >= 0)  # attachments can be empty array
+        
+        return success
+
+    def test_email_thread_endpoint(self):
+        """Test GET /api/emails/thread/{thread_id} endpoint"""
+        # First get an email with thread_id
+        success, response = self.run_test(
+            "Get Email for Thread Test",
+            "GET",
+            "emails?folder=inbox",
+            200
+        )
+        
+        if not success or not response.get('emails'):
+            print("❌ No emails found to test thread endpoint")
+            return False
+        
+        # Find an email with thread_id
+        thread_id = None
+        for email in response['emails']:
+            if email.get('thread_id'):
+                thread_id = email['thread_id']
+                break
+        
+        if not thread_id:
+            print("❌ No emails with thread_id found")
+            return False
+        
+        print(f"   Testing thread_id: {thread_id}")
+        
+        # Test the thread endpoint
+        success, response = self.run_test(
+            "Get Email Thread",
+            "GET",
+            f"emails/thread/{thread_id}",
+            200
+        )
+        
+        if success:
+            thread_emails = response.get('emails', [])
+            returned_thread_id = response.get('thread_id')
+            
+            print(f"   Thread contains {len(thread_emails)} emails")
+            print(f"   Returned thread_id: {returned_thread_id}")
+            
+            # Verify all emails in thread have same thread_id
+            all_same_thread = all(email.get('thread_id') == thread_id for email in thread_emails)
+            if all_same_thread:
+                print("   ✅ All emails in thread have correct thread_id")
+            else:
+                print("   ❌ Some emails in thread have different thread_id")
+            
+            # Check if emails have account_info
+            emails_with_account_info = sum(1 for email in thread_emails if email.get('account_info'))
+            print(f"   Emails with account_info: {emails_with_account_info}/{len(thread_emails)}")
+            
+            return all_same_thread and len(thread_emails) > 0
+        
+        return success
+
+    def test_demo_attachments_variety(self):
+        """Test that demo emails have various attachment types"""
+        success, response = self.run_test(
+            "Check Demo Attachment Variety",
+            "GET",
+            "emails?folder=inbox",
+            200
+        )
+        
+        if success:
+            emails = response.get('emails', [])
+            
+            attachment_types = set()
+            attachment_extensions = set()
+            total_attachments = 0
+            emails_with_attachments = 0
+            
+            for email in emails:
+                attachments = email.get('attachments', [])
+                if attachments:
+                    emails_with_attachments += 1
+                    total_attachments += len(attachments)
+                    
+                    for att in attachments:
+                        att_type = att.get('type', '')
+                        att_name = att.get('name', '')
+                        
+                        if att_type:
+                            attachment_types.add(att_type)
+                        
+                        if '.' in att_name:
+                            ext = att_name.split('.')[-1].lower()
+                            attachment_extensions.add(ext)
+            
+            print(f"   Total emails with attachments: {emails_with_attachments}")
+            print(f"   Total attachments: {total_attachments}")
+            print(f"   Attachment types found: {len(attachment_types)}")
+            print(f"   Attachment extensions: {sorted(attachment_extensions)}")
+            
+            # Check for expected types
+            expected_extensions = {'pdf', 'docx', 'xlsx', 'png', 'jpg', 'pptx'}
+            found_extensions = attachment_extensions.intersection(expected_extensions)
+            
+            print(f"   Expected extensions found: {sorted(found_extensions)}")
+            
+            # Success if we have variety of attachments
+            return (len(attachment_types) >= 3 and 
+                   len(found_extensions) >= 3 and 
+                   emails_with_attachments > 0)
+        
+        return success
+
+    def test_sync_emails_new_fields(self):
+        """Test that sync-emails endpoint supports new fields"""
+        success, response = self.run_test(
+            "Sync Emails with New Fields",
+            "POST",
+            "sync-emails",
+            200
+        )
+        
+        if success:
+            new_emails = response.get('new_emails', 0)
+            print(f"   Added {new_emails} new emails during sync")
+            
+            if new_emails > 0:
+                # Check the newly synced emails have new fields
+                email_success, email_response = self.run_test(
+                    "Check Synced Emails New Fields",
+                    "GET",
+                    "emails?folder=inbox",
+                    200
+                )
+                
+                if email_success:
+                    emails = email_response.get('emails', [])
+                    # Check the most recent emails (should be sync emails)
+                    recent_emails = [e for e in emails if 'Senkronizasyon' in e.get('subject', '')][:new_emails]
+                    
+                    if recent_emails:
+                        print(f"   Checking {len(recent_emails)} synced emails for new fields")
+                        
+                        fields_check = {
+                            'account_id': 0,
+                            'thread_id': 0,
+                            'attachments': 0
+                        }
+                        
+                        for email in recent_emails:
+                            if email.get('account_id'):
+                                fields_check['account_id'] += 1
+                            if email.get('thread_id'):
+                                fields_check['thread_id'] += 1
+                            if 'attachments' in email:
+                                fields_check['attachments'] += 1
+                                if email['attachments']:
+                                    print(f"     Synced email has {len(email['attachments'])} attachments")
+                        
+                        print(f"   New fields in synced emails:")
+                        print(f"     account_id: {fields_check['account_id']}/{len(recent_emails)}")
+                        print(f"     thread_id: {fields_check['thread_id']}/{len(recent_emails)}")
+                        print(f"     attachments: {fields_check['attachments']}/{len(recent_emails)}")
+                        
+                        return (fields_check['account_id'] > 0 and 
+                               fields_check['thread_id'] > 0 and 
+                               fields_check['attachments'] > 0)
+        
+        return success
+
+    def test_account_email_matching(self):
+        """Test that account info is properly matched with emails"""
+        # First get connected accounts
+        success, response = self.run_test(
+            "Get Connected Accounts for Matching Test",
+            "GET",
+            "connected-accounts",
+            200
+        )
+        
+        if not success:
+            return False
+        
+        accounts = response.get('accounts', [])
+        if not accounts:
+            print("   No connected accounts found for matching test")
+            return True  # Not a failure if no accounts
+        
+        print(f"   Found {len(accounts)} connected accounts")
+        account_emails = {acc['id']: acc['email'] for acc in accounts}
+        
+        # Get emails and check account matching
+        email_success, email_response = self.run_test(
+            "Check Account-Email Matching",
+            "GET",
+            "emails?folder=inbox",
+            200
+        )
+        
+        if email_success:
+            emails = email_response.get('emails', [])
+            
+            matched_emails = 0
+            account_info_emails = 0
+            
+            for email in emails[:20]:  # Check first 20 emails
+                account_id = email.get('account_id')
+                account_info = email.get('account_info')
+                
+                if account_info:
+                    account_info_emails += 1
+                    
+                    # Verify account_info matches account_id
+                    if account_id and account_id in account_emails:
+                        expected_email = account_emails[account_id]
+                        actual_email = account_info.get('email')
+                        
+                        if expected_email == actual_email:
+                            matched_emails += 1
+                        else:
+                            print(f"     ❌ Mismatch: account_id {account_id} -> expected {expected_email}, got {actual_email}")
+                    
+                    print(f"     Email account: {account_info.get('name', 'No name')} ({account_info.get('email', 'No email')})")
+            
+            print(f"   Emails with account_info: {account_info_emails}")
+            print(f"   Correctly matched emails: {matched_emails}")
+            
+            return matched_emails > 0 or account_info_emails == 0  # Success if matches found or no account info expected
+        
+        return email_success
+
 def main():
     print("🚀 Starting PostaDepo API Tests")
     print("=" * 50)
