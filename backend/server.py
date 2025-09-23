@@ -622,26 +622,34 @@ async def get_connected_accounts(current_user: dict = Depends(get_current_user))
 
 @api_router.post("/connect-account")
 async def connect_account(account_data: dict, current_user: dict = Depends(get_current_user)):
-    """Demo endpoint for connecting email accounts"""
-    account_type = account_data.get("type")  # 'outlook' or 'gmail'
+    """Outlook hesabı bağlama endpoint'i - sınırsız hesap desteği"""
+    account_type = account_data.get("type", "").lower()
+    email = account_data.get("email", "")
+    name = account_data.get("name", "")
     
-    if account_type not in ['outlook', 'gmail']:
-        raise HTTPException(status_code=400, detail="Unsupported account type")
+    # Sadece Outlook desteği
+    if account_type != "outlook":
+        raise HTTPException(status_code=400, detail="Sadece Outlook hesapları desteklenmektedir")
     
-    # Check if account is already connected
+    # Email adresi gerekli
+    if not email:
+        raise HTTPException(status_code=400, detail="Email adresi gereklidir")
+    
+    # Aynı email adresinin zaten bağlı olup olmadığını kontrol et
     existing_account = await db.connected_accounts.find_one({
         "user_id": current_user["id"],
-        "type": account_type.capitalize()
+        "email": email
     })
     
     if existing_account:
-        raise HTTPException(status_code=400, detail="Account already connected")
+        raise HTTPException(status_code=400, detail="Bu email adresi zaten bağlı")
     
-    # Create new connected account (demo)
+    # Yeni Outlook hesabı oluştur
     new_account = ConnectedAccount(
         user_id=current_user["id"],
-        type=account_type.capitalize(),
-        email=current_user["email"].replace("@postadepo.com", f"@{account_type}.com")
+        type="Outlook",
+        email=email,
+        name=name if name else email.split("@")[0].replace(".", " ").title()
     )
     
     account_dict = new_account.dict()
