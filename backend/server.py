@@ -515,9 +515,13 @@ async def sync_emails(current_user: dict = Depends(get_current_user)):
     # Bağlı hesaplardan sender bilgilerini al
     connected_accounts = await db.connected_accounts.find({"user_id": current_user["id"]}).to_list(length=None)
     
+    # Account mapping
+    account_mapping = {}
     if not connected_accounts:
         # Eğer bağlı hesap yoksa, demo sender'lar kullan
         senders = ["demo.sync@outlook.com (Demo Sync)", "system@outlook.com (Sistem)", "info@outlook.com (Bilgi)"]
+        for sender in senders:
+            account_mapping[sender] = f"demo-{sender.split('@')[0]}-account"
     else:
         senders = []
         for account in connected_accounts:
@@ -525,11 +529,17 @@ async def sync_emails(current_user: dict = Depends(get_current_user)):
             name = account.get("name", email.split("@")[0].replace(".", " ").title())
             sender_format = f"{email} ({name})" if name and name != email.split("@")[0].replace(".", " ").title() else email
             senders.append(sender_format)
+            account_mapping[sender_format] = account["id"]
     
     new_emails = []
     for i in range(3):
         sender = random.choice(senders)
-        total_size = random.randint(1024, 5120)  # 1-5KB
+        
+        # Demo attachments ekle
+        attachments = generate_demo_attachments()
+        attachments_size = sum(att["size"] for att in attachments)
+        total_size = random.randint(1024, 5120) + attachments_size
+        
         email = {
             "id": str(uuid.uuid4()),
             "user_id": current_user["id"],
@@ -542,7 +552,10 @@ async def sync_emails(current_user: dict = Depends(get_current_user)):
             "date": datetime.now(timezone.utc).isoformat(),
             "read": False,
             "important": False,
-            "size": total_size
+            "size": total_size,
+            "account_id": account_mapping.get(sender),
+            "thread_id": str(uuid.uuid4()),
+            "attachments": attachments
         }
         new_emails.append(email)
     
