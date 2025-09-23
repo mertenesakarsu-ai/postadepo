@@ -1460,7 +1460,7 @@ def main():
     
     tester = PostaDepoAPITester()
     
-    # Test sequence - Focus on New Email Features and Outlook Multi-Account System
+    # Test sequence - Focus on Attachment Download API and New Email Features
     tests = [
         ("Health Check", tester.test_health_check),
         ("Demo Login", tester.test_login),
@@ -1469,7 +1469,10 @@ def main():
         ("Get Inbox Emails", tester.test_get_emails_inbox),
         ("Storage Information", tester.test_storage_info),
         
-        # NEW EMAIL FEATURES TESTING - Primary Focus
+        # ATTACHMENT DOWNLOAD API TESTING - PRIMARY FOCUS
+        ("🎯 ATTACHMENT DOWNLOAD API COMPREHENSIVE TEST", tester.test_attachment_download_api),
+        
+        # NEW EMAIL FEATURES TESTING - Secondary Focus
         ("Email Model New Fields (account_id, thread_id, attachments)", tester.test_email_model_new_fields),
         ("Email Thread Endpoint", tester.test_email_thread_endpoint),
         ("Demo Attachments Variety", tester.test_demo_attachments_variety),
