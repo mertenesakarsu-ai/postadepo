@@ -704,35 +704,34 @@ const Dashboard = ({ user, onLogout }) => {
         </div>
       </div>
 
-      {/* Email Detail Modal - Modern Blue-Purple Gradient Design */}
+      {/* Email Detail Modal - Clean Design matching main theme */}
       <Dialog open={emailDetailOpen} onOpenChange={setEmailDetailOpen}>
-        <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden bg-gradient-to-br from-slate-50 to-blue-50 border-0 shadow-2xl rounded-2xl">
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden bg-white border-0 shadow-2xl rounded-xl">
           {selectedEmail && (
             <div className="flex flex-col h-[85vh]">
-              {/* Header - Modern Gradient Design */}
-              <div className="relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-indigo-600 opacity-90"></div>
-                <div className="relative p-6 text-white">
+              {/* Header - Clean & Professional */}
+              <div className="relative overflow-hidden border-b border-slate-200">
+                <div className="p-6 bg-gradient-to-r from-slate-50 to-blue-50">
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
-                      <h2 className="text-2xl font-bold mb-2 truncate pr-4 drop-shadow-sm">
+                      <h2 className="text-2xl font-bold mb-2 truncate pr-4 text-slate-800">
                         {selectedEmail.subject}
                       </h2>
                       <div className="flex items-center gap-3 flex-wrap">
                         {selectedEmail.important && (
-                          <div className="flex items-center px-3 py-1.5 bg-white/20 backdrop-blur-sm text-white rounded-full text-sm font-medium">
+                          <div className="flex items-center px-3 py-1.5 bg-red-100 text-red-700 rounded-full text-sm font-medium">
                             <Flag className="w-4 h-4 mr-1.5" />
                             Önemli
                           </div>
                         )}
                         {selectedEmail.attachments && selectedEmail.attachments.length > 0 && (
-                          <div className="flex items-center px-3 py-1.5 bg-white/20 backdrop-blur-sm text-white rounded-full text-sm font-medium">
+                          <div className="flex items-center px-3 py-1.5 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
                             <Paperclip className="w-4 h-4 mr-1.5" />
                             {selectedEmail.attachments.length} Ek Dosya
                           </div>
                         )}
                         {emailThread.length > 1 && (
-                          <div className="flex items-center px-3 py-1.5 bg-white/20 backdrop-blur-sm text-white rounded-full text-sm font-medium">
+                          <div className="flex items-center px-3 py-1.5 bg-green-100 text-green-700 rounded-full text-sm font-medium">
                             <MessageSquare className="w-4 h-4 mr-1.5" />
                             {emailThread.length} Mesaj
                           </div>
@@ -745,16 +744,25 @@ const Dashboard = ({ user, onLogout }) => {
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="text-white/80 hover:text-white hover:bg-white/10 backdrop-blur-sm"
+                        className="text-slate-500 hover:text-slate-700 hover:bg-slate-100"
                       >
                         <ArrowLeft className="w-4 h-4" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="text-white/80 hover:text-white hover:bg-white/10 backdrop-blur-sm"
+                        className="text-slate-500 hover:text-slate-700 hover:bg-slate-100"
                       >
                         <ArrowRight className="w-4 h-4" />
+                      </Button>
+                      <div className="w-px h-6 bg-slate-300 mx-2"></div>
+                      <Button
+                        onClick={() => setEmailDetailOpen(false)}
+                        variant="ghost"
+                        size="sm"
+                        className="text-slate-500 hover:text-slate-700 hover:bg-slate-100"
+                      >
+                        ✕
                       </Button>
                     </div>
                   </div>
@@ -762,13 +770,13 @@ const Dashboard = ({ user, onLogout }) => {
               </div>
 
               {/* Main Content Area */}
-              <div className="flex flex-1 overflow-hidden bg-white/50 backdrop-blur-sm">
-                {/* Thread Sidebar - Modern Card Design */}
+              <div className="flex flex-1 overflow-hidden bg-slate-50">
+                {/* Thread Sidebar - Clean Design */}
                 {emailThread.length > 1 && (
-                  <div className="w-80 border-r border-blue-200/50 overflow-y-auto bg-gradient-to-b from-blue-50/50 to-purple-50/50">
+                  <div className="w-80 border-r border-slate-200 overflow-y-auto bg-white">
                     <div className="p-5">
                       <h3 className="font-semibold text-slate-700 mb-4 flex items-center text-lg">
-                        <MessageSquare className="w-5 h-5 mr-2 text-blue-500" />
+                        <MessageSquare className="w-5 h-5 mr-2 text-blue-600" />
                         Konuşma ({emailThread.length})
                       </h3>
                       
@@ -776,10 +784,10 @@ const Dashboard = ({ user, onLogout }) => {
                         {emailThread.map((threadEmail, index) => (
                           <div 
                             key={threadEmail.id}
-                            className={`p-4 rounded-xl cursor-pointer transition-all transform hover:scale-105 ${
+                            className={`p-4 rounded-lg cursor-pointer transition-all ${
                               threadEmail.id === selectedEmail.id 
-                                ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg ring-2 ring-blue-300' 
-                                : 'bg-white/80 hover:bg-white hover:shadow-md text-slate-700'
+                                ? 'bg-blue-600 text-white shadow-md' 
+                                : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
                             }`}
                             onClick={() => setSelectedEmail(threadEmail)}
                           >
@@ -816,21 +824,21 @@ const Dashboard = ({ user, onLogout }) => {
                   </div>
                 )}
                 
-                {/* Email Content - Modern Card Layout */}
+                {/* Email Content - Clean Layout */}
                 <div className="flex-1 overflow-y-auto">
                   {/* Sender Info Card */}
                   <div className="p-6">
-                    <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-blue-100/50 mb-6">
+                    <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200 mb-6">
                       <div className="flex items-start space-x-4">
-                        {/* Modern Avatar */}
+                        {/* Clean Avatar */}
                         <div className="flex-shrink-0">
                           {selectedEmail.account_info ? (
-                            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-white font-bold text-lg shadow-lg ${getAccountColor(selectedEmail.account_id)}`}>
+                            <div className={`w-14 h-14 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-sm ${getAccountColor(selectedEmail.account_id)}`}>
                               {selectedEmail.account_info.name ? selectedEmail.account_info.name.charAt(0).toUpperCase() : 
                                selectedEmail.account_info.email.charAt(0).toUpperCase()}
                             </div>
                           ) : (
-                            <div className="w-14 h-14 bg-gradient-to-br from-slate-200 to-slate-300 rounded-2xl flex items-center justify-center shadow-lg">
+                            <div className="w-14 h-14 bg-slate-200 rounded-xl flex items-center justify-center shadow-sm">
                               <User className="w-7 h-7 text-slate-500" />
                             </div>
                           )}
@@ -843,7 +851,7 @@ const Dashboard = ({ user, onLogout }) => {
                               {selectedEmail.sender.includes(' (') ? selectedEmail.sender.split(' (')[1].replace(')', '') : selectedEmail.sender}
                             </h3>
                             {selectedEmail.account_info && (
-                              <span className={`px-3 py-1 rounded-full text-sm text-white font-semibold shadow-sm ${getAccountColor(selectedEmail.account_id)}`}>
+                              <span className={`px-3 py-1 rounded-full text-sm text-white font-semibold ${getAccountColor(selectedEmail.account_id)}`}>
                                 {selectedEmail.account_info.type}
                               </span>
                             )}
@@ -868,7 +876,7 @@ const Dashboard = ({ user, onLogout }) => {
                         </div>
                         
                         {/* Date & Size Card */}
-                        <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-4 text-right border border-blue-100">
+                        <div className="bg-slate-50 rounded-lg p-4 text-right border border-slate-200">
                           <div className="flex items-center mb-2 text-slate-600">
                             <Calendar className="w-4 h-4 mr-2" />
                             <span className="text-sm font-medium">{formatDate(selectedEmail.date)}</span>
@@ -881,20 +889,20 @@ const Dashboard = ({ user, onLogout }) => {
                       </div>
                     </div>
 
-                    {/* Attachments - Modern Cards */}
+                    {/* Attachments - Clean Cards */}
                     {selectedEmail.attachments && selectedEmail.attachments.length > 0 && (
                       <div className="mb-6">
-                        <div className="bg-gradient-to-r from-blue-50 via-purple-50 to-indigo-50 rounded-2xl p-6 border border-blue-200/50">
+                        <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
                           <div className="flex items-center mb-4">
-                            <Paperclip className="w-5 h-5 text-blue-600 mr-3" />
+                            <Paperclip className="w-5 h-5 text-slate-600 mr-3" />
                             <h4 className="font-bold text-slate-800 text-lg">Ek Dosyalar ({selectedEmail.attachments.length})</h4>
                           </div>
                           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                             {selectedEmail.attachments.map((attachment, index) => (
-                              <div key={index} className="group bg-white rounded-xl p-4 border border-blue-100 hover:shadow-lg hover:border-blue-300 transition-all transform hover:scale-105 cursor-pointer">
+                              <div key={index} className="group bg-slate-50 rounded-lg p-4 border border-slate-200 hover:shadow-md hover:border-slate-300 transition-all cursor-pointer">
                                 <div className="flex items-center justify-between">
                                   <div className="flex items-center flex-1 min-w-0">
-                                    <div className="mr-3 p-2 bg-gradient-to-br from-blue-100 to-purple-100 rounded-lg">
+                                    <div className="mr-3 p-2 bg-white rounded-md shadow-sm">
                                       {getAttachmentIcon(attachment.type)}
                                     </div>
                                     <div className="min-w-0 flex-1">
@@ -906,7 +914,7 @@ const Dashboard = ({ user, onLogout }) => {
                                     onClick={() => downloadAttachment(attachment)}
                                     variant="ghost" 
                                     size="sm" 
-                                    className="ml-2 h-8 w-8 p-0 text-blue-600 hover:text-white hover:bg-gradient-to-r hover:from-blue-500 hover:to-purple-500 rounded-lg transition-all shadow-sm"
+                                    className="ml-2 h-8 w-8 p-0 text-blue-600 hover:text-white hover:bg-blue-600 rounded-lg transition-all"
                                   >
                                     <Download className="w-4 h-4" />
                                   </Button>
@@ -919,7 +927,7 @@ const Dashboard = ({ user, onLogout }) => {
                     )}
 
                     {/* Email Content Card */}
-                    <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-blue-100/50">
+                    <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
                       <div className="prose max-w-none">
                         <div className="whitespace-pre-wrap text-slate-700 leading-relaxed text-base">
                           {selectedEmail.content}
@@ -930,12 +938,11 @@ const Dashboard = ({ user, onLogout }) => {
                 </div>
               </div>
               
-              {/* Footer - Danger Zone */}
-              <div className="border-t border-blue-200/50 p-4 bg-gradient-to-r from-red-50 to-pink-50">
+              {/* Footer - Actions */}
+              <div className="border-t border-slate-200 p-4 bg-slate-50">
                 <div className="flex justify-between items-center">
-                  <div className="flex items-center text-red-600">
-                    <AlertTriangle className="w-4 h-4 mr-2" />
-                    <span className="text-sm font-medium">Tehlikeli İşlemler</span>
+                  <div className="flex items-center text-slate-600">
+                    <span className="text-sm font-medium">E-posta İşlemleri</span>
                   </div>
                   <Button
                     onClick={() => setDeleteConfirmOpen(true)}
@@ -944,7 +951,7 @@ const Dashboard = ({ user, onLogout }) => {
                     className="text-red-600 border-red-300 hover:bg-red-500 hover:text-white hover:border-red-500 font-semibold"
                   >
                     <Trash className="w-4 h-4 mr-2" />
-                    Kalıcı Olarak Sil
+                    Sil
                   </Button>
                 </div>
               </div>
