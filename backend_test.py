@@ -334,7 +334,7 @@ class PostaDepoAPITester:
             400,
             data={
                 "type": "outlook",
-                "email": "test@outlook.com",  # Same as first account
+                "email": "john.doe@outlook.com",  # Same as first account
                 "name": "Duplicate Test"
             }
         )
