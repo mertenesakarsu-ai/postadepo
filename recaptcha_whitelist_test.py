@@ -5,7 +5,7 @@ from datetime import datetime
 import uuid
 
 class PostaDepoRecaptchaWhitelistTester:
-    def __init__(self, base_url="https://logo-enhancer.preview.emergentagent.com/api"):
+    def __init__(self, base_url="https://team-backup.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.token = None
         self.user = None
