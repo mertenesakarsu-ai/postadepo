@@ -1001,7 +1001,10 @@ async def download_attachment(attachment_id: str, current_user: dict = Depends(g
         )
         
     except Exception as e:
-        logger.error(f"Error downloading attachment: {str(e)}")
+        logging.error(f"Error downloading attachment: {str(e)}")
+        # Check if it's a 404 case (attachment not found)
+        if "not found" in str(e).lower():
+            raise HTTPException(status_code=404, detail="Attachment not found")
         raise HTTPException(status_code=500, detail="Error downloading attachment")
 
 @api_router.delete("/connected-accounts/{account_id}")
