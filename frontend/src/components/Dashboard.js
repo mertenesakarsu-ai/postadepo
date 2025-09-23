@@ -849,63 +849,87 @@ const Dashboard = ({ user, onLogout }) => {
               </div>
             )}
 
-            {/* Outlook Connection */}
+            {/* Outlook Multiple Accounts */}
             <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-lg border border-blue-200">
               <div className="flex items-center space-x-3 mb-4">
                 <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
                   <Mail className="w-6 h-6 text-white" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-semibold text-blue-800">{t('connect.outlookTitle')}</h3>
-                  <p className="text-sm text-blue-600">{t('connect.outlookSubtitle')}</p>
+                  <h3 className="font-semibold text-blue-800">Outlook Hesapları</h3>
+                  <p className="text-sm text-blue-600">Microsoft 365 / Exchange / Hotmail - Sınırsız hesap bağlama</p>
                 </div>
-                {connectedAccounts.some(acc => acc.type === 'Outlook') && (
-                  <Button
-                    onClick={() => {
-                      const outlookAccount = connectedAccounts.find(acc => acc.type === 'Outlook');
-                      handleDisconnectAccount(outlookAccount.id, 'Outlook');
-                    }}
-                    variant="outline"
-                    size="sm"
-                    className="border-red-300 text-red-600 hover:bg-red-50"
-                    title="Outlook hesabını ayır"
-                  >
-                    <LogOut className="w-4 h-4 mr-1" />
-                    Ayır
-                  </Button>
-                )}
               </div>
               
-              {connectedAccounts.some(acc => acc.type === 'Outlook') ? (
-                <div className="bg-green-100 border border-green-300 p-4 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <CheckCircle className="w-5 h-5 text-green-600" />
-                    <div>
-                      <p className="font-medium text-green-800">{t('connect.connected')}</p>
-                      <p className="text-sm text-green-700">
-                        {connectedAccounts.find(acc => acc.type === 'Outlook')?.email}
-                      </p>
+              {/* Bağlı Hesaplar Listesi */}
+              {connectedAccounts.filter(acc => acc.type === 'Outlook').length > 0 && (
+                <div className="mb-4 space-y-2">
+                  <h4 className="font-medium text-blue-800 mb-2">Bağlı Hesaplar ({connectedAccounts.filter(acc => acc.type === 'Outlook').length})</h4>
+                  {connectedAccounts.filter(acc => acc.type === 'Outlook').map((account) => (
+                    <div key={account.id} className="bg-green-100 border border-green-300 p-3 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                          <CheckCircle className="w-5 h-5 text-green-600" />
+                          <div>
+                            <p className="font-medium text-green-800">{account.name || account.email.split('@')[0]}</p>
+                            <p className="text-sm text-green-700">{account.email}</p>
+                          </div>
+                        </div>
+                        <Button
+                          onClick={() => handleDisconnectAccount(account.id, 'Outlook')}
+                          variant="outline"
+                          size="sm"
+                          className="border-red-300 text-red-600 hover:bg-red-50"
+                          title="Hesap bağlantısını kes"
+                        >
+                          <LogOut className="w-4 h-4" />
+                        </Button>
+                      </div>
                     </div>
-                  </div>
+                  ))}
                 </div>
-              ) : (
-                <>
-                  <div className="space-y-4 text-sm text-blue-700 mb-4">
-                    <p className="text-xs bg-blue-100 p-2 rounded">
-                      ⚠️ {t('connect.authWarning')}
-                    </p>
-                  </div>
-                  
-                  <Button 
-                    onClick={handleConnectOutlook}
-                    disabled={loading}
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                  >
-                    <Zap className="w-4 h-4 mr-2" />
-                    {t('connect.connectOutlook')}
-                  </Button>
-                </>
               )}
+              
+              {/* Yeni Hesap Ekleme Formu */}
+              <div className="space-y-4">
+                <div className="space-y-4 text-sm text-blue-700 mb-4">
+                  <p className="text-xs bg-blue-100 p-2 rounded">
+                    ⚠️ {t('connect.authWarning')}
+                  </p>
+                </div>
+                
+                <div className="space-y-3">
+                  <input
+                    type="email"
+                    placeholder="ornek@outlook.com veya ornek@hotmail.com"
+                    value={newOutlookEmail}
+                    onChange={(e) => setNewOutlookEmail(e.target.value)}
+                    className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                  <input
+                    type="text"
+                    placeholder="İsim Soyisim (opsiyonel)"
+                    value={newOutlookName}
+                    onChange={(e) => setNewOutlookName(e.target.value)}
+                    className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                
+                <Button 
+                  onClick={async () => {
+                    const success = await handleConnectOutlook(newOutlookEmail, newOutlookName);
+                    if (success) {
+                      setNewOutlookEmail('');
+                      setNewOutlookName('');
+                    }
+                  }}
+                  disabled={loading || !newOutlookEmail}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Outlook Hesabı Ekle
+                </Button>
+              </div>
             </div>
 
             {/* Gmail kısmı kaldırıldı - sadece Outlook desteği */}
