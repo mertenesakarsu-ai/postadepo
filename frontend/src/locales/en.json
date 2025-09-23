@@ -80,10 +80,7 @@
     "connectDate": "Connected on",
     "outlookTitle": "Connect Your Outlook Account",
     "outlookSubtitle": "Microsoft 365 / Exchange Online / Hotmail",
-    "gmailTitle": "Connect Your Gmail Account",
-    "gmailSubtitle": "Google Workspace / Gmail",
     "connectOutlook": "Connect Outlook Account",
-    "connectGmail": "Connect Gmail Account",
     "authWarning": "Your information will only be used to read your emails and save them to the database. No password information is requested."
   },
   "auth": {
