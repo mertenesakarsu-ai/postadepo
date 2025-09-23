@@ -426,6 +426,42 @@ const Dashboard = ({ user, onLogout }) => {
            email.content.toLowerCase().includes(searchTerm.toLowerCase());
   });
 
+  // Attachment download fonksiyonu
+  const downloadAttachment = async (attachment) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API}/attachments/download/${attachment.id}`, {
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Download failed');
+      }
+      
+      // Dosyayı blob olarak al
+      const blob = await response.blob();
+      
+      // Download link oluştur
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = attachment.name;
+      document.body.appendChild(link);
+      link.click();
+      
+      // Cleanup
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      toast.success(`${attachment.name} başarıyla indirildi`);
+    } catch (error) {
+      console.error('Download error:', error);
+      toast.error('Dosya indirme hatası');
+    }
+  };
+
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString(language === 'tr' ? 'tr-TR' : 'en-US', {
       day: '2-digit',
