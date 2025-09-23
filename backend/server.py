@@ -110,8 +110,9 @@ class StorageInfo(BaseModel):
 class ConnectedAccount(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     user_id: str
-    type: str  # outlook, gmail
+    type: str  # sadece outlook
     email: str
+    name: Optional[str] = None  # isim soyisim bilgisi
     connected_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class RecaptchaVerificationRequest(BaseModel):
