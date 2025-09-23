@@ -237,51 +237,110 @@ class PostaDepoAPITester:
         
         return success
 
-    def test_connect_outlook_account(self):
-        """Test connecting Outlook account (demo mode)"""
+    def test_connect_outlook_account_1(self):
+        """Test connecting first Outlook account with email and name"""
         success, response = self.run_test(
-            "Connect Outlook Account",
+            "Connect First Outlook Account",
             "POST",
             "connect-account",
             200,
-            data={"type": "outlook"}
+            data={
+                "type": "outlook",
+                "email": "test@outlook.com",
+                "name": "Test Kullanıcı"
+            }
         )
         
         if success:
             account = response.get('account', {})
             print(f"   Connected account: {account.get('email')} ({account.get('type')})")
+            print(f"   Account name: {account.get('name')}")
             # Store account ID for later tests
-            self.outlook_account_id = account.get('id')
+            self.outlook_account_id_1 = account.get('id')
         
         return success
 
-    def test_connect_gmail_account(self):
-        """Test connecting Gmail account (demo mode)"""
+    def test_connect_outlook_account_2(self):
+        """Test connecting second Outlook account with different email"""
         success, response = self.run_test(
-            "Connect Gmail Account",
+            "Connect Second Outlook Account",
             "POST",
             "connect-account",
             200,
-            data={"type": "gmail"}
+            data={
+                "type": "outlook",
+                "email": "user@hotmail.com",
+                "name": "İkinci Kullanıcı"
+            }
         )
         
         if success:
             account = response.get('account', {})
             print(f"   Connected account: {account.get('email')} ({account.get('type')})")
+            print(f"   Account name: {account.get('name')}")
             # Store account ID for later tests
-            self.gmail_account_id = account.get('id')
+            self.outlook_account_id_2 = account.get('id')
         
         return success
 
-    def test_connect_duplicate_account(self):
-        """Test connecting duplicate account (should fail)"""
+    def test_connect_outlook_account_3(self):
+        """Test connecting third Outlook account to verify unlimited support"""
+        success, response = self.run_test(
+            "Connect Third Outlook Account",
+            "POST",
+            "connect-account",
+            200,
+            data={
+                "type": "outlook",
+                "email": "corporate@outlook.com",
+                "name": "Kurumsal Hesap"
+            }
+        )
+        
+        if success:
+            account = response.get('account', {})
+            print(f"   Connected account: {account.get('email')} ({account.get('type')})")
+            print(f"   Account name: {account.get('name')}")
+            # Store account ID for later tests
+            self.outlook_account_id_3 = account.get('id')
+        
+        return success
+
+    def test_connect_gmail_account_should_fail(self):
+        """Test connecting Gmail account (should fail - Gmail support removed)"""
+        success, response = self.run_test(
+            "Connect Gmail Account (Should Fail)",
+            "POST",
+            "connect-account",
+            400,
+            data={
+                "type": "gmail",
+                "email": "test@gmail.com",
+                "name": "Gmail User"
+            }
+        )
+        
+        if success:
+            print("   ✅ Gmail connection correctly rejected")
+        
+        return success
+
+    def test_connect_duplicate_outlook_account(self):
+        """Test connecting duplicate Outlook account (should fail)"""
         success, response = self.run_test(
             "Connect Duplicate Outlook Account",
             "POST",
             "connect-account",
             400,
-            data={"type": "outlook"}
+            data={
+                "type": "outlook",
+                "email": "test@outlook.com",  # Same as first account
+                "name": "Duplicate Test"
+            }
         )
+        
+        if success:
+            print("   ✅ Duplicate email correctly rejected")
         
         return success
 
