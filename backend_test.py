@@ -399,33 +399,39 @@ class PostaDepoAPITester:
         
         return success
 
-    def test_disconnect_outlook_account(self):
-        """Test disconnecting Outlook account"""
-        if not hasattr(self, 'outlook_account_id'):
-            print("❌ No Outlook account ID available for disconnect test")
+    def test_disconnect_outlook_account_1(self):
+        """Test disconnecting first Outlook account"""
+        if not hasattr(self, 'outlook_account_id_1'):
+            print("❌ No first Outlook account ID available for disconnect test")
             return False
             
         success, response = self.run_test(
-            "Disconnect Outlook Account",
+            "Disconnect First Outlook Account",
             "DELETE",
-            f"connected-accounts/{self.outlook_account_id}",
+            f"connected-accounts/{self.outlook_account_id_1}",
             200
         )
         
+        if success:
+            print("   ✅ First Outlook account successfully disconnected")
+        
         return success
 
-    def test_disconnect_gmail_account(self):
-        """Test disconnecting Gmail account"""
-        if not hasattr(self, 'gmail_account_id'):
-            print("❌ No Gmail account ID available for disconnect test")
+    def test_disconnect_outlook_account_2(self):
+        """Test disconnecting second Outlook account"""
+        if not hasattr(self, 'outlook_account_id_2'):
+            print("❌ No second Outlook account ID available for disconnect test")
             return False
             
         success, response = self.run_test(
-            "Disconnect Gmail Account",
+            "Disconnect Second Outlook Account",
             "DELETE",
-            f"connected-accounts/{self.gmail_account_id}",
+            f"connected-accounts/{self.outlook_account_id_2}",
             200
         )
+        
+        if success:
+            print("   ✅ Second Outlook account successfully disconnected")
         
         return success
 
