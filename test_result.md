@@ -192,6 +192,9 @@ frontend:
       - working: false
         agent: "main"
         comment: "E-posta detay modalı modern mavi-mor gradient teması ile tamamen yenilendi. Gradient arka planlar, şeffaf kartlar, modern rounded köşeler, backdrop blur efektleri, hover animasyonları eklendi. Professional ve canlı görünüm elde edildi."
+      - working: false
+        agent: "main"
+        comment: "Kullanıcı feedback'i sonrası tasarım ana temaya uygun hale getirildi. Pembe tonlar kaldırıldı, slate-blue tema ile uyumlu temiz tasarım yapıldı. Kapatma (X) butonu eklendi."
 
   - task: "Kalıcı sil butonunu yerini değiştirme"
     implemented: true
@@ -204,6 +207,21 @@ frontend:
       - working: false
         agent: "main"
         comment: "Kalıcı sil butonu modal header'ından footer'a (tehlike bölgesi) taşındı. Kırmızı gradient arka plan ve uyarı ikonu ile görsel olarak ayrıştırıldı."
+      - working: false
+        agent: "main"  
+        comment: "Kullanıcı feedback'i sonrası 'Tehlikeli İşlemler' yazısı 'E-posta İşlemleri' olarak değiştirildi ve daha temiz görünüm elde edildi."
+
+  - task: "Demo e-posta içerik zenginleştirme"
+    implemented: true
+    working: false
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "main"
+        comment: "Demo e-posta içerikleri çok kısa ve tek cümlelik idi. 3 farklı uzun template eklendi: detaylı proje güncellemeleri, stratejik toplantı notları, teknik süreç açıklamaları. Artık paragraflar, listeler, başlıklar içeren gerçekçi e-postalar üretiliyor."
 
   - task: "İşlevsel attachment download butonları"
     implemented: true
