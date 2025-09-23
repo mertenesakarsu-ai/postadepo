@@ -442,6 +442,26 @@ const Dashboard = ({ user, onLogout }) => {
     return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
   };
 
+  // Attachment ikon belirleme
+  const getAttachmentIcon = (fileType) => {
+    if (fileType.includes('pdf')) return <FileText className="w-5 h-5 text-red-500" />;
+    if (fileType.includes('word')) return <FileType className="w-5 h-5 text-blue-500" />;
+    if (fileType.includes('excel') || fileType.includes('spreadsheet')) return <BarChart3 className="w-5 h-5 text-green-500" />;
+    if (fileType.includes('image')) return <Image className="w-5 h-5 text-purple-500" />;
+    if (fileType.includes('presentation')) return <FileType className="w-5 h-5 text-orange-500" />;
+    return <Paperclip className="w-5 h-5 text-gray-500" />;
+  };
+
+  // Hesap renk belirleme
+  const getAccountColor = (accountId) => {
+    const colors = [
+      'bg-blue-500', 'bg-green-500', 'bg-purple-500', 'bg-red-500', 
+      'bg-yellow-500', 'bg-indigo-500', 'bg-pink-500', 'bg-cyan-500'
+    ];
+    const hash = accountId ? accountId.split('').reduce((a, b) => a + b.charCodeAt(0), 0) : 0;
+    return colors[hash % colors.length];
+  };
+
   return (
     <div className="h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 flex">
       {/* Sidebar */}
