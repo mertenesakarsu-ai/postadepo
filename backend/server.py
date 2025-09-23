@@ -549,6 +549,51 @@ async def import_emails(file: UploadFile = File(...), current_user: dict = Depen
     
     return {"success": True, "count": len(imported_emails)}
 
+@api_router.post("/update-demo-emails")
+async def update_demo_emails(current_user: dict = Depends(get_current_user)):
+    """
+    Mevcut demo emaillerini bağlı hesap bilgileriyle günceller
+    """
+    # Bağlı hesaplardan sender bilgilerini al
+    connected_accounts = await db.connected_accounts.find({"user_id": current_user["id"]}).to_list(length=None)
+    
+    if not connected_accounts:
+        return {"success": False, "message": "Bağlı hesap bulunamadı"}
+    
+    # Mevcut demo emailleri bul
+    demo_emails = await db.emails.find({"user_id": current_user["id"]}).to_list(length=None)
+    
+    if not demo_emails:
+        return {"success": False, "message": "Güncellenecek email bulunamadı"}
+    
+    # Sender mapppingi oluştur
+    sender_mapping = {}
+    for account in connected_accounts:
+        email = account["email"]
+        name = account.get("name", email.split("@")[0].replace(".", " ").title())
+        sender_format = f"{email} ({name})" if name and name != email.split("@")[0].replace(".", " ").title() else email
+        sender_mapping[email] = sender_format
+    
+    # Demo emailleri güncelle
+    updated_count = 0
+    for demo_email in demo_emails:
+        old_sender = demo_email["sender"]
+        
+        # Eski formatı kontrol et (sadece email varsa)
+        if "@" in old_sender and "(" not in old_sender:
+            # Bağlı hesaplarda bu email var mı kontrol et
+            for account_email, formatted_sender in sender_mapping.items():
+                if account_email in old_sender:
+                    # Email'i güncelle
+                    await db.emails.update_one(
+                        {"id": demo_email["id"]},
+                        {"$set": {"sender": formatted_sender}}
+                    )
+                    updated_count += 1
+                    break
+    
+    return {"success": True, "updated_count": updated_count, "message": f"{updated_count} email güncellendi"}
+
 @api_router.post("/export-emails")
 async def export_emails(request: dict, current_user: dict = Depends(get_current_user)):
     format_type = request.get("format", "json")
