@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Gmail hesap bağlama sistemini kaldır, sadece Outlook hesap bağlama olsun ve birden fazla bağlama seçeneği olsun. Amacım kurumsal firmayı baz aldığında firmanın personellerinin maillerini yedeklemek için sisteme kaydetmesi, hepsine gelen veriler tek web sitemden görülebilmesi, aynı zamanda yedekleme yapılması."
+user_problem_statement: "E-posta detay kısmında hangi hesaptan gelen/giden mailler olduğu belli olmuyor. E-posta detay kısmını Outlook'taki gibi düzenle. Hangi e-postanın hangi hesaptan geldiği/gittiği detaylı belirtilmeli. Mesaj ve yanıtlar (conversation) da gösterilmeli. Demo için ekli mail da ekle nasıl göründüğünü göreyim."
 
 backend:
   - task: "Gmail desteğini kaldırma ve Outlook çoklu hesap desteği"
