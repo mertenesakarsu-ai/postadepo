@@ -124,12 +124,27 @@ class RecaptchaVerificationResponse(BaseModel):
     
 # Demo data generation
 async def generate_demo_emails(user_id: str) -> List[Dict[str, Any]]:
-    senders = [
-        "ali.kaya@outlook.com", "mehmet.demir@outlook.com", "fatma.yilmaz@hotmail.com",
-        "ahmet.ozkan@outlook.com", "ayse.celik@hotmail.com", "mustafa.arslan@outlook.com",
-        "zeynep.koc@outlook.com", "omer.sahin@hotmail.com", "elif.yildiz@outlook.com",
-        "burak.ozer@hotmail.com"
-    ]
+    # Bağlı hesaplardan gerçek email ve isim bilgilerini al
+    connected_accounts = await db.connected_accounts.find({"user_id": user_id}).to_list(length=None)
+    
+    # Eğer bağlı hesap varsa onları kullan, yoksa demo senders kullan
+    if connected_accounts:
+        senders = []
+        for account in connected_accounts:
+            email = account["email"]
+            name = account.get("name", email.split("@")[0].replace(".", " ").title())
+            sender_format = f"{email} ({name})" if name and name != email.split("@")[0].replace(".", " ").title() else email
+            senders.append(sender_format)
+    else:
+        # Demo senders (isim formatında)
+        demo_senders_with_names = [
+            "ali.kaya@outlook.com (Ali Kaya)", "mehmet.demir@outlook.com (Mehmet Demir)", 
+            "fatma.yilmaz@hotmail.com (Fatma Yılmaz)", "ahmet.ozkan@outlook.com (Ahmet Özkan)", 
+            "ayse.celik@hotmail.com (Ayşe Çelik)", "mustafa.arslan@outlook.com (Mustafa Arslan)",
+            "zeynep.koc@outlook.com (Zeynep Koç)", "omer.sahin@hotmail.com (Ömer Şahin)", 
+            "elif.yildiz@outlook.com (Elif Yıldız)", "burak.ozer@hotmail.com (Burak Özer)"
+        ]
+        senders = demo_senders_with_names
     
     subjects = [
         "Önemli Toplantı Davetiyesi", "Proje Güncellemesi", "Hesap Bilgileri",
