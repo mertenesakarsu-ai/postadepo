@@ -746,7 +746,7 @@ const Dashboard = ({ user, onLogout }) => {
                       size="sm"
                       className="text-slate-600 border-slate-300 hover:text-slate-800 hover:bg-slate-100 hover:border-slate-400 font-semibold px-4"
                     >
-                      Kapat
+                      ✕ Kapat
                     </Button>
                   </div>
                 </div>
