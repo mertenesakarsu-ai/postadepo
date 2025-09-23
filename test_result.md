@@ -106,7 +106,7 @@ user_problem_statement: "E-posta detay bölümü çok karanlık ve okunmayacak h
 
 backend:
   - task: "Attachment download API endpoint'i"
-    implemented: false
+    implemented: true
     working: false
     file: "/app/backend/server.py"
     stuck_count: 0
@@ -115,7 +115,7 @@ backend:
     status_history:
       - working: false
         agent: "main"
-        comment: "Ek dosya indirme için GET /api/attachments/download/{attachment_id} endpoint'i eklenecek"
+        comment: "GET /api/attachments/download/{attachment_id} endpoint'i eklendi. Attachment'lara unique ID ve base64 encoded content eklendi. Demo file content generator eklendi."
 
   - task: "E-posta model güncellemeleri ve hesap entegrasyonu"
     implemented: true
