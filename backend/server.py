@@ -18,6 +18,7 @@ import zipfile
 import io
 import random
 import httpx
+import base64
 
 
 ROOT_DIR = Path(__file__).parent
