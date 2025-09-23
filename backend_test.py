@@ -246,8 +246,8 @@ class PostaDepoAPITester:
             200,
             data={
                 "type": "outlook",
-                "email": "test@outlook.com",
-                "name": "Test Kullanıcı"
+                "email": "john.doe@outlook.com",
+                "name": "John Doe"
             }
         )
         
@@ -269,8 +269,8 @@ class PostaDepoAPITester:
             200,
             data={
                 "type": "outlook",
-                "email": "user@hotmail.com",
-                "name": "İkinci Kullanıcı"
+                "email": "jane.smith@hotmail.com",
+                "name": "Jane Smith"
             }
         )
         
@@ -292,8 +292,8 @@ class PostaDepoAPITester:
             200,
             data={
                 "type": "outlook",
-                "email": "corporate@outlook.com",
-                "name": "Kurumsal Hesap"
+                "email": "corporate.user@outlook.com",
+                "name": "Corporate User"
             }
         )
         
