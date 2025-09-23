@@ -979,11 +979,23 @@ async def download_attachment(attachment_id: str, current_user: dict = Depends(g
         # Determine media type based on file extension
         media_type = attachment.get("type", "application/octet-stream")
         
+        # Handle Unicode characters in filename for HTTP headers
+        try:
+            # Try to encode filename as ASCII for HTTP header
+            safe_filename = attachment['name'].encode('ascii').decode('ascii')
+        except UnicodeEncodeError:
+            # If filename contains non-ASCII characters, use RFC 5987 encoding
+            import urllib.parse
+            encoded_filename = urllib.parse.quote(attachment['name'].encode('utf-8'))
+            safe_filename = f"filename*=UTF-8''{encoded_filename}"
+        else:
+            safe_filename = f"filename={safe_filename}"
+        
         return StreamingResponse(
             iter_content(),
             media_type=media_type,
             headers={
-                "Content-Disposition": f"attachment; filename={attachment['name']}",
+                "Content-Disposition": f"attachment; {safe_filename}",
                 "Content-Length": str(len(content))
             }
         )
