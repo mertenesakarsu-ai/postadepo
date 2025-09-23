@@ -145,8 +145,81 @@ def generate_demo_attachments():
     # 60% şansla ek ekle, eğer ek eklenecekse 1-3 adet
     if random.random() < 0.6:
         num_attachments = random.randint(1, 3)
-        return random.sample(attachment_templates, num_attachments)
+        attachments = random.sample(attachment_templates, num_attachments)
+        
+        # Her attachment'a unique ID ve demo content ekle
+        for attachment in attachments:
+            attachment['id'] = str(uuid.uuid4())
+            attachment['content'] = generate_demo_file_content(attachment['type'])
+            
+        return attachments
     return []
+
+def generate_demo_file_content(file_type: str) -> str:
+    """Generate demo content for different file types (base64 encoded)"""
+    if 'pdf' in file_type:
+        # Simple PDF-like content
+        content = """PostaDepo Demo PDF Dosyası
+        
+Bu bir demo PDF dosyasıdır. Gerçek bir PDF formatında değildir.
+İçerik test amaçlıdır.
+
+Bölüm 1: Giriş
+Bu bölümde proje hakkında genel bilgiler bulunmaktadır.
+
+Bölüm 2: Detaylar
+Detaylı açıklamalar ve teknik bilgiler.
+
+Bölüm 3: Sonuç
+Projenin sonuç ve önerileri."""
+        
+    elif 'image' in file_type:
+        # Simple image placeholder
+        content = "DEMO IMAGE DATA - Bu gerçek bir resim dosyası değildir, test amaçlıdır."
+        
+    elif 'word' in file_type or 'document' in file_type:
+        content = """PostaDepo Demo Word Belgesi
+
+Bu bir demo Word belgesidir.
+
+1. Başlık
+   - Alt başlık 1
+   - Alt başlık 2
+
+2. İçerik
+   Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+   
+3. Sonuç
+   Demo belge içeriği burada sona ermektedir."""
+   
+    elif 'excel' in file_type or 'spreadsheet' in file_type:
+        content = """PostaDepo Demo Excel Dosyası
+
+A1: Başlık    B1: Değer    C1: Açıklama
+A2: Item 1    B2: 100      C2: Demo veri
+A3: Item 2    B3: 200      C3: Test veri
+A4: TOPLAM    B4: 300      C4: Sonuç"""
+
+    elif 'presentation' in file_type:
+        content = """PostaDepo Demo PowerPoint Sunumu
+
+Slayt 1: Başlık Sayfası
+- PostaDepo Demo Sunumu
+- Sunum Tarihi: 2024
+
+Slayt 2: İçerik
+- Ana noktalar
+- Detaylı açıklamalar
+
+Slayt 3: Sonuç
+- Özet
+- Teşekkürler"""
+    
+    else:
+        content = "PostaDepo Demo Dosyası - Bu bir test dosyasıdır."
+    
+    # Base64 encode the content
+    return base64.b64encode(content.encode('utf-8')).decode('utf-8')
 
 # Demo data generation
 async def generate_demo_emails(user_id: str) -> List[Dict[str, Any]]:
