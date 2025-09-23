@@ -668,54 +668,180 @@ const Dashboard = ({ user, onLogout }) => {
         </div>
       </div>
 
-      {/* Email Detail Modal */}
+      {/* Email Detail Modal - Outlook Style */}
       <Dialog open={emailDetailOpen} onOpenChange={setEmailDetailOpen}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto backdrop-blur-md bg-white/95">
-          <DialogHeader>
-            <DialogTitle className="text-xl text-slate-800">{selectedEmail?.subject}</DialogTitle>
-          </DialogHeader>
-          {selectedEmail && (
-            <div className="space-y-4">
-              <div className="bg-slate-50 p-4 rounded-lg">
-                <div className="flex justify-between items-start mb-2">
-                  <div>
-                    <p className="font-semibold text-slate-800">{selectedEmail.sender}</p>
-                    <p className="text-sm text-slate-600">{selectedEmail.recipient}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm text-slate-500">{formatDate(selectedEmail.date)}</p>
-                    <span className="inline-block text-xs text-slate-500 bg-slate-200 px-2 py-1 rounded-full mt-1">
-                      {t('email.size')}: {formatSize(selectedEmail.size || 1024)}
-                    </span>
-                  </div>
-                </div>
-                {selectedEmail.important && (
-                  <div className="flex items-center space-x-2 text-red-600">
-                    <Flag className="w-4 h-4" />
-                    <span className="text-sm font-medium">{t('email.important')}</span>
+        <DialogContent className="max-w-6xl max-h-[85vh] overflow-hidden backdrop-blur-md bg-white/98 border-0 shadow-2xl">
+          <DialogHeader className="pb-4 border-b border-slate-200">
+            <div className="flex items-center justify-between">
+              <DialogTitle className="text-2xl font-semibold text-slate-800 truncate mr-4">
+                {selectedEmail?.subject}
+              </DialogTitle>
+              <div className="flex items-center gap-2">
+                {selectedEmail?.important && (
+                  <div className="flex items-center px-3 py-1 bg-red-50 text-red-600 rounded-full text-sm">
+                    <Flag className="w-4 h-4 mr-1" />
+                    Önemli
                   </div>
                 )}
-              </div>
-              <div className="prose max-w-none">
-                <div className="whitespace-pre-wrap text-slate-700 leading-relaxed">
-                  {selectedEmail.content}
-                </div>
-              </div>
-              
-              {/* Move delete button to top-right corner */}
-              <div className="flex justify-between items-center pt-4 border-t">
-                <div className="text-sm text-slate-500">
-                  {t('email.actions')}
-                </div>
                 <Button
                   onClick={() => setDeleteConfirmOpen(true)}
                   variant="outline"
                   size="sm"
                   className="border-red-300 text-red-600 hover:bg-red-50"
                 >
-                  <Trash className="w-4 h-4 mr-2" />
-                  {t('email.permanentlyDelete')}
+                  <Trash className="w-4 h-4" />
                 </Button>
+              </div>
+            </div>
+          </DialogHeader>
+          
+          {selectedEmail && (
+            <div className="flex h-[calc(85vh-8rem)] overflow-hidden">
+              {/* Thread Sidebar - Conversation List */}
+              {emailThread.length > 1 && (
+                <div className="w-80 border-r border-slate-200 bg-slate-50/50 p-4 overflow-y-auto">
+                  <div className="flex items-center mb-4">
+                    <MessageSquare className="w-5 h-5 text-blue-500 mr-2" />
+                    <h3 className="font-semibold text-slate-700">İleti Geçmişi ({emailThread.length})</h3>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    {emailThread.map((threadEmail, index) => (
+                      <div 
+                        key={threadEmail.id}
+                        className={`p-3 rounded-lg cursor-pointer transition-colors ${
+                          threadEmail.id === selectedEmail.id 
+                            ? 'bg-blue-100 border-l-4 border-blue-500' 
+                            : 'bg-white hover:bg-slate-50'
+                        }`}
+                        onClick={() => setSelectedEmail(threadEmail)}
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center">
+                            {threadEmail.account_info && (
+                              <div className={`w-3 h-3 rounded-full mr-2 ${getAccountColor(threadEmail.account_id)}`} />
+                            )}
+                            <span className="text-sm font-medium text-slate-700 truncate">
+                              {threadEmail.sender.split(' (')[0]}
+                            </span>
+                          </div>
+                          <span className="text-xs text-slate-500">
+                            {formatDate(threadEmail.date).split(' ')[0]}
+                          </span>
+                        </div>
+                        <p className="text-xs text-slate-600 truncate">{threadEmail.preview}</p>
+                        {threadEmail.attachments && threadEmail.attachments.length > 0 && (
+                          <div className="flex items-center mt-1">
+                            <Paperclip className="w-3 h-3 text-slate-400 mr-1" />
+                            <span className="text-xs text-slate-500">{threadEmail.attachments.length} ek</span>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {/* Main Email Content */}
+              <div className="flex-1 p-6 overflow-y-auto">
+                {/* Email Header - Outlook Style */}
+                <div className="bg-gradient-to-r from-blue-50 to-slate-50 p-6 rounded-lg mb-6 border border-slate-200">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex-1">
+                      {/* From Section */}
+                      <div className="flex items-center mb-3">
+                        <div className="flex items-center">
+                          {selectedEmail.account_info ? (
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold mr-3 ${getAccountColor(selectedEmail.account_id)}`}>
+                              {selectedEmail.account_info.name ? selectedEmail.account_info.name.charAt(0).toUpperCase() : 
+                               selectedEmail.account_info.email.charAt(0).toUpperCase()}
+                            </div>
+                          ) : (
+                            <User className="w-10 h-10 p-2 bg-slate-200 rounded-full mr-3" />
+                          )}
+                          <div>
+                            <div className="flex items-center">
+                              <span className="font-semibold text-slate-800 mr-2">
+                                {selectedEmail.sender.includes(' (') ? selectedEmail.sender.split(' (')[1].replace(')', '') : selectedEmail.sender}
+                              </span>
+                              {selectedEmail.account_info && (
+                                <span className={`px-2 py-1 rounded-full text-xs text-white font-medium ${getAccountColor(selectedEmail.account_id)}`}>
+                                  {selectedEmail.account_info.type}
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-sm text-slate-600">
+                              <strong>From:</strong> {selectedEmail.sender.split(' (')[0]}
+                            </p>
+                            <p className="text-sm text-slate-600">
+                              <strong>To:</strong> {selectedEmail.recipient}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Account Badge */}
+                      {selectedEmail.account_info && (
+                        <div className="flex items-center mb-3">
+                          <Building2 className="w-4 h-4 text-slate-500 mr-2" />
+                          <span className="text-sm text-slate-600">
+                            <strong>Hesap:</strong> {selectedEmail.account_info.name} ({selectedEmail.account_info.email})
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="text-right">
+                      <div className="flex items-center text-sm text-slate-500 mb-1">
+                        <Calendar className="w-4 h-4 mr-1" />
+                        {formatDate(selectedEmail.date)}
+                      </div>
+                      <div className="flex items-center text-sm text-slate-500">
+                        <HardDrive className="w-4 h-4 mr-1" />
+                        {formatSize(selectedEmail.size || 1024)}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Attachments Section */}
+                {selectedEmail.attachments && selectedEmail.attachments.length > 0 && (
+                  <div className="mb-6">
+                    <div className="flex items-center mb-3">
+                      <Paperclip className="w-5 h-5 text-slate-600 mr-2" />
+                      <h4 className="font-semibold text-slate-700">Ekler ({selectedEmail.attachments.length})</h4>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {selectedEmail.attachments.map((attachment, index) => (
+                        <div key={index} className="flex items-center p-3 bg-slate-50 rounded-lg border border-slate-200 hover:bg-slate-100 transition-colors">
+                          <div className="mr-3">
+                            {getAttachmentIcon(attachment.type)}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-slate-700 truncate">{attachment.name}</p>
+                            <div className="flex items-center text-xs text-slate-500">
+                              <span>{formatSize(attachment.size)}</span>
+                              <span className="mx-1">•</span>
+                              <span>{attachment.type.split('/')[1].toUpperCase()}</span>
+                            </div>
+                          </div>
+                          <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-800">
+                            <Download className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Email Content */}
+                <div className="bg-white rounded-lg border border-slate-200 p-6">
+                  <div className="prose max-w-none">
+                    <div className="whitespace-pre-wrap text-slate-700 leading-relaxed text-base">
+                      {selectedEmail.content}
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           )}
