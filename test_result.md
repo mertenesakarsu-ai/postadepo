@@ -207,11 +207,8 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Logo boyutlandırma ve çerçeve/gölge efektlerini kaldırma"
-    - "Whitelist sistemi ve kullanıcı onay mekanizması"
-    - "reCAPTCHA doğrulama API endpoint'i"
-    - "Kayıt formuna reCAPTCHA entegrasyonu"
-    - "Admin endpoint'leri - kullanıcı onaylama"
+    - "Gmail desteğini kaldırma ve Outlook çoklu hesap desteği"
+    - "Gmail UI'ını kaldırma ve Outlook çoklu hesap UI'ı"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
