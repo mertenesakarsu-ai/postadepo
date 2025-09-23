@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "ŞİMDİ githubumda websitem var oradan repomdaki dosyalarımı al ve senden istediğim şu logom png formatında bir görsel ama yerleştirme şekli çok kötü ben logolarımı daha okuna bilir boyutlarda olması ve bir çerçeve veya bir sınır içinde olmamasını istiyorum"
+user_problem_statement: "Gmail hesap bağlama sistemini kaldır, sadece Outlook hesap bağlama olsun ve birden fazla bağlama seçeneği olsun. Amacım kurumsal firmayı baz aldığında firmanın personellerinin maillerini yedeklemek için sisteme kaydetmesi, hepsine gelen veriler tek web sitemden görülebilmesi, aynı zamanda yedekleme yapılması."
 
 backend:
   - task: "Whitelist sistemi ve kullanıcı onay mekanizması"
