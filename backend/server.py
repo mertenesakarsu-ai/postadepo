@@ -125,10 +125,10 @@ class RecaptchaVerificationResponse(BaseModel):
 # Demo data generation
 def generate_demo_emails(user_id: str) -> List[Dict[str, Any]]:
     senders = [
-        "ali.kaya@gmail.com", "mehmet.demir@outlook.com", "fatma.yilmaz@hotmail.com",
-        "ahmet.ozkan@gmail.com", "ayse.celik@yahoo.com", "mustafa.arslan@gmail.com",
-        "zeynep.koc@outlook.com", "omer.sahin@hotmail.com", "elif.yildiz@gmail.com",
-        "burak.ozer@yahoo.com"
+        "ali.kaya@outlook.com", "mehmet.demir@outlook.com", "fatma.yilmaz@hotmail.com",
+        "ahmet.ozkan@outlook.com", "ayse.celik@hotmail.com", "mustafa.arslan@outlook.com",
+        "zeynep.koc@outlook.com", "omer.sahin@hotmail.com", "elif.yildiz@outlook.com",
+        "burak.ozer@hotmail.com"
     ]
     
     subjects = [
