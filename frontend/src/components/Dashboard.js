@@ -70,6 +70,8 @@ const Dashboard = ({ user, onLogout }) => {
     autoSyncInterval: 10
   });
   const [connectedAccounts, setConnectedAccounts] = useState([]);
+  const [newOutlookEmail, setNewOutlookEmail] = useState('');
+  const [newOutlookName, setNewOutlookName] = useState('');
 
   // Update folder names when language changes
   useEffect(() => {
