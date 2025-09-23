@@ -80,10 +80,7 @@
     "connectDate": "Bağlantı tarihi",
     "outlookTitle": "Outlook Mail Hesabınızı Bağlayın",
     "outlookSubtitle": "Microsoft 365 / Exchange Online / Hotmail",
-    "gmailTitle": "Gmail Hesabınızı Bağlayın",
-    "gmailSubtitle": "Google Workspace / Gmail",
     "connectOutlook": "Outlook Hesabı Bağla",
-    "connectGmail": "Gmail Hesabı Bağla",
     "authWarning": "Bilgileriniz yalnızca e-postalarınızı okuyup veritabanına kaydetmek için kullanılacaktır. Hiçbir şekilde şifre bilgisi istenmez."
   },
   "auth": {
