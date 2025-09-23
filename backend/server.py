@@ -457,18 +457,34 @@ async def delete_email(email_id: str, current_user: dict = Depends(get_current_u
 
 @api_router.post("/sync-emails")
 async def sync_emails(current_user: dict = Depends(get_current_user)):
-    # Simulate email sync by adding a few new demo emails
+    # Simulate email sync by adding a few new demo emails from connected accounts
+    
+    # Bağlı hesaplardan sender bilgilerini al
+    connected_accounts = await db.connected_accounts.find({"user_id": current_user["id"]}).to_list(length=None)
+    
+    if not connected_accounts:
+        # Eğer bağlı hesap yoksa, demo sender'lar kullan
+        senders = ["demo.sync@outlook.com (Demo Sync)", "system@outlook.com (Sistem)", "info@outlook.com (Bilgi)"]
+    else:
+        senders = []
+        for account in connected_accounts:
+            email = account["email"]
+            name = account.get("name", email.split("@")[0].replace(".", " ").title())
+            sender_format = f"{email} ({name})" if name and name != email.split("@")[0].replace(".", " ").title() else email
+            senders.append(sender_format)
+    
     new_emails = []
     for i in range(3):
+        sender = random.choice(senders)
         total_size = random.randint(1024, 5120)  # 1-5KB
         email = {
             "id": str(uuid.uuid4()),
             "user_id": current_user["id"],
             "folder": "inbox",
-            "sender": f"sync{i}@example.com",
+            "sender": sender,
             "recipient": current_user["email"],
             "subject": f"Senkronizasyon Sonucu Yeni E-posta {i+1}",
-            "content": f"Bu e-posta senkronizasyon işlemi sonucu eklenen demo e-postadır. Timestamp: {datetime.now(timezone.utc)}",
+            "content": f"Bu e-posta senkronizasyon işlemi sonucu eklenen demo e-postadır. Gönderen: {sender}, Timestamp: {datetime.now(timezone.utc)}",
             "preview": "Bu e-posta senkronizasyon işlemi sonucu eklenen demo e-postadır...",
             "date": datetime.now(timezone.utc).isoformat(),
             "read": False,
