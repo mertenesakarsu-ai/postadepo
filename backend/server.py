@@ -125,12 +125,35 @@ class RecaptchaVerificationResponse(BaseModel):
     success: bool
     message: Optional[str] = None
     
+# Demo attachment generator
+def generate_demo_attachments():
+    """Demo ek dosyalar üret"""
+    attachment_templates = [
+        {"name": "Proje_Raporu.pdf", "type": "application/pdf", "size": random.randint(500000, 2000000)},
+        {"name": "Sunum.pptx", "type": "application/vnd.openxmlformats-officedocument.presentationml.presentation", "size": random.randint(1000000, 5000000)},
+        {"name": "Fatura.docx", "type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "size": random.randint(200000, 800000)},
+        {"name": "Bütçe.xlsx", "type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "size": random.randint(100000, 500000)},
+        {"name": "Ürün_Fotoğrafı.jpg", "type": "image/jpeg", "size": random.randint(300000, 2000000)},
+        {"name": "Logo.png", "type": "image/png", "size": random.randint(50000, 500000)},
+        {"name": "Sözleşme.pdf", "type": "application/pdf", "size": random.randint(800000, 1500000)},
+        {"name": "Katalog.pdf", "type": "application/pdf", "size": random.randint(2000000, 10000000)},
+        {"name": "Grafik.png", "type": "image/png", "size": random.randint(100000, 800000)},
+        {"name": "Teklif.docx", "type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "size": random.randint(150000, 600000)}
+    ]
+    
+    # 60% şansla ek ekle, eğer ek eklenecekse 1-3 adet
+    if random.random() < 0.6:
+        num_attachments = random.randint(1, 3)
+        return random.sample(attachment_templates, num_attachments)
+    return []
+
 # Demo data generation
 async def generate_demo_emails(user_id: str) -> List[Dict[str, Any]]:
     # Bağlı hesaplardan gerçek email ve isim bilgilerini al
     connected_accounts = await db.connected_accounts.find({"user_id": user_id}).to_list(length=None)
     
-    # Eğer bağlı hesap varsa onları kullan, yoksa demo senders kullan
+    # Account mapping (hesap ID'si için)
+    account_mapping = {}
     if connected_accounts:
         senders = []
         for account in connected_accounts:
@@ -138,6 +161,7 @@ async def generate_demo_emails(user_id: str) -> List[Dict[str, Any]]:
             name = account.get("name", email.split("@")[0].replace(".", " ").title())
             sender_format = f"{email} ({name})" if name and name != email.split("@")[0].replace(".", " ").title() else email
             senders.append(sender_format)
+            account_mapping[sender_format] = account["id"]
     else:
         # Demo senders (isim formatında)
         demo_senders_with_names = [
@@ -148,6 +172,9 @@ async def generate_demo_emails(user_id: str) -> List[Dict[str, Any]]:
             "elif.yildiz@outlook.com (Elif Yıldız)", "burak.ozer@hotmail.com (Burak Özer)"
         ]
         senders = demo_senders_with_names
+        # Demo hesaplar için dummy account ID'ler
+        for sender in senders:
+            account_mapping[sender] = f"demo-{sender.split('@')[0].split('.')[0]}-account"
     
     subjects = [
         "Önemli Toplantı Davetiyesi", "Proje Güncellemesi", "Hesap Bilgileri",
@@ -158,17 +185,37 @@ async def generate_demo_emails(user_id: str) -> List[Dict[str, Any]]:
     
     folders = ["inbox", "sent", "spam"]
     
+    # Thread ID'ler için (conversation grouping)
+    thread_subjects = {}
+    
     emails = []
     for i in range(50):
         sender = random.choice(senders)
         subject = random.choice(subjects)
+        
+        # Thread grouping - aynı konularda conversation oluştur
+        base_subject = subject
+        if base_subject in thread_subjects:
+            # Mevcut thread'e ekle
+            thread_id = thread_subjects[base_subject]
+            if random.random() < 0.3:  # 30% şansla RE: ekle
+                subject = f"RE: {subject}"
+        else:
+            # Yeni thread oluştur
+            thread_id = str(uuid.uuid4())
+            thread_subjects[base_subject] = thread_id
+        
         content = f"Bu bir demo e-posta içeriğidir. {subject} konusunda detaylı bilgi için lütfen eki kontrol ediniz.\n\nSaygılarımla,\n{sender.split('@')[0].replace('.', ' ').title()}"
         
-        # Calculate more realistic email size
+        # Demo attachments ekle
+        attachments = generate_demo_attachments()
+        
+        # Calculate more realistic email size (content + attachments)
         content_size = len(content.encode('utf-8'))
         subject_size = len(subject.encode('utf-8'))
         header_size = len(sender.encode('utf-8')) + 200  # approximate header size
-        total_size = content_size + subject_size + header_size + random.randint(512, 2048)  # Add some variance
+        attachments_size = sum(att["size"] for att in attachments)
+        total_size = content_size + subject_size + header_size + attachments_size + random.randint(512, 2048)
         
         email = {
             "id": str(uuid.uuid4()),
@@ -182,7 +229,10 @@ async def generate_demo_emails(user_id: str) -> List[Dict[str, Any]]:
             "date": datetime.now(timezone.utc).isoformat(),
             "read": random.choice([True, False]),
             "important": random.choice([True, False]) if random.random() < 0.3 else False,
-            "size": total_size
+            "size": total_size,
+            "account_id": account_mapping.get(sender),
+            "thread_id": thread_id,
+            "attachments": attachments
         }
         emails.append(email)
     
