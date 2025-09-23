@@ -261,7 +261,6 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Attachment download API endpoint'i"
     - "Modern mavi-mor gradient UI tasarımı"
     - "İşlevsel attachment download butonları"
   stuck_tasks: []
