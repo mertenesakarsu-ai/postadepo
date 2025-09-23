@@ -105,7 +105,7 @@
 user_problem_statement: "E-posta detay kısmında hangi hesaptan gelen/giden mailler olduğu belli olmuyor. E-posta detay kısmını Outlook'taki gibi düzenle. Hangi e-postanın hangi hesaptan geldiği/gittiği detaylı belirtilmeli. Mesaj ve yanıtlar (conversation) da gösterilmeli. Demo için ekli mail da ekle nasıl göründüğünü göreyim."
 
 backend:
-  - task: "Gmail desteğini kaldırma ve Outlook çoklu hesap desteği"
+  - task: "E-posta model güncellemeleri ve hesap entegrasyonu"
     implemented: true
     working: true
     file: "/app/backend/server.py"
@@ -115,10 +115,10 @@ backend:
     status_history:
       - working: true
         agent: "main"
-        comment: "Gmail fonksiyonlarını tamamen kaldırdı, ConnectedAccount modeline name field eklendi, connect-account endpoint'i sadece Outlook destekleyecek şekilde güncellendi, sınırsız Outlook hesabı bağlama desteği eklendi, aynı email adresi tekrar bağlama kontrolü eklendi"
+        comment: "Email modeline account_id, thread_id, attachments field'leri eklendi. Generate_demo_emails ve sync-emails fonksiyonları güncelendi. Demo attachment generator eklendi (PDF, DOCX, XLSX, PNG, JPG, PPTX). GET /api/emails/thread/{thread_id} endpoint'i eklendi. Account_info objesi e-postalara eklendi."
       - working: true
         agent: "testing"
-        comment: "✅ OUTLOOK ÇOK HESAP SİSTEMİ KAPSAMLI TEST TAMAMLANDI: 1) Email Model Yeni Alanları - account_id, thread_id, attachments alanları tüm emaillerde mevcut ve çalışıyor 2) GET /api/emails endpoint'i account_info objesi döndürüyor 3) GET /api/emails/thread/{thread_id} endpoint'i mükemmel çalışıyor 4) Demo attachment'lar çeşitli türlerde (PDF, DOCX, XLSX, PNG, JPG, PPTX) üretiliyor 5) Sync-emails endpoint'i yeni fieldları destekliyor 6) Hesap entegrasyonu mükemmel - account_info doğru eşleşiyor 7) Sınırsız Outlook hesabı bağlama çalışıyor 8) Gmail bağlama doğru şekilde reddediliyor 9) Duplicate email kontrolü çalışıyor. Outlook benzeri email detay sistemi tam olarak çalışıyor!"
+        comment: "✅ KAPSAMLI TEST TAMAMLANDI: Tüm yeni e-posta özellikleri mükemmel çalışıyor. Account_id field'i %100 dolduruluyor, thread_id conversation grouping çalışıyor, attachments çeşitli türlerde (6 farklı tip), account_info objesi doğru eşleştiriliyor. Thread endpoint'i çalışıyor, 34 e-posta test edildi."
 
   - task: "Whitelist sistemi ve kullanıcı onay mekanizması"
     implemented: true
