@@ -105,12 +105,24 @@
 user_problem_statement: "Gmail hesap bağlama sistemini kaldır, sadece Outlook hesap bağlama olsun ve birden fazla bağlama seçeneği olsun. Amacım kurumsal firmayı baz aldığında firmanın personellerinin maillerini yedeklemek için sisteme kaydetmesi, hepsine gelen veriler tek web sitemden görülebilmesi, aynı zamanda yedekleme yapılması."
 
 backend:
-  - task: "Whitelist sistemi ve kullanıcı onay mekanizması"
+  - task: "Gmail desteğini kaldırma ve Outlook çoklu hesap desteği"
     implemented: true
     working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Gmail fonksiyonlarını tamamen kaldırdı, ConnectedAccount modeline name field eklendi, connect-account endpoint'i sadece Outlook destekleyecek şekilde güncellendi, sınırsız Outlook hesabı bağlama desteği eklendi, aynı email adresi tekrar bağlama kontrolü eklendi"
+
+  - task: "Whitelist sistemi ve kullanıcı onay mekanizması"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "medium"
     needs_retesting: false
     status_history:
       - working: true
@@ -125,7 +137,7 @@ backend:
     working: true
     file: "/app/backend/server.py"
     stuck_count: 0
-    priority: "high"
+    priority: "medium"
     needs_retesting: false
     status_history:
       - working: true
@@ -140,7 +152,7 @@ backend:
     working: true
     file: "/app/backend/server.py"
     stuck_count: 0
-    priority: "medium"
+    priority: "low"
     needs_retesting: false
     status_history:
       - working: true
