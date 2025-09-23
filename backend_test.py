@@ -462,6 +462,199 @@ class PostaDepoAPITester:
         
         return success
 
+    def test_recaptcha_verification(self):
+        """Test reCAPTCHA verification endpoint"""
+        # Test with empty token (should fail)
+        success, response = self.run_test(
+            "reCAPTCHA Verification (Empty Token)",
+            "POST",
+            "verify-recaptcha",
+            400,
+            data={"recaptcha_token": ""}
+        )
+        
+        if not success:
+            # Try with fake token (should return success=false)
+            success, response = self.run_test(
+                "reCAPTCHA Verification (Fake Token)",
+                "POST",
+                "verify-recaptcha",
+                200,
+                data={"recaptcha_token": "fake-token-for-testing"}
+            )
+            
+            if success and not response.get('success', True):
+                print("   ✅ reCAPTCHA correctly rejected fake token")
+                return True
+        
+        return success
+
+    def test_user_registration(self):
+        """Test user registration (should create unapproved user)"""
+        import random
+        test_email = f"testuser{random.randint(1000, 9999)}@test.com"
+        
+        success, response = self.run_test(
+            "User Registration",
+            "POST",
+            "auth/register",
+            200,
+            data={
+                "name": "Test User",
+                "email": test_email,
+                "password": "testpass123"
+            }
+        )
+        
+        if success:
+            approved = response.get('approved', True)
+            if not approved:
+                print("   ✅ New user created as unapproved (whitelist working)")
+                self.test_user_id = response.get('user_id')
+                self.test_user_email = test_email
+                return True
+            else:
+                print("   ❌ New user was approved automatically (whitelist not working)")
+        
+        return success
+
+    def test_unapproved_user_login(self):
+        """Test login with unapproved user (should fail)"""
+        if not hasattr(self, 'test_user_email'):
+            print("❌ No test user available for unapproved login test")
+            return False
+            
+        success, response = self.run_test(
+            "Unapproved User Login",
+            "POST",
+            "auth/login",
+            403,
+            data={
+                "email": self.test_user_email,
+                "password": "testpass123"
+            }
+        )
+        
+        if success:
+            print("   ✅ Unapproved user correctly rejected")
+        
+        return success
+
+    def test_admin_get_pending_users(self):
+        """Test admin endpoint to get pending users"""
+        success, response = self.run_test(
+            "Admin Get Pending Users",
+            "GET",
+            "admin/pending-users",
+            200
+        )
+        
+        if success:
+            pending_users = response.get('pending_users', [])
+            print(f"   Found {len(pending_users)} pending users")
+            
+            # Check if our test user is in the list
+            if hasattr(self, 'test_user_email'):
+                test_user_found = any(user.get('email') == self.test_user_email for user in pending_users)
+                if test_user_found:
+                    print("   ✅ Test user found in pending list")
+                else:
+                    print("   ❌ Test user not found in pending list")
+        
+        return success
+
+    def test_admin_approve_user(self):
+        """Test admin endpoint to approve user"""
+        if not hasattr(self, 'test_user_id'):
+            print("❌ No test user ID available for approval test")
+            return False
+            
+        success, response = self.run_test(
+            "Admin Approve User",
+            "POST",
+            f"admin/approve-user/{self.test_user_id}",
+            200
+        )
+        
+        if success:
+            print("   ✅ User successfully approved by admin")
+        
+        return success
+
+    def test_approved_user_login(self):
+        """Test login with newly approved user (should succeed)"""
+        if not hasattr(self, 'test_user_email'):
+            print("❌ No test user available for approved login test")
+            return False
+            
+        success, response = self.run_test(
+            "Approved User Login",
+            "POST",
+            "auth/login",
+            200,
+            data={
+                "email": self.test_user_email,
+                "password": "testpass123"
+            }
+        )
+        
+        if success:
+            print("   ✅ Approved user successfully logged in")
+            # Restore demo user token for remaining tests
+            demo_success, demo_response = self.run_test(
+                "Restore Demo Login",
+                "POST",
+                "auth/login",
+                200,
+                data={"email": "demo@postadepo.com", "password": "demo123"}
+            )
+            if demo_success:
+                self.token = demo_response['token']
+                self.user = demo_response['user']
+        
+        return success
+
+    def test_non_admin_access_admin_endpoints(self):
+        """Test non-admin user accessing admin endpoints (should fail)"""
+        # First login as the test user (non-admin)
+        if not hasattr(self, 'test_user_email'):
+            print("❌ No test user available for non-admin test")
+            return False
+            
+        login_success, login_response = self.run_test(
+            "Login as Non-Admin User",
+            "POST",
+            "auth/login",
+            200,
+            data={
+                "email": self.test_user_email,
+                "password": "testpass123"
+            }
+        )
+        
+        if not login_success:
+            return False
+            
+        # Temporarily use non-admin token
+        original_token = self.token
+        self.token = login_response['token']
+        
+        # Try to access admin endpoint
+        success, response = self.run_test(
+            "Non-Admin Access Admin Endpoint",
+            "GET",
+            "admin/pending-users",
+            403
+        )
+        
+        # Restore demo user token
+        self.token = original_token
+        
+        if success:
+            print("   ✅ Non-admin user correctly denied access to admin endpoints")
+        
+        return success
+
 def main():
     print("🚀 Starting PostaDepo API Tests")
     print("=" * 50)
