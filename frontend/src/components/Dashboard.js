@@ -34,7 +34,18 @@ import {
   Save,
   FileText,
   Zap,
-  Plus
+  Plus,
+  Paperclip,
+  User,
+  Building2,
+  ChevronRight,
+  Calendar,
+  BarChart3,
+  Image,
+  FileType,
+  ArrowLeft,
+  ArrowRight,
+  MessageSquare
 } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
