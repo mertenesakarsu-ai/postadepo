@@ -369,7 +369,18 @@ class PostaDepoAPITester:
             accounts = response.get('accounts', [])
             print(f"   Found {len(accounts)} connected accounts")
             for account in accounts:
-                print(f"     - {account.get('email')} ({account.get('type')})")
+                print(f"     - {account.get('email')} ({account.get('type')}) - {account.get('name')}")
+            
+            # Verify we have multiple Outlook accounts
+            outlook_accounts = [acc for acc in accounts if acc.get('type', '').lower() == 'outlook']
+            print(f"   Outlook accounts: {len(outlook_accounts)}")
+            
+            # Verify no Gmail accounts exist
+            gmail_accounts = [acc for acc in accounts if acc.get('type', '').lower() == 'gmail']
+            if len(gmail_accounts) == 0:
+                print("   ✅ No Gmail accounts found (as expected)")
+            else:
+                print(f"   ❌ Found {len(gmail_accounts)} Gmail accounts (should be 0)")
         
         return success
 
