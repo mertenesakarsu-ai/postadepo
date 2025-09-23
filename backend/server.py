@@ -467,6 +467,45 @@ async def mark_email_read(email_id: str, current_user: dict = Depends(get_curren
     
     return {"success": True}
 
+@api_router.get("/emails/thread/{thread_id}")
+async def get_email_thread(thread_id: str, current_user: dict = Depends(get_current_user)):
+    """E-posta thread'ini (conversation) getir"""
+    # Thread'deki tüm e-postaları getir
+    emails_cursor = db.emails.find({
+        "user_id": current_user["id"],
+        "thread_id": thread_id
+    }).sort("date", 1)  # Tarih sırasına göre (eskiden yeniye)
+    
+    emails = await emails_cursor.to_list(length=None)
+    
+    if not emails:
+        raise HTTPException(status_code=404, detail="Thread not found")
+    
+    # Bağlı hesap bilgilerini al
+    connected_accounts = await db.connected_accounts.find({"user_id": current_user["id"]}).to_list(length=None)
+    accounts_dict = {acc["id"]: acc for acc in connected_accounts}
+    
+    # Clean up emails ve hesap bilgilerini ekle
+    cleaned_emails = []
+    for email in emails:
+        email_dict = dict(email)
+        if "_id" in email_dict:
+            del email_dict["_id"]
+        
+        # Hesap bilgilerini ekle
+        if "account_id" in email_dict and email_dict["account_id"] in accounts_dict:
+            account = accounts_dict[email_dict["account_id"]]
+            email_dict["account_info"] = {
+                "id": account["id"],
+                "name": account.get("name", ""),
+                "email": account["email"],
+                "type": account["type"]
+            }
+        
+        cleaned_emails.append(email_dict)
+    
+    return {"thread_id": thread_id, "emails": cleaned_emails}
+
 @api_router.post("/admin/approve-user/{user_id}")
 async def approve_user(user_id: str, current_user: dict = Depends(get_current_user)):
     """
