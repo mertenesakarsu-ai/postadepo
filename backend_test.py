@@ -891,36 +891,51 @@ def main():
     
     tester = PostaDepoAPITester()
     
-    # Test sequence
+    # Test sequence - Focus on Email Sender Format Testing
     tests = [
         ("Health Check", tester.test_health_check),
         ("Demo Login", tester.test_login),
         ("Invalid Login", tester.test_invalid_login),
         ("Unauthorized Access", tester.test_unauthorized_access),
         ("Get Inbox Emails", tester.test_get_emails_inbox),
-        ("Get All Folder Emails", tester.test_get_emails_all_folders),
         ("Storage Information", tester.test_storage_info),
-        ("Mark Email Read", tester.test_mark_email_read),
         
-        # Account Connection Tests
+        # Account Connection Tests - Multiple Outlook Accounts
         ("Get Connected Accounts (Empty)", tester.test_get_connected_accounts_empty),
-        ("Connect Outlook Account", tester.test_connect_outlook_account),
-        ("Connect Gmail Account", tester.test_connect_gmail_account),
-        ("Connect Duplicate Account", tester.test_connect_duplicate_account),
+        ("Connect First Outlook Account", tester.test_connect_outlook_account_1),
+        ("Connect Second Outlook Account", tester.test_connect_outlook_account_2),
+        ("Connect Third Outlook Account", tester.test_connect_outlook_account_3),
+        ("Connect Outlook Without Name", tester.test_connect_outlook_without_name),
+        ("Connect Gmail Account (Should Fail)", tester.test_connect_gmail_account_should_fail),
+        ("Connect Duplicate Outlook Account", tester.test_connect_duplicate_outlook_account),
         ("Connect Invalid Account Type", tester.test_connect_invalid_account_type),
         ("Get Connected Accounts (With Data)", tester.test_get_connected_accounts_with_data),
         
-        # Sync Tests
-        ("Sync Emails (With Connected Accounts)", tester.test_sync_emails_with_accounts),
+        # Email Sender Format Tests
+        ("Check Email Sender Format After Connecting", tester.test_email_sender_format_after_connecting_accounts),
+        ("Update Demo Emails Endpoint", tester.test_update_demo_emails_endpoint),
+        ("Sync Emails with Connected Account Format", tester.test_sync_emails_with_connected_account_format),
+        ("Import Emails with Connected Account Format", tester.test_import_emails_with_connected_account_format),
+        ("Email Format with No-Name Account", tester.test_email_format_with_no_name_account),
         
-        # Disconnect Tests
-        ("Disconnect Outlook Account", tester.test_disconnect_outlook_account),
-        ("Disconnect Gmail Account", tester.test_disconnect_gmail_account),
-        ("Disconnect Non-existent Account", tester.test_disconnect_nonexistent_account),
-        
-        # Final Tests
-        ("Sync Emails (No Connected Accounts)", tester.test_sync_emails_without_accounts),
+        # Additional Tests
+        ("Mark Email Read", tester.test_mark_email_read),
         ("Export Emails", tester.test_export_emails),
+        ("reCAPTCHA Verification", tester.test_recaptcha_verification),
+        
+        # User Registration and Admin Tests
+        ("User Registration", tester.test_user_registration),
+        ("Unapproved User Login", tester.test_unapproved_user_login),
+        ("Admin Get Pending Users", tester.test_admin_get_pending_users),
+        ("Admin Approve User", tester.test_admin_approve_user),
+        ("Approved User Login", tester.test_approved_user_login),
+        ("Non-Admin Access Admin Endpoints", tester.test_non_admin_access_admin_endpoints),
+        
+        # Cleanup Tests
+        ("Disconnect First Outlook Account", tester.test_disconnect_outlook_account_1),
+        ("Disconnect Second Outlook Account", tester.test_disconnect_outlook_account_2),
+        ("Disconnect Non-existent Account", tester.test_disconnect_nonexistent_account),
+        ("Sync Emails (No Connected Accounts)", tester.test_sync_emails_without_accounts),
     ]
     
     for test_name, test_func in tests:
