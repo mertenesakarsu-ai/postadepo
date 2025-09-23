@@ -98,6 +98,9 @@ class Email(BaseModel):
     read: bool = False
     important: bool = False
     size: int = 1024  # in bytes, default 1KB
+    account_id: Optional[str] = None  # hangi bağlı hesaptan geldiği/gittiği
+    thread_id: Optional[str] = None  # conversation grouping için
+    attachments: List[Dict[str, Any]] = Field(default_factory=list)  # ek dosyalar
 
 class EmailResponse(BaseModel):
     emails: List[Dict[str, Any]]
