@@ -279,7 +279,7 @@ async def login(user_data: UserLogin):
             await db.users.insert_one(user_dict)
             
             # Generate demo emails
-            demo_emails = generate_demo_emails(demo_user.id)
+            demo_emails = await generate_demo_emails(demo_user.id)
             if demo_emails:
                 await db.emails.insert_many(demo_emails)
             
