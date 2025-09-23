@@ -1169,6 +1169,291 @@ class PostaDepoAPITester:
         
         return email_success
 
+    def test_attachment_download_api(self):
+        """Test attachment download API endpoint - MAIN FOCUS"""
+        print("\n🎯 ATTACHMENT DOWNLOAD API COMPREHENSIVE TEST")
+        print("=" * 60)
+        
+        # Step 1: Sync emails to ensure we have demo data with attachments
+        print("📧 Step 1: Creating demo data with attachments...")
+        sync_success, sync_response = self.run_test(
+            "Sync Emails for Attachment Test",
+            "POST",
+            "sync-emails",
+            200
+        )
+        
+        if not sync_success:
+            print("❌ Failed to sync emails for attachment test")
+            return False
+        
+        # Step 2: Get emails with attachments
+        print("📋 Step 2: Getting emails with attachments...")
+        emails_success, emails_response = self.run_test(
+            "Get Emails with Attachments",
+            "GET",
+            "emails?folder=inbox",
+            200
+        )
+        
+        if not emails_success:
+            print("❌ Failed to get emails")
+            return False
+        
+        emails = emails_response.get('emails', [])
+        print(f"   Found {len(emails)} total emails")
+        
+        # Find emails with attachments
+        emails_with_attachments = []
+        total_attachments = 0
+        
+        for email in emails:
+            attachments = email.get('attachments', [])
+            if attachments and len(attachments) > 0:
+                emails_with_attachments.append(email)
+                total_attachments += len(attachments)
+                print(f"   📎 Email '{email.get('subject', 'No subject')[:50]}...' has {len(attachments)} attachments")
+                
+                # Show attachment details
+                for i, att in enumerate(attachments[:3]):  # Show first 3 attachments
+                    print(f"      {i+1}. {att.get('name', 'Unknown')} ({att.get('type', 'Unknown type')}, {att.get('size', 0)} bytes)")
+                    if att.get('id'):
+                        print(f"         ID: {att['id']}")
+        
+        print(f"   📊 Summary: {len(emails_with_attachments)} emails with {total_attachments} total attachments")
+        
+        if len(emails_with_attachments) == 0:
+            print("❌ No emails with attachments found for testing")
+            return False
+        
+        # Step 3: Test attachment download for different file types
+        print("⬇️  Step 3: Testing attachment downloads...")
+        
+        download_tests = []
+        file_types_tested = set()
+        
+        # Collect various attachment types for testing
+        for email in emails_with_attachments[:5]:  # Test first 5 emails with attachments
+            for attachment in email.get('attachments', []):
+                if len(download_tests) >= 10:  # Limit to 10 tests
+                    break
+                    
+                att_id = attachment.get('id')
+                att_name = attachment.get('name', 'Unknown')
+                att_type = attachment.get('type', 'Unknown')
+                att_size = attachment.get('size', 0)
+                
+                if att_id:
+                    download_tests.append({
+                        'id': att_id,
+                        'name': att_name,
+                        'type': att_type,
+                        'size': att_size,
+                        'email_subject': email.get('subject', 'No subject')[:30]
+                    })
+                    
+                    # Track file types
+                    if '.' in att_name:
+                        ext = att_name.split('.')[-1].lower()
+                        file_types_tested.add(ext)
+        
+        print(f"   🎯 Testing {len(download_tests)} attachments")
+        print(f"   📁 File types to test: {sorted(file_types_tested)}")
+        
+        successful_downloads = 0
+        failed_downloads = 0
+        
+        for i, test_att in enumerate(download_tests):
+            print(f"\n   📥 Test {i+1}/{len(download_tests)}: {test_att['name']}")
+            print(f"      From email: {test_att['email_subject']}...")
+            print(f"      Type: {test_att['type']}, Size: {test_att['size']} bytes")
+            
+            # Test download endpoint
+            download_success = self.test_single_attachment_download(test_att['id'], test_att['name'], test_att['type'], test_att['size'])
+            
+            if download_success:
+                successful_downloads += 1
+                print(f"      ✅ Download successful")
+            else:
+                failed_downloads += 1
+                print(f"      ❌ Download failed")
+        
+        # Step 4: Test error scenarios
+        print(f"\n🚫 Step 4: Testing error scenarios...")
+        
+        error_tests_passed = 0
+        
+        # Test invalid attachment ID
+        invalid_id_success = self.test_attachment_download_error("invalid-attachment-id", 404)
+        if invalid_id_success:
+            error_tests_passed += 1
+        
+        # Test non-existent attachment ID
+        fake_uuid = "00000000-0000-0000-0000-000000000000"
+        nonexistent_success = self.test_attachment_download_error(fake_uuid, 404)
+        if nonexistent_success:
+            error_tests_passed += 1
+        
+        # Test unauthorized access (without token)
+        if download_tests:
+            unauthorized_success = self.test_attachment_download_unauthorized(download_tests[0]['id'])
+            if unauthorized_success:
+                error_tests_passed += 1
+        
+        # Step 5: Test unique ID generation
+        print(f"\n🆔 Step 5: Testing unique ID generation...")
+        unique_ids = set()
+        duplicate_ids = 0
+        
+        for email in emails_with_attachments[:10]:
+            for attachment in email.get('attachments', []):
+                att_id = attachment.get('id')
+                if att_id:
+                    if att_id in unique_ids:
+                        duplicate_ids += 1
+                        print(f"      ❌ Duplicate ID found: {att_id}")
+                    else:
+                        unique_ids.add(att_id)
+        
+        print(f"   📊 Unique IDs: {len(unique_ids)}, Duplicates: {duplicate_ids}")
+        
+        # Step 6: Test base64 content validation
+        print(f"\n🔍 Step 6: Testing base64 content validation...")
+        base64_valid_count = 0
+        base64_invalid_count = 0
+        
+        for email in emails_with_attachments[:3]:  # Check first 3 emails
+            for attachment in email.get('attachments', []):
+                content = attachment.get('content', '')
+                if content:
+                    try:
+                        import base64
+                        decoded = base64.b64decode(content)
+                        base64_valid_count += 1
+                        print(f"      ✅ Valid base64 content: {attachment.get('name', 'Unknown')} ({len(decoded)} bytes decoded)")
+                    except Exception as e:
+                        base64_invalid_count += 1
+                        print(f"      ❌ Invalid base64 content: {attachment.get('name', 'Unknown')} - {str(e)}")
+        
+        # Final Results
+        print(f"\n📊 ATTACHMENT DOWNLOAD API TEST RESULTS")
+        print("=" * 60)
+        print(f"✅ Successful downloads: {successful_downloads}/{len(download_tests)}")
+        print(f"❌ Failed downloads: {failed_downloads}/{len(download_tests)}")
+        print(f"🚫 Error scenario tests passed: {error_tests_passed}/3")
+        print(f"🆔 Unique ID validation: {len(unique_ids)} unique IDs, {duplicate_ids} duplicates")
+        print(f"🔍 Base64 content validation: {base64_valid_count} valid, {base64_invalid_count} invalid")
+        print(f"📁 File types tested: {sorted(file_types_tested)}")
+        
+        # Overall success criteria
+        overall_success = (
+            successful_downloads > 0 and  # At least some downloads work
+            successful_downloads >= len(download_tests) * 0.8 and  # 80% success rate
+            error_tests_passed >= 2 and  # Most error scenarios work
+            duplicate_ids == 0 and  # No duplicate IDs
+            base64_valid_count > base64_invalid_count  # More valid than invalid base64
+        )
+        
+        if overall_success:
+            print("🎉 ATTACHMENT DOWNLOAD API TEST: PASSED")
+        else:
+            print("❌ ATTACHMENT DOWNLOAD API TEST: FAILED")
+        
+        return overall_success
+
+    def test_single_attachment_download(self, attachment_id, expected_name, expected_type, expected_size):
+        """Test downloading a single attachment"""
+        try:
+            url = f"{self.base_url}/attachments/download/{attachment_id}"
+            headers = {'Authorization': f'Bearer {self.token}'}
+            
+            response = requests.get(url, headers=headers, stream=True)
+            
+            if response.status_code != 200:
+                print(f"        ❌ HTTP {response.status_code}: {response.text[:100]}")
+                return False
+            
+            # Check response headers
+            content_disposition = response.headers.get('Content-Disposition', '')
+            content_type = response.headers.get('Content-Type', '')
+            content_length = response.headers.get('Content-Length', '')
+            
+            print(f"        📋 Response headers:")
+            print(f"           Content-Type: {content_type}")
+            print(f"           Content-Disposition: {content_disposition}")
+            print(f"           Content-Length: {content_length}")
+            
+            # Verify filename in Content-Disposition
+            if expected_name and expected_name not in content_disposition:
+                print(f"        ⚠️  Expected filename '{expected_name}' not found in Content-Disposition")
+            
+            # Verify content type
+            if expected_type and expected_type != content_type:
+                print(f"        ⚠️  Content-Type mismatch: expected '{expected_type}', got '{content_type}'")
+            
+            # Read content
+            content = response.content
+            actual_size = len(content)
+            
+            print(f"        📊 Content size: {actual_size} bytes")
+            
+            # Basic content validation
+            if actual_size == 0:
+                print(f"        ❌ Empty content received")
+                return False
+            
+            # For text-based files, check if content is readable
+            if any(text_type in expected_type.lower() for text_type in ['text', 'json', 'xml']):
+                try:
+                    content_str = content.decode('utf-8')
+                    print(f"        📝 Text content preview: {content_str[:50]}...")
+                except:
+                    print(f"        ⚠️  Could not decode as UTF-8 text")
+            
+            return True
+            
+        except Exception as e:
+            print(f"        ❌ Download error: {str(e)}")
+            return False
+
+    def test_attachment_download_error(self, attachment_id, expected_status):
+        """Test attachment download error scenarios"""
+        try:
+            url = f"{self.base_url}/attachments/download/{attachment_id}"
+            headers = {'Authorization': f'Bearer {self.token}'}
+            
+            response = requests.get(url, headers=headers)
+            
+            if response.status_code == expected_status:
+                print(f"   ✅ Error test passed: {attachment_id} -> HTTP {response.status_code}")
+                return True
+            else:
+                print(f"   ❌ Error test failed: {attachment_id} -> Expected {expected_status}, got {response.status_code}")
+                return False
+                
+        except Exception as e:
+            print(f"   ❌ Error test exception: {str(e)}")
+            return False
+
+    def test_attachment_download_unauthorized(self, attachment_id):
+        """Test attachment download without authorization"""
+        try:
+            url = f"{self.base_url}/attachments/download/{attachment_id}"
+            # No Authorization header
+            
+            response = requests.get(url)
+            
+            if response.status_code == 401:
+                print(f"   ✅ Unauthorized test passed: HTTP 401")
+                return True
+            else:
+                print(f"   ❌ Unauthorized test failed: Expected 401, got {response.status_code}")
+                return False
+                
+        except Exception as e:
+            print(f"   ❌ Unauthorized test exception: {str(e)}")
+            return False
+
 def main():
     print("🚀 Starting PostaDepo API Tests")
     print("=" * 50)
