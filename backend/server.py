@@ -946,6 +946,52 @@ async def connect_account(account_data: dict, current_user: dict = Depends(get_c
     
     return {"success": True, "account": account_dict}
 
+@api_router.get("/attachments/download/{attachment_id}")
+async def download_attachment(attachment_id: str, current_user: dict = Depends(get_current_user)):
+    """Download attachment by ID"""
+    try:
+        # Find the email that contains this attachment
+        email = await db.emails.find_one({
+            "user_id": current_user["id"],
+            "attachments": {"$elemMatch": {"id": attachment_id}}
+        })
+        
+        if not email:
+            raise HTTPException(status_code=404, detail="Attachment not found")
+        
+        # Find the specific attachment
+        attachment = None
+        for att in email.get("attachments", []):
+            if att.get("id") == attachment_id:
+                attachment = att
+                break
+        
+        if not attachment:
+            raise HTTPException(status_code=404, detail="Attachment not found")
+        
+        # Get the attachment content (base64 decoded)
+        content = base64.b64decode(attachment.get("content", ""))
+        
+        # Create streaming response
+        def iter_content():
+            yield content
+        
+        # Determine media type based on file extension
+        media_type = attachment.get("type", "application/octet-stream")
+        
+        return StreamingResponse(
+            iter_content(),
+            media_type=media_type,
+            headers={
+                "Content-Disposition": f"attachment; filename={attachment['name']}",
+                "Content-Length": str(len(content))
+            }
+        )
+        
+    except Exception as e:
+        logger.error(f"Error downloading attachment: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error downloading attachment")
+
 @api_router.delete("/connected-accounts/{account_id}")
 async def disconnect_account(account_id: str, current_user: dict = Depends(get_current_user)):
     """Remove connected account"""
