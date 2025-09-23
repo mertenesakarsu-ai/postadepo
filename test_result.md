@@ -258,11 +258,12 @@ metadata:
 
 test_plan:
   current_focus:
-    - "E-posta model güncellemeleri ve hesap entegrasyonu"
-    - "Outlook benzeri e-posta detay modalı ve thread sistemi"
+    - "Attachment download API endpoint'i"
+    - "Modern mavi-mor gradient UI tasarımı"
+    - "İşlevsel attachment download butonları"
   stuck_tasks: []
   test_all: false
-  test_priority: "completed"
+  test_priority: "high_first"
 
 agent_communication:
   - agent: "main"
