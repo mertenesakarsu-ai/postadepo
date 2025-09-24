@@ -1271,6 +1271,77 @@ async def login(user_data: UserLogin):
         "user": {"id": user_obj.id, "name": user_obj.name, "email": user_obj.email}
     }
 
+@api_router.post("/auth/outlook-login")
+async def outlook_login(code: str, state: str):
+    """Complete Outlook OAuth login and create/login user"""
+    try:
+        if not outlook_auth_service.is_configured():
+            raise HTTPException(
+                status_code=503, 
+                detail="Outlook integration not configured. Azure credentials needed."
+            )
+        
+        # Exchange authorization code for tokens
+        token_data = await exchange_code_for_tokens(code)
+        
+        if not token_data:
+            raise HTTPException(status_code=400, detail="Failed to exchange code for tokens")
+        
+        # Get user profile from Microsoft Graph
+        user_profile = await get_user_profile_from_graph(token_data["access_token"])
+        
+        if not user_profile:
+            raise HTTPException(status_code=400, detail="Failed to get user profile")
+        
+        # Check if Outlook user already exists
+        existing_user = await db.users.find_one({
+            "email": user_profile.get("mail") or user_profile.get("userPrincipalName"),
+            "user_type": "outlook"
+        })
+        
+        user_email = user_profile.get("mail") or user_profile.get("userPrincipalName")
+        
+        if existing_user:
+            # Update last login
+            await db.users.update_one(
+                {"id": existing_user["id"]},
+                {"$set": {"last_login": datetime.now(timezone.utc)}}
+            )
+            user = existing_user
+        else:
+            # Create new Outlook user (auto-approved)
+            new_user = OutlookUser(
+                email=user_email,
+                display_name=user_profile.get("displayName", ""),
+                microsoft_user_id=user_profile["id"],
+                tenant_id=os.getenv("AZURE_TENANT_ID", ""),
+                last_login=datetime.now(timezone.utc)
+            )
+            
+            user_dict = new_user.dict()
+            await db.users.insert_one(user_dict)
+            user = user_dict
+        
+        # Create JWT token for the user
+        token = create_jwt_token(user)
+        
+        return {
+            "token": token,
+            "user": {
+                "id": user["id"],
+                "name": user.get("display_name", user.get("name", "")),
+                "email": user["email"],
+                "user_type": user.get("user_type", "outlook")
+            },
+            "message": "Outlook login successful"
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error during Outlook login: {e}")
+        raise HTTPException(status_code=500, detail="Login failed")
+
 @api_router.get("/emails")
 async def get_emails(folder: str = "inbox", current_user: dict = Depends(get_current_user)):
     query = {"user_id": current_user["id"]}
