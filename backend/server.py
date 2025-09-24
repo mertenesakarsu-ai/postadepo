@@ -1080,21 +1080,28 @@ async def verify_recaptcha(request: RecaptchaVerificationRequest):
     """
     reCAPTCHA token'ını doğrular
     """
-    if not request.recaptcha_token:
-        raise HTTPException(status_code=400, detail="reCAPTCHA token gerekli")
-    
-    verification_result = await verify_recaptcha_token(request.recaptcha_token)
-    
-    if verification_result.get("success", False):
-        return RecaptchaVerificationResponse(
-            success=True,
-            message="reCAPTCHA doğrulaması başarılı"
-        )
-    else:
-        return RecaptchaVerificationResponse(
-            success=False,
-            message="reCAPTCHA doğrulaması başarısız"
-        )
+    try:
+        if not request.recaptcha_token:
+            raise HTTPException(status_code=400, detail="reCAPTCHA token gerekli")
+        
+        verification_result = await verify_recaptcha_token(request.recaptcha_token)
+        
+        if verification_result.get("success", False):
+            return RecaptchaVerificationResponse(
+                success=True,
+                message="reCAPTCHA doğrulaması başarılı"
+            )
+        else:
+            error_codes = verification_result.get("error-codes", [])
+            logging.warning(f"reCAPTCHA verification failed: {error_codes}")
+            
+            return RecaptchaVerificationResponse(
+                success=False,
+                message="reCAPTCHA doğrulaması başarısız"
+            )
+    except Exception as e:
+        logging.error(f"reCAPTCHA endpoint error: {str(e)}")
+        raise HTTPException(status_code=500, detail="reCAPTCHA doğrulama servisi geçici olarak kullanılamıyor")
 
 @api_router.post("/auth/register")
 async def register(user_data: UserCreate):
