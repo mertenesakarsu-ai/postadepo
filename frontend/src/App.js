@@ -73,6 +73,10 @@ function App() {
           <Router>
             <Routes>
               <Route 
+                path="/" 
+                element={<HomePage />} 
+              />
+              <Route 
                 path="/login" 
                 element={
                   !isAuthenticated ? (
@@ -90,12 +94,6 @@ function App() {
                   ) : (
                     <Navigate to="/login" replace />
                   )
-                } 
-              />
-              <Route 
-                path="/" 
-                element={
-                  <Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />
                 } 
               />
             </Routes>
