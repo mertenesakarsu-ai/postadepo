@@ -1963,8 +1963,226 @@ class OutlookEmailService:
             "source": "outlook"
         }
     
+    async def sync_emails_with_token(self, account_id: str, folder_names: List[str] = None) -> Dict[str, Any]:
+        """Sync emails using stored access token"""
+        try:
+            # Get valid access token
+            access_token = await get_valid_access_token(account_id)
+            if not access_token:
+                raise HTTPException(status_code=401, detail="No valid access token available")
+            
+            # Get account details
+            account = await db.connected_accounts.find_one({"id": account_id, "is_connected": True})
+            if not account:
+                raise HTTPException(status_code=404, detail="Account not found")
+            
+            # Default folders to sync all major folders
+            if not folder_names:
+                folder_names = ["inbox", "sent", "drafts", "junk", "deleted"]
+            
+            total_synced = 0
+            folder_results = {}
+            
+            # Sync each folder
+            for folder_name in folder_names:
+                try:
+                    folder_result = await self._sync_folder_with_token(
+                        access_token, account, folder_name
+                    )
+                    folder_results[folder_name] = folder_result
+                    total_synced += folder_result["synced_count"]
+                    
+                except Exception as e:
+                    logger.error(f"Error syncing folder {folder_name}: {e}")
+                    folder_results[folder_name] = {
+                        "synced_count": 0,
+                        "error": str(e)
+                    }
+            
+            # Update account sync timestamp
+            await db.connected_accounts.update_one(
+                {"id": account_id},
+                {"$set": {"last_sync": datetime.now(timezone.utc)}}
+            )
+            
+            return {
+                "account_id": account_id,
+                "account_email": account["email"],
+                "total_synced": total_synced,
+                "folders": folder_results,
+                "sync_timestamp": datetime.now(timezone.utc)
+            }
+            
+        except Exception as e:
+            logger.error(f"Error syncing emails for account {account_id}: {e}")
+            raise HTTPException(status_code=500, detail=f"Email sync failed: {str(e)}")
+    
+    async def _sync_folder_with_token(self, access_token: str, account: dict, folder_name: str) -> Dict[str, Any]:
+        """Sync specific folder using access token"""
+        try:
+            # Get folder messages from Microsoft Graph API
+            folder_id = await self._get_folder_id(access_token, folder_name)
+            if not folder_id:
+                return {"synced_count": 0, "error": f"Folder '{folder_name}' not found"}
+            
+            # Microsoft Graph API endpoint
+            graph_url = f"https://graph.microsoft.com/v1.0/me/mailFolders/{folder_id}/messages"
+            
+            headers = {
+                "Authorization": f"Bearer {access_token}",
+                "Content-Type": "application/json"
+            }
+            
+            # Parameters for email retrieval
+            params = {
+                "$top": 50,  # Batch size
+                "$orderby": "receivedDateTime desc",
+                "$select": "id,subject,bodyPreview,body,from,toRecipients,receivedDateTime,isRead,hasAttachments,parentFolderId"
+            }
+            
+            synced_count = 0
+            
+            async with httpx.AsyncClient() as client:
+                response = await client.get(graph_url, headers=headers, params=params)
+                
+                if response.status_code != 200:
+                    raise Exception(f"Graph API error: {response.status_code} - {response.text}")
+                
+                data = response.json()
+                messages = data.get("value", [])
+                
+                # Process each message
+                for message in messages:
+                    try:
+                        email_data = await self._convert_graph_message_v2(message, account, folder_name)
+                        
+                        # Check if email already exists
+                        existing = await db.emails.find_one({
+                            "message_id": email_data["message_id"],
+                            "user_id": account["user_id"]
+                        })
+                        
+                        if not existing:
+                            await db.emails.insert_one(email_data)
+                            synced_count += 1
+                            
+                    except Exception as e:
+                        logger.error(f"Error processing message {message.get('id', 'unknown')}: {e}")
+                        continue
+            
+            return {"synced_count": synced_count}
+            
+        except Exception as e:
+            logger.error(f"Error syncing folder {folder_name}: {e}")
+            return {"synced_count": 0, "error": str(e)}
+    
+    async def _get_folder_id(self, access_token: str, folder_name: str) -> Optional[str]:
+        """Get folder ID by name"""
+        try:
+            headers = {
+                "Authorization": f"Bearer {access_token}",
+                "Content-Type": "application/json"
+            }
+            
+            async with httpx.AsyncClient() as client:
+                response = await client.get(
+                    "https://graph.microsoft.com/v1.0/me/mailFolders",
+                    headers=headers
+                )
+                
+                if response.status_code != 200:
+                    return None
+                
+                data = response.json()
+                folders = data.get("value", [])
+                
+                # Look for folder by display name (case insensitive)
+                for folder in folders:
+                    if folder.get("displayName", "").lower() == folder_name.lower():
+                        return folder.get("id")
+                
+                # Also check standard folder names
+                folder_mapping = {
+                    "inbox": "inbox",
+                    "sent": "sentitems", 
+                    "drafts": "drafts",
+                    "junk": "junkemail",
+                    "deleted": "deleteditems"
+                }
+                
+                target_name = folder_mapping.get(folder_name.lower(), folder_name.lower())
+                for folder in folders:
+                    if folder.get("displayName", "").lower().replace(" ", "") == target_name:
+                        return folder.get("id")
+                
+                return None
+                
+        except Exception as e:
+            logger.error(f"Error getting folder ID for {folder_name}: {e}")
+            return None
+    
+    async def _convert_graph_message_v2(self, message: dict, account: dict, folder_name: str) -> Dict[str, Any]:
+        """Convert Microsoft Graph message to our email format (v2 with token auth)"""
+        
+        # Handle sender
+        sender_email = ""
+        sender_name = ""
+        if message.get("from") and message["from"].get("emailAddress"):
+            sender_email = message["from"]["emailAddress"].get("address", "")
+            sender_name = message["from"]["emailAddress"].get("name", "")
+        
+        # Handle recipients
+        recipients = []
+        if message.get("toRecipients"):
+            for recipient in message["toRecipients"]:
+                if recipient.get("emailAddress", {}).get("address"):
+                    recipients.append(recipient["emailAddress"]["address"])
+        
+        # Handle content
+        content = ""
+        content_type = "text"
+        if message.get("body"):
+            content = message["body"].get("content", "")
+            content_type = message["body"].get("contentType", "text")
+        
+        preview = message.get("bodyPreview", content[:200])
+        
+        # Handle datetime
+        received_datetime = message.get("receivedDateTime")
+        if received_datetime:
+            try:
+                received_datetime = datetime.fromisoformat(received_datetime.replace("Z", "+00:00"))
+            except:
+                received_datetime = datetime.now(timezone.utc)
+        else:
+            received_datetime = datetime.now(timezone.utc)
+        
+        return {
+            "id": str(uuid.uuid4()),
+            "message_id": message.get("id", str(uuid.uuid4())),
+            "user_id": account["user_id"],
+            "account_id": account["id"],
+            "account_email": account["email"],
+            "folder": folder_name.lower(),
+            "sender": sender_email,
+            "sender_name": sender_name,
+            "recipients": recipients,
+            "subject": message.get("subject", "(No Subject)"),
+            "content": content,
+            "content_type": content_type,
+            "preview": preview,
+            "date": received_datetime,
+            "read": message.get("isRead", False),
+            "has_attachments": message.get("hasAttachments", False),
+            "size": len(content.encode('utf-8')) if content else 1024,
+            "thread_id": None,  
+            "attachments": [],  
+            "source": "outlook",
+            "synced_at": datetime.now(timezone.utc)
+        }
+
     async def sync_user_emails(self, user_email: str, folder_name: str = "Inbox", sync_count: int = 50) -> Dict[str, Any]:
-        """Sync emails from Outlook to database"""
+        """Legacy sync method - kept for compatibility"""
         try:
             emails = await self.get_user_emails(user_email, folder_name, sync_count)
             
@@ -1991,17 +2209,6 @@ class OutlookEmailService:
                 except Exception as e:
                     logger.error(f"Error syncing email {email_data.get('message_id', 'unknown')}: {e}")
                     error_count += 1
-            
-            # Update account sync timestamp
-            await db.connected_accounts.update_one(
-                {"email": user_email, "user_id": user_email},
-                {
-                    "$set": {
-                        "last_sync": datetime.now(timezone.utc)
-                    }
-                },
-                upsert=True
-            )
             
             return {
                 "account_email": user_email,
