@@ -121,5 +121,52 @@
     "outlookError": "Outlook connection error",
     "noAccountsConnected": "You need to connect an email account first for synchronization",
     "accountDisconnected": "{type} account has been disconnected"
+  },
+  "homepage": {
+    "title": "PostaDepo",
+    "subtitle": "Corporate Email Backup Solution",
+    "heroTitle": "Backup Your Outlook Emails Securely",
+    "heroSubtitle": "Backup your big data reliably. Professional service with affordable prices for corporate solutions.",
+    "getStarted": "Get Started",
+    "tryDemo": "Try Demo",
+    "learnMore": "Learn More",
+    "features": {
+      "title": "Why PostaDepo?",
+      "bigData": {
+        "title": "Big Data Support",
+        "description": "Terabytes of email data backed up securely. End your worries with unlimited capacity."
+      },
+      "affordablePrice": {
+        "title": "Affordable Pricing",
+        "description": "Budget-friendly solutions for your corporate needs. Get quality service at affordable prices."
+      },
+      "security": {
+        "title": "Security Guarantee",
+        "description": "Your data is under maximum security with 256-bit SSL encryption."
+      },
+      "integration": {
+        "title": "Easy Integration",
+        "description": "Seamless integration with Microsoft Outlook, Exchange and Office 365."
+      },
+      "support": {
+        "title": "24/7 Support",
+        "description": "Our expert team is always with you. Instant technical support."
+      },
+      "backup": {
+        "title": "Automatic Backup",
+        "description": "Your data stays safe continuously with scheduled backups."
+      }
+    },
+    "cta": {
+      "title": "Get Started Now",
+      "subtitle": "Test all features free with demo account",
+      "contactTitle": "For Information",
+      "contactSubtitle": "Contact us for detailed information about our corporate solutions"
+    },
+    "pricing": {
+      "title": "Pricing",
+      "subtitle": "Choose the package that suits your needs",
+      "comingSoon": "Coming Soon..."
+    }
   }
 }
