@@ -139,6 +139,49 @@ class RecaptchaVerificationRequest(BaseModel):
 class RecaptchaVerificationResponse(BaseModel):
     success: bool
     message: Optional[str] = None
+
+class AccountConnection(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    email: str
+    display_name: Optional[str] = None
+    account_type: str = "outlook"  # outlook, gmail vb.
+    is_connected: bool = True
+    connected_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    last_sync: Optional[datetime] = None
+    sync_token: Optional[str] = None
+
+class OutlookEmail(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    message_id: str  # Outlook'tan gelen unique ID
+    user_id: str
+    account_id: str  # hangi hesaptan geldiği
+    folder: str  # inbox, sent, vb.
+    sender: str
+    recipient: str
+    subject: str
+    content: str
+    preview: str
+    date: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    read: bool = False
+    important: bool = False
+    size: int = 1024
+    thread_id: Optional[str] = None
+    attachments: List[Dict[str, Any]] = Field(default_factory=list)
+    source: str = "outlook"  # outlook, demo vb.
+
+class SyncRequest(BaseModel):
+    account_email: str
+    folder_name: Optional[str] = "Inbox"
+    sync_count: int = Field(default=50, ge=1, le=200)
+
+class SyncResponse(BaseModel):
+    account_email: str
+    synced_count: int
+    skipped_count: int
+    error_count: int
+    sync_timestamp: datetime
+    next_sync_token: Optional[str] = None
     
 # Demo attachment generator
 def generate_demo_attachments():
