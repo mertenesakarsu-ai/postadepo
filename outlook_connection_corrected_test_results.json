@@ -1,0 +1,38 @@
+[
+  {
+    "test": "Tyrz User Login",
+    "success": true,
+    "details": "Successfully logged in as tyrzmusak@gmail.com with user_id: f6b7cc6a-cbae-441e-a1ef-455ff0e7e388",
+    "timestamp": "2025-09-24T18:19:47.829012"
+  },
+  {
+    "test": "Outlook Connect Valid Query Params",
+    "success": true,
+    "details": "{\n  \"status_code\": 400,\n  \"content_type\": \"application/json\",\n  \"response_length\": 47,\n  \"request_method\": \"POST with query params\",\n  \"response_type\": \"dict\",\n  \"response_keys\": [\n    \"detail\"\n  ],\n  \"detail_field\": {\n    \"type\": \"str\",\n    \"value\": \"Invalid or expired state parameter\",\n    \"is_string\": true,\n    \"is_object\": false,\n    \"is_list\": false\n  },\n  \"full_response\": {\n    \"detail\": \"Invalid or expired state parameter\"\n  }\n}",
+    "timestamp": "2025-09-24T18:19:47.869265"
+  },
+  {
+    "test": "Outlook Connect Invalid Query Params",
+    "success": true,
+    "details": "{\n  \"status_code\": 400,\n  \"content_type\": \"application/json\",\n  \"response_length\": 47,\n  \"request_method\": \"POST with invalid query params\",\n  \"response_type\": \"dict\",\n  \"response_keys\": [\n    \"detail\"\n  ],\n  \"detail_field\": {\n    \"type\": \"str\",\n    \"value\": \"Invalid or expired state parameter\",\n    \"is_string\": true,\n    \"is_object\": false,\n    \"is_list\": false,\n    \"length\": 34\n  },\n  \"full_response\": {\n    \"detail\": \"Invalid or expired state parameter\"\n  }\n}",
+    "timestamp": "2025-09-24T18:19:47.908078"
+  },
+  {
+    "test": "Outlook Connect Missing Query Parameters",
+    "success": true,
+    "details": "[\n  {\n    \"test_case\": \"Missing Code\",\n    \"status_code\": 422,\n    \"content_type\": \"application/json\",\n    \"response_type\": \"dict\",\n    \"detail_field\": {\n      \"type\": \"list\",\n      \"value\": [\n        {\n          \"type\": \"missing\",\n          \"loc\": [\n            \"query\",\n            \"code\"\n          ],\n          \"msg\": \"Field required\",\n          \"input\": null,\n          \"url\": \"https://errors.pydantic.dev/2.11/v/missing\"\n        }\n      ],\n      \"is_string\": false\n    },\n    \"full_response\": {\n      \"detail\": [\n        {\n          \"type\": \"missing\",\n          \"loc\": [\n            \"query\",\n            \"code\"\n          ],\n          \"msg\": \"Field required\",\n          \"input\": null,\n          \"url\": \"https://errors.pydantic.dev/2.11/v/missing\"\n        }\n      ]\n    }\n  },\n  {\n    \"test_case\": \"Missing State\",\n    \"status_code\": 422,\n    \"content_type\": \"application/json\",\n    \"response_type\": \"dict\",\n    \"detail_field\": {\n      \"type\": \"list\",\n      \"value\": [\n        {\n          \"type\": \"missing\",\n          \"loc\": [\n            \"query\",\n            \"state\"\n          ],\n          \"msg\": \"Field required\",\n          \"input\": null,\n          \"url\": \"https://errors.pydantic.dev/2.11/v/missing\"\n        }\n      ],\n      \"is_string\": false\n    },\n    \"full_response\": {\n      \"detail\": [\n        {\n          \"type\": \"missing\",\n          \"loc\": [\n            \"query\",\n            \"state\"\n          ],\n          \"msg\": \"Field required\",\n          \"input\": null,\n          \"url\": \"https://errors.pydantic.dev/2.11/v/missing\"\n        }\n      ]\n    }\n  },\n  {\n    \"test_case\": \"Empty Code\",\n    \"status_code\": 400,\n    \"content_type\": \"application/json\",\n    \"response_type\": \"dict\",\n    \"detail_field\": {\n      \"type\": \"str\",\n      \"value\": \"Invalid or expired state parameter\",\n      \"is_string\": true\n    },\n    \"full_response\": {\n      \"detail\": \"Invalid or expired state parameter\"\n    }\n  },\n  {\n    \"test_case\": \"Empty State\",\n    \"status_code\": 400,\n    \"content_type\": \"application/json\",\n    \"response_type\": \"dict\",\n    \"detail_field\": {\n      \"type\": \"str\",\n      \"value\": \"Invalid or expired state parameter\",\n      \"is_string\": true\n    },\n    \"full_response\": {\n      \"detail\": \"Invalid or expired state parameter\"\n    }\n  },\n  {\n    \"test_case\": \"No Parameters\",\n    \"status_code\": 422,\n    \"content_type\": \"application/json\",\n    \"response_type\": \"dict\",\n    \"detail_field\": {\n      \"type\": \"list\",\n      \"value\": [\n        {\n          \"type\": \"missing\",\n          \"loc\": [\n            \"query\",\n            \"code\"\n          ],\n          \"msg\": \"Field required\",\n          \"input\": null,\n          \"url\": \"https://errors.pydantic.dev/2.11/v/missing\"\n        },\n        {\n          \"type\": \"missing\",\n          \"loc\": [\n            \"query\",\n            \"state\"\n          ],\n          \"msg\": \"Field required\",\n          \"input\": null,\n          \"url\": \"https://errors.pydantic.dev/2.11/v/missing\"\n        }\n      ],\n      \"is_string\": false\n    },\n    \"full_response\": {\n      \"detail\": [\n        {\n          \"type\": \"missing\",\n          \"loc\": [\n            \"query\",\n            \"code\"\n          ],\n          \"msg\": \"Field required\",\n          \"input\": null,\n          \"url\": \"https://errors.pydantic.dev/2.11/v/missing\"\n        },\n        {\n          \"type\": \"missing\",\n          \"loc\": [\n            \"query\",\n            \"state\"\n          ],\n          \"msg\": \"Field required\",\n          \"input\": null,\n          \"url\": \"https://errors.pydantic.dev/2.11/v/missing\"\n        }\n      ]\n    }\n  }\n]",
+    "timestamp": "2025-09-24T18:19:48.107914"
+  },
+  {
+    "test": "Realistic OAuth Flow Simulation",
+    "success": true,
+    "details": "{\n  \"auth_url_status\": 200,\n  \"auth_url_available\": true,\n  \"auth_url_response\": {\n    \"auth_url\": \"https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=b815aa7f-3797-4320-9cfa-9a12e338f1fe&response_type=code&redirect_uri=https://data-migration-app.preview.emergentagent.com/auth/callback&response_mode=query&scope=https://graph.microsoft.com/Mail.Read https://graph.microsoft.com/Mail.ReadWrite https://graph.microsoft.com/User.Read offline_access&state=f6b7cc6a-cbae-441e-a1ef-455ff0e7e388_37b3ad48-585c-43a3-84fb-ff2c7a554480\",\n    \"state\": \"f6b7cc6a-cbae-441e-a1ef-455ff0e7e388_37b3ad48-585c-43a3-84fb-ff2c7a554480\",\n    \"redirect_uri\": \"https://data-migration-app.preview.emergentagent.com/auth/callback\"\n  },\n  \"extracted_state\": \"f6b7cc6a-cbae-441e-a1ef-455ff0e7e388_37b3ad48-585c-43a3-84fb-ff2c7a554480\",\n  \"connect_with_real_state\": {\n    \"status_code\": 500,\n    \"content_type\": \"application/json\",\n    \"response_data\": {\n      \"detail\": \"Failed to connect account\"\n    },\n    \"detail_field\": {\n      \"type\": \"str\",\n      \"is_string\": true,\n      \"value\": \"Failed to connect account\"\n    }\n  }\n}",
+    "timestamp": "2025-09-24T18:19:48.181683"
+  },
+  {
+    "test": "React Rendering Issues Analysis",
+    "success": true,
+    "details": "{\n  \"total_issues_found\": 0,\n  \"issues\": [],\n  \"summary\": \"No obvious React rendering issues found\"\n}",
+    "timestamp": "2025-09-24T18:19:48.182849"
+  }
+]
