@@ -351,7 +351,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Ana sayfa routing ve özellikler testi"
+    - "Tyrz Musak kullanıcı hesabı oluşturma ve test"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
