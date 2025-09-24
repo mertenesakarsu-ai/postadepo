@@ -2405,10 +2405,11 @@ async def get_connected_outlook_accounts(current_user: dict = Depends(get_curren
 
 @api_router.post("/outlook/sync")
 async def sync_outlook_emails(
-    sync_request: SyncRequest,
+    account_id: str,
+    folders: Optional[List[str]] = None,
     current_user: dict = Depends(get_current_user)
 ):
-    """Sync emails from connected Outlook account"""
+    """Sync emails from connected Outlook account using stored tokens"""
     try:
         if not outlook_auth_service.is_configured():
             raise HTTPException(
@@ -2416,9 +2417,9 @@ async def sync_outlook_emails(
                 detail="Outlook integration not configured. Please provide Azure credentials."
             )
         
-        # Verify account is connected
+        # Verify account is connected and belongs to user
         account = await db.connected_accounts.find_one({
-            "email": sync_request.account_email,
+            "id": account_id,
             "user_id": current_user["id"],
             "is_connected": True
         })
@@ -2429,14 +2430,13 @@ async def sync_outlook_emails(
                 detail="Account not connected or not found"
             )
         
-        # Perform sync
-        result = await outlook_email_service.sync_user_emails(
-            user_email=sync_request.account_email,
-            folder_name=sync_request.folder_name,
-            sync_count=sync_request.sync_count
+        # Perform sync with token-based authentication
+        result = await outlook_email_service.sync_emails_with_token(
+            account_id=account_id,
+            folder_names=folders
         )
         
-        return SyncResponse(**result)
+        return result
         
     except HTTPException:
         raise
