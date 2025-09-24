@@ -98,6 +98,18 @@ class User(BaseModel):
     name: str
     email: EmailStr
     approved: bool = False  # Whitelist durumu - sadece true olanlar giriş yapabilir
+    user_type: str = "email"  # "email" for regular signup, "outlook" for OAuth users
+
+class OutlookUser(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    email: EmailStr
+    display_name: str
+    microsoft_user_id: str
+    tenant_id: str
+    approved: bool = True  # Outlook users auto-approved
+    user_type: str = "outlook"
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    last_login: Optional[datetime] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class Email(BaseModel):
