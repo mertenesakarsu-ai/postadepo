@@ -2082,7 +2082,7 @@ async def connect_outlook_account(
         raise HTTPException(status_code=500, detail="Failed to connect account")
 
 @api_router.get("/outlook/accounts")
-async def get_connected_accounts(current_user: dict = Depends(get_current_user)):
+async def get_connected_outlook_accounts(current_user: dict = Depends(get_current_user)):
     """Get user's connected Outlook accounts"""
     try:
         accounts = await db.connected_accounts.find({
