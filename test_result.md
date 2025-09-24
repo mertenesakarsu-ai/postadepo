@@ -205,6 +205,42 @@ backend:
         comment: "🎉 ANA SAYFA ROUTING VE ÖZELLİKLER TESTİ TAMAMLANDI: ✅ Ana sayfa (/) erişimi çalışıyor (200 OK, valid HTML structure), ✅ Login sayfası (/login) erişimi çalışıyor (200 OK, valid HTML structure), ✅ Demo giriş fonksiyonu mükemmel çalışıyor (demo@postadepo.com / demo123), ✅ E-postalar API endpoint'i çalışıyor (18 inbox, 50 total emails), ✅ Diğer API endpoint'leri çalışıyor (storage-info, connected-accounts), ✅ Geçersiz giriş doğru şekilde reddediliyor (401). Tüm temel routing ve API fonksiyonları %100 başarı oranıyla çalışıyor. Backend comprehensive test: 49/51 passed (96% success rate)."
 
 frontend:
+  - task: "Ana sayfa (Landing Page) oluşturma"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/HomePage.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "PostaDepo kurumsal ana sayfa oluşturuldu. Büyük veri yedekleme ve uygun fiyat vurgusu, Türkçe/İngilizce dil desteği, modern tasarım, özellikleri kartları, fiyatlandırma alanı (hazır ama boş), CTA bölümü, footer. Routing güncellendi: / -> HomePage."
+
+  - task: "Dil değiştirici (TR/EN) ekleme"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/LanguageSwitcher.js, /app/frontend/src/components/LoginPage.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Sağ üst köşeye Türkçe/İngilizce dil değiştiricisi eklendi. HomePage ve LoginPage'de aktif. Mevcut LanguageContext ile entegre, çalışan TR/EN butonları."
+
+  - task: "Ana sayfadan kullanıcı paneline yönlendirme"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/HomePage.js, /app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "'Hemen Başla' ve 'Demo Dene' butonları /login sayfasına yönlendiriyor. Routing güncellendi, demo bilgileri mevcut giriş sayfasındaki bilgiler kullanılıyor."
+
   - task: "Modern mavi-mor gradient UI tasarımı"
     implemented: true
     working: false
