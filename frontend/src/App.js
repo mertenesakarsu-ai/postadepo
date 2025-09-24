@@ -97,6 +97,10 @@ function App() {
                   )
                 } 
               />
+              <Route 
+                path="/auth/callback" 
+                element={<OutlookCallback />} 
+              />
             </Routes>
           </Router>
           <Toaster />
