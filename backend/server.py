@@ -2204,6 +2204,201 @@ async def disconnect_outlook_account(
         logger.error(f"Error disconnecting account: {e}")
         raise HTTPException(status_code=500, detail="Failed to disconnect account")
 
+# ============== OUTLOOK API ENDPOINTS ==============
+
+@api_router.get("/outlook/status")
+async def outlook_status():
+    """Check Outlook API integration status"""
+    return {
+        "graph_sdk_available": GRAPH_AVAILABLE,
+        "credentials_configured": outlook_auth_service.is_configured(),
+        "client_id_set": bool(os.getenv('AZURE_CLIENT_ID')),
+        "tenant_id_set": bool(os.getenv('AZURE_TENANT_ID')),
+        "message": "Outlook API ready" if outlook_auth_service.is_configured() else "Azure credentials needed"
+    }
+
+@api_router.post("/outlook/connect-account")
+async def connect_outlook_account(
+    email: str,
+    display_name: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """Connect user's Outlook account"""
+    try:
+        if not outlook_auth_service.is_configured():
+            raise HTTPException(
+                status_code=503, 
+                detail="Outlook integration not configured. Azure credentials needed."
+            )
+        
+        # Check if account already connected
+        existing = await db.connected_accounts.find_one({
+            "email": email,
+            "user_id": current_user["id"]
+        })
+        
+        if existing:
+            return {"message": "Account already connected", "account": existing}
+        
+        # Create new connection
+        connection_data = {
+            "id": str(uuid.uuid4()),
+            "user_id": current_user["id"],
+            "email": email,
+            "display_name": display_name or email.split("@")[0],
+            "account_type": "outlook",
+            "is_connected": True,
+            "connected_at": datetime.now(timezone.utc),
+            "last_sync": None,
+            "sync_token": None
+        }
+        
+        await db.connected_accounts.insert_one(connection_data)
+        
+        return {
+            "message": "Outlook account connected successfully",
+            "account": connection_data
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error connecting Outlook account: {e}")
+        raise HTTPException(status_code=500, detail="Failed to connect account")
+
+@api_router.get("/outlook/accounts")
+async def get_connected_outlook_accounts(current_user: dict = Depends(get_current_user)):
+    """Get user's connected Outlook accounts"""
+    try:
+        accounts = await db.connected_accounts.find({
+            "user_id": current_user["id"],
+            "is_connected": True,
+            "account_type": "outlook"
+        }).to_list(length=None)
+        
+        return {"accounts": accounts}
+        
+    except Exception as e:
+        logger.error(f"Error retrieving connected accounts: {e}")
+        raise HTTPException(status_code=500, detail="Failed to retrieve accounts")
+
+@api_router.post("/outlook/sync")
+async def sync_outlook_emails(
+    sync_request: SyncRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """Sync emails from connected Outlook account"""
+    try:
+        if not outlook_auth_service.is_configured():
+            raise HTTPException(
+                status_code=503,
+                detail="Outlook integration not configured. Please provide Azure credentials."
+            )
+        
+        # Verify account is connected
+        account = await db.connected_accounts.find_one({
+            "email": sync_request.account_email,
+            "user_id": current_user["id"],
+            "is_connected": True
+        })
+        
+        if not account:
+            raise HTTPException(
+                status_code=404,
+                detail="Account not connected or not found"
+            )
+        
+        # Perform sync
+        result = await outlook_email_service.sync_user_emails(
+            user_email=sync_request.account_email,
+            folder_name=sync_request.folder_name,
+            sync_count=sync_request.sync_count
+        )
+        
+        return SyncResponse(**result)
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error syncing Outlook emails: {e}")
+        raise HTTPException(status_code=500, detail=f"Sync failed: {str(e)}")
+
+@api_router.get("/outlook/emails")
+async def get_outlook_emails(
+    account_email: Optional[str] = None,
+    folder: str = "inbox",
+    skip: int = 0,
+    limit: int = 50,
+    current_user: dict = Depends(get_current_user)
+):
+    """Get synced Outlook emails from database"""
+    try:
+        query = {"user_id": current_user["id"], "source": "outlook"}
+        
+        if account_email:
+            query["account_id"] = f"outlook-{account_email}"
+        
+        if folder != "all":
+            query["folder"] = folder.lower()
+        
+        emails = await db.emails.find(query).sort("date", -1).skip(skip).limit(limit).to_list(length=limit)
+        
+        # Calculate folder counts
+        folder_counts = {}
+        if not account_email:
+            # Count across all connected accounts
+            pipeline = [
+                {"$match": {"user_id": current_user["id"], "source": "outlook"}},
+                {"$group": {"_id": "$folder", "count": {"$sum": 1}}}
+            ]
+        else:
+            pipeline = [
+                {"$match": {"user_id": current_user["id"], "source": "outlook", "account_id": f"outlook-{account_email}"}},
+                {"$group": {"_id": "$folder", "count": {"$sum": 1}}}
+            ]
+        
+        counts_result = await db.emails.aggregate(pipeline).to_list(length=None)
+        for item in counts_result:
+            folder_counts[item["_id"]] = item["count"]
+        
+        return EmailResponse(emails=emails, folderCounts=folder_counts)
+        
+    except Exception as e:
+        logger.error(f"Error retrieving Outlook emails: {e}")
+        raise HTTPException(status_code=500, detail="Failed to retrieve emails")
+
+@api_router.delete("/outlook/accounts/{account_email}")
+async def disconnect_outlook_account(
+    account_email: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Disconnect Outlook account"""
+    try:
+        result = await db.connected_accounts.update_one(
+            {"email": account_email, "user_id": current_user["id"]},
+            {"$set": {"is_connected": False}}
+        )
+        
+        if result.modified_count == 0:
+            raise HTTPException(status_code=404, detail="Account not found")
+        
+        return {"message": "Account disconnected successfully"}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error disconnecting account: {e}")
+        raise HTTPException(status_code=500, detail="Failed to disconnect account")
+
+# Health check
+@api_router.get("/")
+async def root():
+    return {"message": "PostaDepo API is running", "status": "healthy"}
+
+@api_router.get("/health")
+async def health_check():
+    return {"status": "healthy", "timestamp": datetime.now(timezone.utc)}
+
 # Include the router in the main app
 app.include_router(api_router)
 
