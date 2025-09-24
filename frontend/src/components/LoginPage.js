@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
 import { toast } from 'sonner';
 import { useLanguage } from '../contexts/LanguageContext';
+import LanguageSwitcher from './LanguageSwitcher';
 import { Mail, Lock, Eye, EyeOff, UserPlus } from 'lucide-react';
 import axios from 'axios';
 import ReCAPTCHA from 'react-google-recaptcha';
