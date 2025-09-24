@@ -121,5 +121,52 @@
     "outlookError": "Outlook bağlantı hatası",
     "noAccountsConnected": "Senkronizasyon için önce bir e-posta hesabı bağlamanız gerekiyor",
     "accountDisconnected": "{type} hesabı bağlantısı kesildi"
+  },
+  "homepage": {
+    "title": "PostaDepo",
+    "subtitle": "Kurumsal E-posta Yedekleme Çözümü",
+    "heroTitle": "Outlook E-postalarınızı Güvenle Yedekleyin",
+    "heroSubtitle": "Büyük verilerinizi güvenilir şekilde yedekleyin. Kurumsal çözümler için uygun fiyatlarla profesyonel hizmet.",
+    "getStarted": "Hemen Başla",
+    "tryDemo": "Demo Dene",
+    "learnMore": "Daha Fazla Bilgi",
+    "features": {
+      "title": "Neden PostaDepo?",
+      "bigData": {
+        "title": "Büyük Veri Desteği",
+        "description": "Terabaytlarca e-posta verisi güvenle yedeklenir. Sınırsız kapasite ile endişenizi sona erdirin."
+      },
+      "affordablePrice": {
+        "title": "Uygun Fiyatlandırma",
+        "description": "Kurumsal ihtiyaçlarınız için bütçe dostu çözümler. Kaliteli hizmeti uygun fiyata alın."
+      },
+      "security": {
+        "title": "Güvenlik Garantisi",
+        "description": "256-bit SSL şifreleme ile verileriniz maksimum güvenlik altında."
+      },
+      "integration": {
+        "title": "Kolay Entegrasyon",
+        "description": "Microsoft Outlook, Exchange ve Office 365 ile sorunsuz entegrasyon."
+      },
+      "support": {
+        "title": "7/24 Destek",
+        "description": "Uzman ekibimiz her zaman yanınızda. Anında teknik destek."
+      },
+      "backup": {
+        "title": "Otomatik Yedekleme",
+        "description": "Zamanlı yedekleme ile verileriniz sürekli güvende kalır."
+      }
+    },
+    "cta": {
+      "title": "Hemen Başlayın",
+      "subtitle": "Demo hesabı ile tüm özellikleri ücretsiz test edin",
+      "contactTitle": "Bilgi Almak İçin",
+      "contactSubtitle": "Kurumsal çözümlerimiz hakkında detaylı bilgi almak için iletişime geçin"
+    },
+    "pricing": {
+      "title": "Fiyatlandırma",
+      "subtitle": "İhtiyacınıza uygun paketi seçin",
+      "comingSoon": "Yakında..."
+    }
   }
 }
