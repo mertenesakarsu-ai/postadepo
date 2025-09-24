@@ -2304,6 +2304,117 @@ async def disconnect_outlook_account(
         logger.error(f"Error disconnecting account: {e}")
         raise HTTPException(status_code=500, detail="Failed to disconnect account")
 
+# ============== HELPER FUNCTIONS FOR OAUTH2 ==============
+
+async def exchange_code_for_tokens(authorization_code: str) -> Optional[dict]:
+    """Exchange authorization code for access and refresh tokens"""
+    try:
+        token_url = "https://login.microsoftonline.com/common/oauth2/v2.0/token"
+        
+        data = {
+            "client_id": os.getenv('AZURE_CLIENT_ID'),
+            "client_secret": os.getenv('AZURE_CLIENT_SECRET'),
+            "code": authorization_code,
+            "redirect_uri": os.getenv('REDIRECT_URI', 'http://localhost:3000/auth/callback'),
+            "grant_type": "authorization_code",
+            "scope": "https://graph.microsoft.com/Mail.Read https://graph.microsoft.com/Mail.ReadWrite https://graph.microsoft.com/User.Read offline_access"
+        }
+        
+        async with httpx.AsyncClient() as client:
+            response = await client.post(token_url, data=data)
+            
+            if response.status_code == 200:
+                return response.json()
+            else:
+                logger.error(f"Token exchange failed: {response.status_code} - {response.text}")
+                return None
+                
+    except Exception as e:
+        logger.error(f"Error exchanging code for tokens: {e}")
+        return None
+
+async def get_user_profile_from_graph(access_token: str) -> Optional[dict]:
+    """Get user profile from Microsoft Graph API"""
+    try:
+        graph_url = "https://graph.microsoft.com/v1.0/me"
+        headers = {
+            "Authorization": f"Bearer {access_token}",
+            "Content-Type": "application/json"
+        }
+        
+        async with httpx.AsyncClient() as client:
+            response = await client.get(graph_url, headers=headers)
+            
+            if response.status_code == 200:
+                return response.json()
+            else:
+                logger.error(f"Graph API call failed: {response.status_code} - {response.text}")
+                return None
+                
+    except Exception as e:
+        logger.error(f"Error getting user profile: {e}")
+        return None
+
+async def refresh_access_token(refresh_token: str) -> Optional[dict]:
+    """Refresh access token using refresh token"""
+    try:
+        token_url = "https://login.microsoftonline.com/common/oauth2/v2.0/token"
+        
+        data = {
+            "client_id": os.getenv('AZURE_CLIENT_ID'),
+            "client_secret": os.getenv('AZURE_CLIENT_SECRET'),
+            "refresh_token": refresh_token,
+            "grant_type": "refresh_token",
+            "scope": "https://graph.microsoft.com/Mail.Read https://graph.microsoft.com/Mail.ReadWrite https://graph.microsoft.com/User.Read offline_access"
+        }
+        
+        async with httpx.AsyncClient() as client:
+            response = await client.post(token_url, data=data)
+            
+            if response.status_code == 200:
+                return response.json()
+            else:
+                logger.error(f"Token refresh failed: {response.status_code} - {response.text}")
+                return None
+                
+    except Exception as e:
+        logger.error(f"Error refreshing token: {e}")
+        return None
+
+async def get_valid_access_token(account_id: str) -> Optional[str]:
+    """Get valid access token for account, refresh if needed"""
+    try:
+        account = await db.connected_accounts.find_one({"id": account_id, "is_connected": True})
+        if not account:
+            return None
+        
+        # Check if token is still valid (with 5 minute buffer)
+        if datetime.now(timezone.utc) < account["token_expires_at"].replace(minute=account["token_expires_at"].minute - 5):
+            return account["access_token"]
+        
+        # Token expired, try to refresh
+        if account.get("refresh_token"):
+            new_tokens = await refresh_access_token(account["refresh_token"])
+            if new_tokens:
+                # Update account with new tokens
+                await db.connected_accounts.update_one(
+                    {"id": account_id},
+                    {"$set": {
+                        "access_token": new_tokens["access_token"],
+                        "refresh_token": new_tokens.get("refresh_token", account["refresh_token"]),
+                        "token_expires_at": datetime.now(timezone.utc).replace(
+                            second=datetime.now(timezone.utc).second + new_tokens.get("expires_in", 3600)
+                        )
+                    }}
+                )
+                return new_tokens["access_token"]
+        
+        return None
+        
+    except Exception as e:
+        logger.error(f"Error getting valid access token: {e}")
+        return None
+
 # Health check
 @api_router.get("/")
 async def root():
