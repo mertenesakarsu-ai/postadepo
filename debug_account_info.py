@@ -2,7 +2,7 @@ import requests
 import json
 
 # Test the account info issue
-base_url = "https://backup-service.preview.emergentagent.com/api"
+base_url = "https://mail-connect-2.preview.emergentagent.com/api"
 
 # Login first
 login_response = requests.post(f"{base_url}/auth/login", json={
