@@ -19,6 +19,20 @@ import io
 import random
 import httpx
 import base64
+import asyncio
+
+# Microsoft Graph SDK imports
+try:
+    from azure.identity.aio import ClientSecretCredential
+    from azure.identity import ClientSecretCredential as SyncClientSecretCredential
+    from msgraph import GraphServiceClient
+    from msgraph.generated.models.message import Message
+    from msgraph.generated.models.folder import Folder
+    from msgraph.generated.users.item.mail_folders.item.messages.messages_request_builder import MessagesRequestBuilder
+    GRAPH_AVAILABLE = True
+except ImportError as e:
+    logging.warning(f"Microsoft Graph SDK not available: {e}")
+    GRAPH_AVAILABLE = False
 
 
 ROOT_DIR = Path(__file__).parent
