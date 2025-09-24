@@ -136,6 +136,11 @@ const LoginPage = ({ onLogin }) => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 flex items-center justify-center p-4">
+      {/* Language Switcher - Top Right */}
+      <div className="absolute top-4 right-4 z-10">
+        <LanguageSwitcher />
+      </div>
+      
       <div className="w-full max-w-md">
         {/* Login Card */}
         <Card className="backdrop-blur-sm bg-white/90 border-0 shadow-2xl">
