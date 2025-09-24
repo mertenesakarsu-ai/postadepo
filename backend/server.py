@@ -1811,8 +1811,7 @@ async def disconnect_account(account_id: str, current_user: dict = Depends(get_c
     
     return {"success": True, "message": "Account disconnected"}
 
-# Include the router in the main app
-app.include_router(api_router)
+# OUTLOOK API ENDPOINTS will be added after this comment
 
 app.add_middleware(
     CORSMiddleware,
