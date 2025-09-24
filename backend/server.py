@@ -1856,7 +1856,7 @@ class OutlookAuthService:
         return all([self.client_id, self.client_secret, self.tenant_id]) and GRAPH_AVAILABLE
 
 class OutlookEmailService:
-    """Microsoft Graph API email service"""
+    """Microsoft Graph API email service with token-based authentication"""
     
     def __init__(self):
         self.auth_service = OutlookAuthService()
