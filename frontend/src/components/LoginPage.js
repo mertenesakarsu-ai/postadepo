@@ -83,7 +83,17 @@ const LoginPage = ({ onLogin }) => {
       } catch (error) {
         console.error('reCAPTCHA verification error:', error);
         setIsRecaptchaVerified(false);
-        toast.error('reCAPTCHA doğrulaması sırasında hata oluştu');
+        
+        // Daha detaylı hata mesajı
+        if (error.response?.status === 500) {
+          toast.error('Sunucu hatası. Lütfen daha sonra tekrar deneyin.');
+        } else if (error.response?.status === 400) {
+          toast.error('reCAPTCHA token geçersiz. Lütfen tekrar deneyin.');
+        } else if (error.code === 'NETWORK_ERROR') {
+          toast.error('Ağ bağlantısı hatası. İnternet bağlantınızı kontrol edin.');
+        } else {
+          toast.error('reCAPTCHA doğrulaması sırasında hata oluştu. Lütfen tekrar deneyin.');
+        }
       }
     } else {
       setIsRecaptchaVerified(false);
