@@ -303,8 +303,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Modern mavi-mor gradient UI tasarımı"
-    - "İşlevsel attachment download butonları"
+    - "Ana sayfa routing ve özellikler testi"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
