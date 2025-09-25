@@ -363,8 +363,9 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Tyrz Musak kullanıcı hesabı oluşturma ve test"
-  stuck_tasks: []
+    - "Outlook hesap bağlama ve email sync sorunu"
+  stuck_tasks:
+    - "Outlook hesap bağlama ve email sync sorunu"
   test_all: false
   test_priority: "high_first"
 
