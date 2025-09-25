@@ -216,6 +216,18 @@ backend:
         agent: "testing"
         comment: "🎯 TYRZ MUSAK KULLANICI HESABI BAŞARIYLA OLUŞTURULDU VE TEST EDİLDİ: ✅ POST /api/register ile tyrzmusak@gmail.com hesabı oluşturuldu, ✅ Admin onayı ile approved=true yapıldı (whitelist'e eklendi), ✅ Veritabanında kullanıcının approved=true olduğu doğrulandı, ✅ POST /api/login ile başarılı giriş yapıldı (deneme123 şifresi), ✅ GET /api/emails ile email listesine erişim sağlandı, ✅ GET /api/outlook/status ile Outlook entegrasyon durumu kontrol edildi (API hazır), ✅ user_type: email olarak ayarlandı. Kullanıcı gerçek Outlook hesabını bağlamaya hazır durumda. 7/7 test başarılı - User ID: f6b7cc6a-cbae-441e-a1ef-455ff0e7e388"
 
+  - task: "Outlook hesap bağlama ve email sync sorunu"
+    implemented: true
+    working: false
+    file: "/app/backend/server.py"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "testing"
+        comment: "🚨 KRİTİK SORUN TESPİT EDİLDİ: Kullanıcının 'başlangıçta başarıyla bağlandı ama sonra hata veriyor' şikayetinin kök nedeni bulundu. ✅ Auth URL generation çalışıyor (200 OK, Microsoft endpoint), ✅ OAuth callback handling çalışıyor (400 invalid code), ✅ Tüm API endpoint'leri erişilebilir, ✅ Azure credentials configured, ❌ AMA: Veritabanında 0 connected_accounts var, ❌ OAuth states oluşuyor ama account connection tamamlanmıyor, ❌ Token exchange veya account storage başarısız, ❌ Bu yüzden email sync 404 Account not found hatası veriyor. PROBLEM: OAuth flow başlıyor ama account connection/token storage aşamasında kesiliyor."
+
 frontend:
   - task: "Ana sayfa (Landing Page) oluşturma"
     implemented: true
