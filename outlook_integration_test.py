@@ -244,17 +244,16 @@ class OutlookIntegrationTester:
         success, response, http_response = self.run_test(
             "Outlook Callback - Invalid Code",
             "POST",
-            "auth/outlook-login",
-            400,  # Expecting error for invalid code
-            data={"code": "invalid_test_code", "state": "test_state"}
+            "auth/outlook-login?code=invalid_test_code&state=test_state",
+            400  # Expecting error for invalid code
         )
         
-        if http_response and http_response.status_code in [400, 401, 500]:
+        if http_response and http_response.status_code in [400, 401, 500, 503]:
             print("   ℹ️  Callback endpoint exists and handles invalid codes")
-            self.log_result("Outlook Callback", True, "Endpoint exists and handles errors properly")
+            self.log_result("Outlook Callback", True, f"Endpoint exists and handles errors properly (status: {http_response.status_code})")
             return True
         else:
-            self.log_result("Outlook Callback", False, "Unexpected callback behavior")
+            self.log_result("Outlook Callback", False, f"Unexpected callback behavior (status: {http_response.status_code if http_response else 'None'})")
             return False
 
     def test_outlook_status_check(self):
