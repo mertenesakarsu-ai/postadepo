@@ -294,6 +294,42 @@ class OutlookIntegrationTester:
         else:
             self.log_result("Outlook Connect Account", False, f"Unexpected response (status: {http_response.status_code if http_response else 'None'})")
             return False
+
+    def test_outlook_status_check(self):
+        """Test Outlook integration status"""
+        print("\n" + "="*60)
+        print("📊 TESTING OUTLOOK INTEGRATION STATUS")
+        print("="*60)
+        
+        if not self.token:
+            print("❌ No authentication token available")
+            self.log_result("Outlook Status", False, "No authentication token")
+            return False
+        
+        success, response, _ = self.run_test(
+            "Outlook Integration Status",
+            "GET",
+            "outlook/status",
+            200
+        )
+        
+        if success:
+            configured = response.get('credentials_configured', False)
+            ready = response.get('graph_sdk_available', False)
+            print(f"   Integration configured: {configured}")
+            print(f"   Graph SDK available: {ready}")
+            
+            if configured and ready:
+                print("   ✅ Outlook integration is configured and ready")
+                self.log_result("Outlook Status", True, "Integration configured and ready")
+                return True
+            else:
+                print("   ⚠️  Outlook integration has some issues")
+                self.log_result("Outlook Status", False, f"Integration issues - configured: {configured}, ready: {ready}")
+                return False
+        else:
+            self.log_result("Outlook Status", False, "Could not check integration status")
+            return False
         """Test Outlook integration status"""
         print("\n" + "="*60)
         print("📊 TESTING OUTLOOK INTEGRATION STATUS")
