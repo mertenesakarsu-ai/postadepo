@@ -191,12 +191,20 @@ class OutlookOAuthTester:
             
             if response.status_code == 200:
                 data = response.json()
-                # Should return a list (empty or with accounts)
+                # Should return either a list or an object with accounts key
                 if isinstance(data, list):
-                    self.log_test("Outlook Accounts Endpoint", True, f"Returned {len(data)} connected accounts")
+                    self.log_test("Outlook Accounts Endpoint", True, f"Returned {len(data)} connected accounts (list format)")
                     return True
+                elif isinstance(data, dict) and "accounts" in data:
+                    accounts = data["accounts"]
+                    if isinstance(accounts, list):
+                        self.log_test("Outlook Accounts Endpoint", True, f"Returned {len(accounts)} connected accounts (object format)")
+                        return True
+                    else:
+                        self.log_test("Outlook Accounts Endpoint", False, "accounts field is not a list", data)
+                        return False
                 else:
-                    self.log_test("Outlook Accounts Endpoint", False, "Response is not a list", data)
+                    self.log_test("Outlook Accounts Endpoint", False, "Response format not recognized", data)
                     return False
             else:
                 self.log_test("Outlook Accounts Endpoint", False, f"Status: {response.status_code}", response.text)
