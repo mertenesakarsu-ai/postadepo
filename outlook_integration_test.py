@@ -190,20 +190,14 @@ class OutlookIntegrationTester:
         if accounts_success:
             accounts = accounts_response.get('accounts', [])
             if accounts:
-                # Try to sync with the first connected account
-                account_email = accounts[0].get('email')
-                sync_data = {
-                    "account_email": account_email,
-                    "folder_name": "Inbox",
-                    "sync_count": 10
-                }
+                # Try to sync with the first connected account using query parameter
+                account_id = accounts[0].get('id')
                 
                 success, response, _ = self.run_test(
-                    f"Outlook Email Sync - {account_email}",
+                    f"Outlook Email Sync - Account ID: {account_id}",
                     "POST",
-                    "outlook/sync",
-                    200,
-                    data=sync_data
+                    f"outlook/sync?account_id={account_id}",
+                    200
                 )
                 
                 if success:
@@ -218,27 +212,21 @@ class OutlookIntegrationTester:
                     self.log_result("Outlook Email Sync", False, "Sync request failed")
                     return False
             else:
-                # No connected accounts, try sync anyway to see the error
-                sync_data = {
-                    "account_email": "tyrzmusak@gmail.com",
-                    "folder_name": "Inbox", 
-                    "sync_count": 10
-                }
-                
+                # No connected accounts, try sync with dummy account_id to see the error
                 success, response, http_response = self.run_test(
                     "Outlook Email Sync - No Connected Account",
                     "POST",
-                    "outlook/sync",
-                    400  # Expecting error since no account connected
+                    "outlook/sync?account_id=dummy-account-id",
+                    404  # Expecting 404 since account doesn't exist
                 )
                 
                 # This is actually expected behavior if no account is connected
-                if http_response and http_response.status_code == 400:
-                    print("   ℹ️  Expected error: No connected Outlook account")
-                    self.log_result("Outlook Email Sync", True, "Expected error - no connected account")
+                if http_response and http_response.status_code == 404:
+                    print("   ℹ️  Expected error: Account not found")
+                    self.log_result("Outlook Email Sync", True, "Expected error - account not found")
                     return True
                 else:
-                    self.log_result("Outlook Email Sync", False, "Unexpected response for no connected account")
+                    self.log_result("Outlook Email Sync", False, f"Unexpected response: {http_response.status_code if http_response else 'None'}")
                     return False
         else:
             self.log_result("Outlook Email Sync", False, "Could not check connected accounts")
