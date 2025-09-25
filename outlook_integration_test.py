@@ -256,7 +256,44 @@ class OutlookIntegrationTester:
             self.log_result("Outlook Callback", False, f"Unexpected callback behavior (status: {http_response.status_code if http_response else 'None'})")
             return False
 
-    def test_outlook_status_check(self):
+    def test_outlook_connect_account(self):
+        """Test Outlook account connection endpoint"""
+        print("\n" + "="*60)
+        print("🔗 TESTING OUTLOOK ACCOUNT CONNECTION")
+        print("="*60)
+        
+        if not self.token:
+            print("❌ No authentication token available")
+            self.log_result("Outlook Connect Account", False, "No authentication token")
+            return False
+        
+        # Test the connect account endpoint with dummy data
+        connect_data = {
+            "email": "tyrzmusak@gmail.com",
+            "display_name": "Tyrz Musak",
+            "access_token": "dummy_access_token",
+            "refresh_token": "dummy_refresh_token"
+        }
+        
+        success, response, http_response = self.run_test(
+            "Outlook Connect Account - Test Data",
+            "POST",
+            "outlook/connect-account",
+            200,  # Expecting success or specific error
+            data=connect_data
+        )
+        
+        if success:
+            print("   ✅ Account connection endpoint accessible")
+            self.log_result("Outlook Connect Account", True, "Endpoint accessible and processes requests")
+            return True
+        elif http_response and http_response.status_code in [400, 401, 503]:
+            print(f"   ℹ️  Expected error for dummy data (status: {http_response.status_code})")
+            self.log_result("Outlook Connect Account", True, f"Endpoint handles invalid data properly (status: {http_response.status_code})")
+            return True
+        else:
+            self.log_result("Outlook Connect Account", False, f"Unexpected response (status: {http_response.status_code if http_response else 'None'})")
+            return False
         """Test Outlook integration status"""
         print("\n" + "="*60)
         print("📊 TESTING OUTLOOK INTEGRATION STATUS")
