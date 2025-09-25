@@ -341,6 +341,7 @@ class OutlookIntegrationTester:
             ("User Login", self.test_tyrz_user_login),
             ("Outlook Auth URL", self.test_outlook_auth_url),
             ("Outlook Callback", self.test_outlook_callback_simulation),
+            ("Outlook Connect Account", self.test_outlook_connect_account),
             ("Outlook Accounts", self.test_outlook_accounts_list),
             ("Outlook Sync", self.test_outlook_sync_endpoint),
             ("Outlook Status", self.test_outlook_status_check)
