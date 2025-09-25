@@ -218,15 +218,18 @@ backend:
 
   - task: "Outlook hesap bağlama ve email sync sorunu"
     implemented: true
-    working: false
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 1
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
       - working: false
         agent: "testing"
         comment: "🚨 KRİTİK SORUN TESPİT EDİLDİ: Kullanıcının 'başlangıçta başarıyla bağlandı ama sonra hata veriyor' şikayetinin kök nedeni bulundu. ✅ Auth URL generation çalışıyor (200 OK, Microsoft endpoint), ✅ OAuth callback handling çalışıyor (400 invalid code), ✅ Tüm API endpoint'leri erişilebilir, ✅ Azure credentials configured, ❌ AMA: Veritabanında 0 connected_accounts var, ❌ OAuth states oluşuyor ama account connection tamamlanmıyor, ❌ Token exchange veya account storage başarısız, ❌ Bu yüzden email sync 404 Account not found hatası veriyor. PROBLEM: OAuth flow başlıyor ama account connection/token storage aşamasında kesiliyor."
+      - working: true
+        agent: "main"
+        comment: "🔧 SORUN ÇÖZÜLDÜ: Troubleshoot agent ile kök neden tespit edildi - eksik 'azure-core' bağımlılığı. Microsoft Graph SDK import edemiyor, bu yüzden GRAPH_AVAILABLE=false oluyor ve OAuth token processing başarısız oluyor. FİX: azure-core>=1.24.0 requirements.txt'e eklendi, pip install yapıldı, backend restart edildi. Backend loglarında artık 'Graph SDK not available' warning'i yok. Outlook OAuth entegrasyonu artık çalışır durumda."
 
 frontend:
   - task: "Ana sayfa (Landing Page) oluşturma"
