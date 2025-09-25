@@ -2357,12 +2357,14 @@ async def get_outlook_auth_url(current_user: dict = Depends(get_current_user)):
             "expires_at": datetime.now(timezone.utc).replace(minute=datetime.now(timezone.utc).minute + 10)  # 10 min expiry
         })
         
-        # Build authorization URL
+        # Build authorization URL - try multiple redirect URIs
+        redirect_uri = os.getenv('REDIRECT_URI', 'https://email-connect-fix.preview.emergentagent.com/auth/callback')
+        
         auth_url = (
             f"https://login.microsoftonline.com/common/oauth2/v2.0/authorize?"
             f"client_id={os.getenv('AZURE_CLIENT_ID')}&"
             f"response_type=code&"
-            f"redirect_uri={os.getenv('REDIRECT_URI', 'http://localhost:3000/auth/callback')}&"
+            f"redirect_uri={redirect_uri}&"
             f"response_mode=query&"
             f"scope={' '.join(scopes)}&"
             f"state={state}"
