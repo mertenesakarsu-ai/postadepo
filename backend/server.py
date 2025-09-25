@@ -33,6 +33,12 @@ try:
 except ImportError as e:
     logging.warning(f"Microsoft Graph SDK not available: {e}")
     GRAPH_AVAILABLE = False
+    # Define dummy classes to prevent NameError
+    GraphServiceClient = None
+    ClientSecretCredential = None
+    Message = None
+    Folder = None
+    MessagesRequestBuilder = None
 
 
 ROOT_DIR = Path(__file__).parent
