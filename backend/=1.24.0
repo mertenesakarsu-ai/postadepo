@@ -1,0 +1,9 @@
+Looking in indexes: https://pypi.org/simple, https://d33sy5i8bnduwe.cloudfront.net/simple/
+Requirement already satisfied: azure-core in /root/.venv/lib/python3.11/site-packages (1.35.1)
+Requirement already satisfied: requests>=2.21.0 in /root/.venv/lib/python3.11/site-packages (from azure-core) (2.32.5)
+Requirement already satisfied: six>=1.11.0 in /root/.venv/lib/python3.11/site-packages (from azure-core) (1.17.0)
+Requirement already satisfied: typing-extensions>=4.6.0 in /root/.venv/lib/python3.11/site-packages (from azure-core) (4.15.0)
+Requirement already satisfied: charset_normalizer<4,>=2 in /root/.venv/lib/python3.11/site-packages (from requests>=2.21.0->azure-core) (3.4.3)
+Requirement already satisfied: idna<4,>=2.5 in /root/.venv/lib/python3.11/site-packages (from requests>=2.21.0->azure-core) (3.10)
+Requirement already satisfied: urllib3<3,>=1.21.1 in /root/.venv/lib/python3.11/site-packages (from requests>=2.21.0->azure-core) (2.5.0)
+Requirement already satisfied: certifi>=2017.4.17 in /root/.venv/lib/python3.11/site-packages (from requests>=2.21.0->azure-core) (2025.8.3)
