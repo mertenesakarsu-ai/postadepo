@@ -3,7 +3,7 @@ import json
 
 class FocusedEmailTester:
     def __init__(self):
-        self.base_url = "https://email-connect-fix.preview.emergentagent.com/api"
+        self.base_url = "https://outlook-fix.preview.emergentagent.com/api"
         self.token = None
         
     def login(self):
