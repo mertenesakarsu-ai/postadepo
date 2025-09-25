@@ -2624,10 +2624,41 @@ async def exchange_code_for_tokens(authorization_code: str) -> Optional[dict]:
         async with httpx.AsyncClient() as client:
             response = await client.post(token_url, data=data)
             
+            logger.info(f"Token exchange attempt - Status: {response.status_code}")
+            logger.info(f"Token exchange - Request data: {data}")
+            
             if response.status_code == 200:
+                logger.info("Token exchange successful")
                 return response.json()
             else:
                 logger.error(f"Token exchange failed: {response.status_code} - {response.text}")
+                
+                # If redirect_uri error, try alternative URIs
+                if "redirect_uri" in response.text.lower():
+                    logger.warning("Redirect URI mismatch detected, trying alternatives...")
+                    
+                    alternative_uris = [
+                        "http://localhost:3000/auth/callback",
+                        "https://localhost:3000/auth/callback", 
+                        "https://email-connect-fix.preview.emergentagent.com/auth/callback",
+                        "http://localhost:8080/auth/callback"
+                    ]
+                    
+                    for alt_uri in alternative_uris:
+                        if alt_uri != data["redirect_uri"]:  # Don't try the same URI again
+                            logger.info(f"Trying alternative redirect URI: {alt_uri}")
+                            alt_data = data.copy()
+                            alt_data["redirect_uri"] = alt_uri
+                            
+                            alt_response = await client.post(token_url, data=alt_data)
+                            logger.info(f"Alternative URI attempt - Status: {alt_response.status_code}")
+                            
+                            if alt_response.status_code == 200:
+                                logger.info(f"Token exchange successful with alternative URI: {alt_uri}")
+                                return alt_response.json()
+                            else:
+                                logger.error(f"Alternative URI failed: {alt_uri} - {alt_response.text}")
+                
                 return None
                 
     except Exception as e:
