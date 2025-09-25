@@ -2609,11 +2609,14 @@ async def exchange_code_for_tokens(authorization_code: str) -> Optional[dict]:
     try:
         token_url = "https://login.microsoftonline.com/common/oauth2/v2.0/token"
         
+        # Use the same redirect URI as in auth URL generation
+        redirect_uri = os.getenv('REDIRECT_URI', 'https://email-connect-fix.preview.emergentagent.com/auth/callback')
+        
         data = {
             "client_id": os.getenv('AZURE_CLIENT_ID'),
             "client_secret": os.getenv('AZURE_CLIENT_SECRET'),
             "code": authorization_code,
-            "redirect_uri": os.getenv('REDIRECT_URI', 'http://localhost:3000/auth/callback'),
+            "redirect_uri": redirect_uri,
             "grant_type": "authorization_code",
             "scope": "https://graph.microsoft.com/Mail.Read https://graph.microsoft.com/Mail.ReadWrite https://graph.microsoft.com/User.Read offline_access"
         }
