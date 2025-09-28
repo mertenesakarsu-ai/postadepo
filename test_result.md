@@ -192,7 +192,7 @@ backend:
         agent: "testing"
         comment: "🎉 TÜRKÇE REVIEW REQUEST KAPSAMLI TEST TAMAMLANDI: 1) Demo e-posta üretimi: Ortalama 4460 karakter uzunluğunda, 50/65 e-posta uzun içerikli (>1000 kar), 5 farklı detaylı template kullanılıyor. 2) E-posta listesi endpoint: 4 klasörde toplam 130 e-posta, 100 tanesi uzun içerikli, tüm content field'ları doğru doluyor. 3) E-posta detay endpoint'leri: Thread endpoint 5/5 başarılı, mark-as-read 3/3 başarılı. 4) Attachment download API: 10/10 başarılı indirme, Türkçe karakter desteği (Bütçe.xlsx, Sözleşme.pdf), 4 farklı dosya tipi (PDF, DOCX, XLSX, PNG), hata senaryoları çalışıyor. 5) Authentication: 7/7 test geçti, demo kullanıcısı girişi, whitelist sistemi, admin yetkilendirme. Backend tamamen production-ready!"
 
-  - task: "Ana sayfa routing ve özellikler testi"
+  - task: "Admin kullanıcısı oluşturma ve giriş sistemi"
     implemented: true
     working: true
     file: "/app/backend/server.py"
@@ -201,8 +201,11 @@ backend:
     needs_retesting: false
     status_history:
       - working: true
+        agent: "main"
+        comment: "admin@postadepo.com kullanıcısı oluşturuldu (admindepo* şifresi), admin endpoint'leri güncellendi (approve-user, pending-users, users, reject-user), admin yetkisi kontrolü eklendi"
+      - working: true
         agent: "testing"
-        comment: "🎉 ANA SAYFA ROUTING VE ÖZELLİKLER TESTİ TAMAMLANDI: ✅ Ana sayfa (/) erişimi çalışıyor (200 OK, valid HTML structure), ✅ Login sayfası (/login) erişimi çalışıyor (200 OK, valid HTML structure), ✅ Demo giriş fonksiyonu mükemmel çalışıyor (demo@postadepo.com / demo123), ✅ E-postalar API endpoint'i çalışıyor (18 inbox, 50 total emails), ✅ Diğer API endpoint'leri çalışıyor (storage-info, connected-accounts), ✅ Geçersiz giriş doğru şekilde reddediliyor (401). Tüm temel routing ve API fonksiyonları %100 başarı oranıyla çalışıyor. Backend comprehensive test: 49/51 passed (96% success rate)."
+        comment: "🎉 ADMIN PANELİ BACKEND SİSTEMİ KAPSAMLI TEST TAMAMLANDI (18/18 test %100 başarı): ✅ Admin kullanıcısı giriş testi (admin@postadepo.com / admindepo*) JWT token doğrulandı, ✅ Admin endpoints testleri tüm endpoints çalışıyor, ✅ Yeni kullanıcı kayıt ve whitelist testi approved=false ile oluşturma doğru, ✅ Storage info testi totalEmails ve totalSize değerleri doğru hesaplanıyor, ✅ Güvenlik testleri normal kullanıcı admin erişimi engellendi (403). Admin panel sistemi tamamen production-ready durumda!"
 
   - task: "Tyrz Musak kullanıcı hesabı oluşturma ve test"
     implemented: true
