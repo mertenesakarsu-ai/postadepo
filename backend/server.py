@@ -1466,8 +1466,8 @@ async def approve_user(user_id: str, current_user: dict = Depends(get_current_us
     Admin endpoint - Kullanıcıyı onaylar (whitelist'e ekler)
     Not: Bu endpoint gerçek uygulamada admin authentication gerektirecek
     """
-    # Demo amaçlı basit kontrol - gerçek uygulamada admin rolü kontrolü yapılmalı
-    if current_user["email"] != "demo@postadepo.com":
+    # Admin yetkisi kontrolü
+    if current_user["email"] not in ["demo@postadepo.com", "admin@postadepo.com"]:
         raise HTTPException(status_code=403, detail="Bu işlem için admin yetkisi gerekli")
     
     # Kullanıcıyı bul ve onayla
