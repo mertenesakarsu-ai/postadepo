@@ -128,7 +128,7 @@ class PostaDepoAdminTester:
         )
         
         if success:
-            print("   ✅ Access correctly denied after logout (401 Unauthorized)")
+            print("   ✅ Access correctly denied after logout (403 Forbidden)")
             logout_success = True
         else:
             print("   ❌ Access was not properly denied after logout")
