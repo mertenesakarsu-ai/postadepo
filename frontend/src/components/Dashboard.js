@@ -1149,6 +1149,22 @@ const Dashboard = ({ user, onLogout }) => {
                 <span className="text-slate-600">{t('dashboard.storage')}:</span>
                 <span className="text-slate-800">{formatSize(storageInfo.totalSize)}</span>
               </div>
+              
+              {/* Admin Panel Access */}
+              {(user?.email === 'demo@postadepo.com' || user?.email === 'admin@postadepo.com') && (
+                <div className="pt-2">
+                  <Button 
+                    onClick={() => {
+                      setSettingsOpen(false);
+                      window.location.href = '/admin';
+                    }}
+                    className="w-full h-10 bg-red-600 hover:bg-red-700 text-white rounded-lg"
+                  >
+                    <Shield className="w-4 h-4 mr-2" />
+                    Admin Panel
+                  </Button>
+                </div>
+              )}
             </div>
 
             <Button 
