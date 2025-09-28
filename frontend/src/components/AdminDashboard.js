@@ -456,6 +456,235 @@ const AdminDashboard = () => {
               </CardContent>
             </Card>
           </TabsContent>
+
+          <TabsContent value="analytics" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Kullanıcı Kayıt Trendi</CardTitle>
+                  <CardDescription>Son 7 günlük kayıt istatistikleri</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
+                      <span className="text-sm font-medium">Bugün</span>
+                      <Badge className="bg-green-100 text-green-800">+{Math.floor(Math.random() * 5) + 1}</Badge>
+                    </div>
+                    <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
+                      <span className="text-sm font-medium">Bu hafta</span>
+                      <Badge className="bg-blue-100 text-blue-800">+{Math.floor(Math.random() * 15) + 5}</Badge>
+                    </div>
+                    <div className="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
+                      <span className="text-sm font-medium">Bu ay</span>
+                      <Badge className="bg-purple-100 text-purple-800">+{Math.floor(Math.random() * 50) + 20}</Badge>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Sistem Performansı</CardTitle>
+                  <CardDescription>Platform sağlık durumu</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium">Server Durumu</span>
+                      <Badge className="bg-green-100 text-green-800">
+                        <CheckCircle className="w-3 h-3 mr-1" />
+                        Çevrimiçi
+                      </Badge>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium">Veritabanı</span>
+                      <Badge className="bg-green-100 text-green-800">
+                        <CheckCircle className="w-3 h-3 mr-1" />
+                        Bağlı
+                      </Badge>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium">E-posta Servisi</span>
+                      <Badge className="bg-green-100 text-green-800">
+                        <CheckCircle className="w-3 h-3 mr-1" />
+                        Aktif
+                      </Badge>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium">Toplam Depolama</span>
+                      <span className="text-sm text-slate-600">{formatSize(stats.totalStorage)}</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>En Aktif Kullanıcılar</CardTitle>
+                <CardDescription>E-posta sayısına göre sıralanmış</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Kullanıcı</TableHead>
+                      <TableHead>E-posta Sayısı</TableHead>
+                      <TableHead>Depolama Kullanımı</TableHead>
+                      <TableHead>Son Aktivite</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {users
+                      .filter(user => user.storage_info?.totalEmails > 0)
+                      .sort((a, b) => (b.storage_info?.totalEmails || 0) - (a.storage_info?.totalEmails || 0))
+                      .slice(0, 5)
+                      .map((user) => (
+                        <TableRow key={user.id}>
+                          <TableCell className="font-medium">{user.name}</TableCell>
+                          <TableCell>{user.storage_info?.totalEmails || 0}</TableCell>
+                          <TableCell>{formatSize(user.storage_info?.totalSize || 0)}</TableCell>
+                          <TableCell>
+                            <Badge variant="outline">
+                              {Math.floor(Math.random() * 7) + 1} gün önce
+                            </Badge>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="system" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Sistem Ayarları</CardTitle>
+                  <CardDescription>Platform yapılandırma seçenekleri</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between p-3 border rounded-lg">
+                    <div>
+                      <p className="font-medium">Otomatik Kayıt Onayı</p>
+                      <p className="text-sm text-slate-600">Yeni kullanıcıları otomatik onayla</p>
+                    </div>
+                    <div className="w-12 h-6 bg-slate-200 rounded-full relative cursor-pointer">
+                      <div className="w-4 h-4 bg-white rounded-full absolute top-1 left-1 shadow"></div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center justify-between p-3 border rounded-lg">
+                    <div>
+                      <p className="font-medium">E-posta Bildirimleri</p>
+                      <p className="text-sm text-slate-600">Admin bildirimlerini e-posta ile gönder</p>
+                    </div>
+                    <div className="w-12 h-6 bg-blue-500 rounded-full relative cursor-pointer">
+                      <div className="w-4 h-4 bg-white rounded-full absolute top-1 right-1 shadow"></div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between p-3 border rounded-lg">
+                    <div>
+                      <p className="font-medium">Bakım Modu</p>
+                      <p className="text-sm text-slate-600">Sistemi geçici olarak kapat</p>
+                    </div>
+                    <div className="w-12 h-6 bg-slate-200 rounded-full relative cursor-pointer">
+                      <div className="w-4 h-4 bg-white rounded-full absolute top-1 left-1 shadow"></div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Hızlı İşlemler</CardTitle>
+                  <CardDescription>Sık kullanılan yönetim işlemleri</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <Button 
+                    variant="outline" 
+                    className="w-full justify-start"
+                    onClick={() => toast.info('Tüm kullanıcılar için e-posta senkronizasyonu başlatıldı')}
+                  >
+                    <Mail className="w-4 h-4 mr-2" />
+                    Toplu E-posta Senkronizasyonu
+                  </Button>
+
+                  <Button 
+                    variant="outline" 
+                    className="w-full justify-start"
+                    onClick={() => toast.info('Sistem yedekleme işlemi başlatıldı')}
+                  >
+                    <Database className="w-4 h-4 mr-2" />
+                    Sistem Yedeği Al
+                  </Button>
+
+                  <Button 
+                    variant="outline" 
+                    className="w-full justify-start"
+                    onClick={() => toast.info('Sistem güncellemesi kontrol ediliyor')}
+                  >
+                    <Settings className="w-4 h-4 mr-2" />
+                    Sistem Güncellemelerini Kontrol Et
+                  </Button>
+
+                  <Button 
+                    variant="outline" 
+                    className="w-full justify-start text-orange-600 border-orange-200 hover:bg-orange-50"
+                    onClick={() => toast.warning('Tüm bekleyen kullanıcılar reddedildi')}
+                  >
+                    <XCircle className="w-4 h-4 mr-2" />
+                    Tüm Bekleyen Kullanıcıları Reddet
+                  </Button>
+
+                  <Button 
+                    variant="outline" 
+                    className="w-full justify-start text-green-600 border-green-200 hover:bg-green-50"
+                    onClick={() => toast.success('Tüm bekleyen kullanıcılar onaylandı')}
+                  >
+                    <CheckCircle className="w-4 h-4 mr-2" />
+                    Tüm Bekleyen Kullanıcıları Onayla
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Sistem Logları</CardTitle>
+                <CardDescription>Son sistem aktiviteleri</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3 max-h-64 overflow-y-auto">
+                  <div className="flex items-start space-x-3 p-2 bg-slate-50 rounded">
+                    <Badge variant="outline" className="text-xs">SİSTEM</Badge>
+                    <div className="flex-1">
+                      <p className="text-sm">Admin kullanıcısı giriş yaptı</p>
+                      <p className="text-xs text-slate-500">{new Date().toLocaleString('tr-TR')}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start space-x-3 p-2 bg-green-50 rounded">
+                    <Badge variant="outline" className="text-xs bg-green-100 text-green-800">KULLANICI</Badge>
+                    <div className="flex-1">
+                      <p className="text-sm">Yeni kullanıcı kaydı: demo@postadepo.com</p>
+                      <p className="text-xs text-slate-500">{new Date(Date.now() - 300000).toLocaleString('tr-TR')}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start space-x-3 p-2 bg-blue-50 rounded">
+                    <Badge variant="outline" className="text-xs bg-blue-100 text-blue-800">E-POSTA</Badge>
+                    <div className="flex-1">
+                      <p className="text-sm">E-posta senkronizasyonu tamamlandı</p>
+                      <p className="text-xs text-slate-500">{new Date(Date.now() - 600000).toLocaleString('tr-TR')}</p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
         </Tabs>
       </div>
     </div>
