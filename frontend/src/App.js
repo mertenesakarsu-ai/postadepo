@@ -40,6 +40,10 @@ function App() {
       });
       
       const { token, user } = response.data;
+      console.log('LOGIN DEBUG - Full response:', response.data);
+      console.log('LOGIN DEBUG - User object:', user);
+      console.log('LOGIN DEBUG - User type:', user.user_type);
+      
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
       setIsAuthenticated(true);
@@ -47,8 +51,12 @@ function App() {
       
       // Admin kullanıcılarını admin paneline yönlendir
       const isAdmin = user.user_type === 'admin';
+      console.log('LOGIN DEBUG - isAdmin:', isAdmin);
+      console.log('LOGIN DEBUG - Comparison result:', user.user_type, '===', 'admin');
+      
       return { success: true, isAdmin };
     } catch (error) {
+      console.log('LOGIN DEBUG - Error:', error);
       return { 
         success: false, 
         message: error.response?.data?.detail || 'Giriş başarısız' 
