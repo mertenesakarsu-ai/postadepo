@@ -95,7 +95,7 @@ function App() {
                   !isAuthenticated ? (
                     <LoginPage onLogin={handleLogin} />
                   ) : (
-                    <Navigate to="/dashboard" replace />
+                    <Navigate to={user?.user_type === 'admin' ? '/admin' : '/dashboard'} replace />
                   )
                 } 
               />
