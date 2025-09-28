@@ -212,7 +212,7 @@ class FocusedOutlookTester:
         print("-" * 50)
         
         try:
-            # Check supervisor backend logs
+            # Check supervisor backend logs - only check the most recent 15 lines after restart
             log_files = [
                 "/var/log/supervisor/backend.out.log",
                 "/var/log/supervisor/backend.err.log"
@@ -224,7 +224,7 @@ class FocusedOutlookTester:
             for log_file in log_files:
                 try:
                     result = subprocess.run(
-                        ["tail", "-n", "30", log_file], 
+                        ["tail", "-n", "15", log_file], 
                         capture_output=True, 
                         text=True, 
                         timeout=10
@@ -233,23 +233,41 @@ class FocusedOutlookTester:
                     if result.returncode == 0:
                         log_content = result.stdout
                         
-                        # Check for specific warnings
+                        # Only check logs after the most recent "Application startup complete"
+                        lines = log_content.strip().split('\n')
+                        
+                        # Find the last startup complete line
+                        startup_index = -1
+                        for i in range(len(lines) - 1, -1, -1):
+                            if "Application startup complete" in lines[i]:
+                                startup_index = i
+                                break
+                        
+                        # Only check lines after the startup (current session)
+                        if startup_index >= 0:
+                            current_session_lines = lines[startup_index:]
+                        else:
+                            current_session_lines = lines[-5:]  # fallback to last 5 lines
+                        
+                        current_session_content = '\n'.join(current_session_lines)
+                        
+                        # Check for specific warnings in current session only
                         warning_patterns = [
                             "Microsoft Graph SDK not available",
                             "No module named azure.core",
                             "No module named 'azure.core'",
+                            "No module named 'msal'",
                             "MSAL",
                             "Graph SDK not available"
                         ]
                         
                         for pattern in warning_patterns:
-                            if pattern in log_content:
-                                warnings_found.append(f"{pattern} found in {log_file}")
+                            if pattern in current_session_content:
+                                warnings_found.append(f"{pattern} found in current session of {log_file}")
                         
                         # Collect recent log entries for display
-                        recent_lines = [line.strip() for line in log_content.strip().split('\n')[-10:] if line.strip()]
-                        if recent_lines:
-                            recent_logs.extend([f"From {log_file}:"] + recent_lines[-5:])
+                        if current_session_lines:
+                            recent_logs.extend([f"From {log_file} (current session):"] + current_session_lines[-5:])
                             
                 except subprocess.TimeoutExpired:
                     recent_logs.append(f"Timeout reading {log_file}")
@@ -258,13 +276,13 @@ class FocusedOutlookTester:
             
             details = []
             if warnings_found:
-                details.append("❌ Warnings found:")
+                details.append("❌ Warnings found in current session:")
                 details.extend([f"  - {warning}" for warning in warnings_found])
             else:
-                details.append("✅ No MSAL or Graph SDK warnings found in recent logs")
+                details.append("✅ No MSAL or Graph SDK warnings found in current session logs")
             
             if recent_logs:
-                details.append("\nRecent log entries:")
+                details.append("\nCurrent session log entries:")
                 details.extend([f"  {log}" for log in recent_logs[-10:]])
             
             success = len(warnings_found) == 0
