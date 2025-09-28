@@ -99,6 +99,16 @@ function App() {
                 } 
               />
               <Route 
+                path="/admin" 
+                element={
+                  isAuthenticated ? (
+                    <AdminDashboard />
+                  ) : (
+                    <Navigate to="/login" replace />
+                  )
+                } 
+              />
+              <Route 
                 path="/auth/callback" 
                 element={<OutlookCallback />} 
               />
