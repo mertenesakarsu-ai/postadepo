@@ -1505,6 +1505,94 @@ async def get_pending_users(current_user: dict = Depends(get_current_user)):
         cleaned_users.append(user_dict)
     
     return {"pending_users": cleaned_users}
+@api_router.get("/admin/users")
+async def get_all_users(current_user: dict = Depends(get_current_user)):
+    """
+    Admin endpoint - Tüm kullanıcıları ve storage bilgilerini listeler
+    """
+    # Admin yetkisi kontrolü
+    if current_user["email"] not in ["demo@postadepo.com", "admin@postadepo.com"]:
+        raise HTTPException(status_code=403, detail="Bu işlem için admin yetkisi gerekli")
+    
+    # Tüm kullanıcıları getir
+    users_cursor = db.users.find({})
+    users = await users_cursor.to_list(length=None)
+    
+    # Her kullanıcı için storage bilgisini hesapla
+    users_with_storage = []
+    for user in users:
+        user_dict = dict(user)
+        if "_id" in user_dict:
+            del user_dict["_id"]
+        if "password" in user_dict:
+            del user_dict["password"]
+        
+        # Storage bilgisini hesapla
+        total_emails = await db.emails.count_documents({"user_id": user_dict["id"]})
+        
+        # Total size hesaplama
+        pipeline = [
+            {"$match": {"user_id": user_dict["id"]}},
+            {"$group": {"_id": None, "totalSize": {"$sum": {"$strLenCP": "$content"}}}}
+        ]
+        
+        result = await db.emails.aggregate(pipeline).to_list(length=1)
+        total_size = result[0]["totalSize"] if result else 0
+        
+        user_dict["storage_info"] = {
+            "totalEmails": total_emails,
+            "totalSize": total_size
+        }
+        
+        users_with_storage.append(user_dict)
+    
+    return {"users": users_with_storage}
+
+@api_router.post("/admin/reject-user/{user_id}")
+async def reject_user(user_id: str, current_user: dict = Depends(get_current_user)):
+    """
+    Admin endpoint - Kullanıcıyı reddeder (hesabı siler)
+    """
+    # Admin yetkisi kontrolü
+    if current_user["email"] not in ["demo@postadepo.com", "admin@postadepo.com"]:
+        raise HTTPException(status_code=403, detail="Bu işlem için admin yetkisi gerekli")
+    
+    # Kullanıcıyı bul ve sil
+    result = await db.users.delete_one({"id": user_id})
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Kullanıcı bulunamadı")
+    
+    # Kullanıcının e-postalarını da sil
+    await db.emails.delete_many({"user_id": user_id})
+    
+    return {"message": "Kullanıcı başarıyla reddedildi ve hesabı silindi", "user_id": user_id}
+
+@api_router.post("/admin/create-admin")
+async def create_admin():
+    """
+    Admin kullanıcısını oluşturan endpoint (sadece bir kez çalıştırılmalı)
+    """
+    # Admin kullanıcısı zaten var mı kontrol et
+    existing_admin = await db.users.find_one({"email": "admin@postadepo.com"})
+    if existing_admin:
+        return {"message": "Admin kullanıcısı zaten mevcut"}
+    
+    # Admin kullanıcısını oluştur
+    admin_user = User(
+        name="Admin",
+        email="admin@postadepo.com",
+        approved=True,
+        user_type="admin"
+    )
+    
+    admin_dict = admin_user.dict()
+    # Şifreyi hash'le ve ekle
+    admin_dict["password"] = hash_password("admindepo*")
+    
+    await db.users.insert_one(admin_dict)
+    
+    return {"message": "Admin kullanıcısı başarıyla oluşturuldu", "email": "admin@postadepo.com"}
 
 @api_router.delete("/emails/{email_id}")
 async def delete_email(email_id: str, current_user: dict = Depends(get_current_user)):
