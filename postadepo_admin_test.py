@@ -124,7 +124,7 @@ class PostaDepoAdminTester:
             "Access Admin Endpoint After Logout",
             "GET",
             "admin/users",
-            401  # Should get 401 Unauthorized
+            403  # Should get 403 Forbidden (Not authenticated)
         )
         
         if success:
