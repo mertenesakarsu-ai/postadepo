@@ -16,9 +16,9 @@ from datetime import datetime
 class PostaDepoHomepageRoutingTester:
     def __init__(self):
         # Frontend URL from .env file
-        self.frontend_url = "https://auth-system-repair-3.preview.emergentagent.com"
+        self.frontend_url = "https://signup-admin-view.preview.emergentagent.com"
         # Backend API URL from .env file  
-        self.backend_url = "https://auth-system-repair-3.preview.emergentagent.com/api"
+        self.backend_url = "https://signup-admin-view.preview.emergentagent.com/api"
         self.token = None
         self.user = None
         self.tests_run = 0

@@ -13,7 +13,7 @@ from datetime import datetime
 from typing import Dict, Any, Optional
 
 # Test configuration
-BACKEND_URL = "https://auth-system-repair-3.preview.emergentagent.com/api"
+BACKEND_URL = "https://signup-admin-view.preview.emergentagent.com/api"
 TEST_USER_EMAIL = "tyrzmusak@gmail.com"
 TEST_USER_PASSWORD = "deneme123"
 

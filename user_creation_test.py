@@ -4,7 +4,7 @@ import json
 from datetime import datetime
 
 class UserCreationTester:
-    def __init__(self, base_url="https://auth-system-repair-3.preview.emergentagent.com/api"):
+    def __init__(self, base_url="https://signup-admin-view.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.token = None
         self.user = None
