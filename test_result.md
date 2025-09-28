@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "E-posta detay bölümü çok karanlık ve okunmayacak halde, tasarımını daha modern bir UI yapmanı ve aynı zamanda kalıcı sil butonunu yerini değiştirmeni ve ekleri indirmek için butonları işlevsel yapmanı ve bu eklerinde veritabanına kayıt olması mühim"
+user_problem_statement: "Postadepo projesi için kullanıcı yönetimi ve admin paneli sistemi oluştur. Whitelist kayıt, admin paneli (admin@postadepo.com ve admindepo* şifresi), MongoDB Atlas yönetimi, depolama alanı takibi, güvenlik ve yetkilendirme özellikleri."
 
 backend:
   - task: "Attachment download API endpoint'i"
