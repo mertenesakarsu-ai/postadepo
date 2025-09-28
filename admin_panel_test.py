@@ -438,7 +438,7 @@ class PostaDepoAdminPanelTester:
         return all_forbidden
 
     def test_no_token_admin_access(self):
-        """Token olmadan admin endpoints'lerine erişim testi (401 dönmeli)"""
+        """Token olmadan admin endpoints'lerine erişim testi (403 dönmeli - FastAPI HTTPBearer davranışı)"""
         admin_endpoints = [
             ("GET /api/admin/users", "GET", "admin/users"),
             ("GET /api/admin/pending-users", "GET", "admin/pending-users"),
@@ -447,15 +447,15 @@ class PostaDepoAdminPanelTester:
         all_unauthorized = True
         for endpoint_name, method, endpoint in admin_endpoints:
             success, response = self.run_test(
-                f"Token Olmadan {endpoint_name} Erişimi (401 bekleniyor)",
+                f"Token Olmadan {endpoint_name} Erişimi (403 bekleniyor)",
                 method,
                 endpoint,
-                401,
+                403,  # FastAPI HTTPBearer returns 403 for missing auth
                 token=""  # No token
             )
             
             if success:
-                print(f"   ✅ {endpoint_name}: Token olmadan erişim engellendi (401)")
+                print(f"   ✅ {endpoint_name}: Token olmadan erişim engellendi (403)")
             else:
                 print(f"   ❌ {endpoint_name}: Token olmadan erişilebildi (güvenlik sorunu)")
                 all_unauthorized = False
