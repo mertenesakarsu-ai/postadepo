@@ -16,6 +16,7 @@ const API = `${BACKEND_URL}/api`;
 
 const LoginPage = ({ onLogin }) => {
   const { t } = useLanguage();
+  const navigate = useNavigate();
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
