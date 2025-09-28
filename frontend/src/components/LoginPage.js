@@ -83,34 +83,61 @@ const LoginPage = ({ onLogin }) => {
   const handleRecaptchaChange = async (token) => {
     if (token) {
       try {
+        console.log('reCAPTCHA token received, verifying...', token.substring(0, 20) + '...');
+        
         const response = await axios.post(`${API}/verify-recaptcha`, {
           recaptcha_token: token
         }, {
-          timeout: 10000 // 10 saniye timeout
+          timeout: 15000, // 15 saniye timeout
+          headers: {
+            'Content-Type': 'application/json'
+          }
         });
+        
+        console.log('reCAPTCHA verification response:', response.data);
         
         if (response.data.success) {
           setIsRecaptchaVerified(true);
           toast.success('reCAPTCHA doğrulaması başarılı');
         } else {
           setIsRecaptchaVerified(false);
-          toast.error('reCAPTCHA doğrulaması başarısız');
+          const errorMsg = response.data.message || 'reCAPTCHA doğrulaması başarısız';
+          toast.error(errorMsg);
+          console.error('reCAPTCHA verification failed:', response.data);
         }
       } catch (error) {
         console.error('reCAPTCHA verification error:', error);
         setIsRecaptchaVerified(false);
         
-        // Daha detaylı hata mesajı
-        if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
-          toast.error('reCAPTCHA sunucu bağlantısı zaman aşımına uğradı. Lütfen tekrar deneyin.');
-        } else if (error.response?.status === 500) {
-          toast.error('Sunucu hatası. Lütfen daha sonra tekrar deneyin.');
-        } else if (error.response?.status === 400) {
-          toast.error('reCAPTCHA token geçersiz. Lütfen tekrar deneyin.');
-        } else if (error.code === 'NETWORK_ERROR') {
-          toast.error('Ağ bağlantısı hatası. İnternet bağlantınızı kontrol edin.');
-        } else {
-          toast.error('reCAPTCHA doğrulaması sırasında hata oluştu. Lütfen tekrar deneyin.');
+        // Network error kontrolü
+        if (!navigator.onLine) {
+          toast.error('İnternet bağlantınız yok. Lütfen bağlantınızı kontrol edin.');
+        }
+        // Timeout hatası
+        else if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
+          toast.error('Sunucu yanıt vermedi. Lütfen tekrar deneyin.');
+        }
+        // Server hatası
+        else if (error.response?.status >= 500) {
+          toast.error('Sunucu hatası oluştu. Lütfen daha sonra tekrar deneyin.');
+        }
+        // 400 hataları
+        else if (error.response?.status === 400) {
+          const errorMsg = error.response?.data?.detail || 'reCAPTCHA token geçersiz';
+          toast.error(errorMsg);
+        }
+        // 403/401 yetki hataları
+        else if (error.response?.status === 403 || error.response?.status === 401) {
+          toast.error('reCAPTCHA doğrulama yetkisi hatası');
+        }
+        // Network connection error
+        else if (error.code === 'NETWORK_ERROR' || error.message.includes('Network Error')) {
+          toast.error('Sunucuya bağlanılamadı. İnternet bağlantınızı kontrol edin.');
+        }
+        // Diğer hatalar
+        else {
+          const errorMsg = error.response?.data?.detail || error.message || 'reCAPTCHA doğrulaması başarısız';
+          toast.error(`reCAPTCHA hatası: ${errorMsg}`);
         }
         
         // reCAPTCHA'yı reset et
