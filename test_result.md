@@ -433,6 +433,9 @@ frontend:
       - working: true
         agent: "main"
         comment: "reCAPTCHA v2 bileşeni kayıt formuna eklendi, doğrulama olmadan kayıt yapılamıyor, kayıt butonu reCAPTCHA tamamlandığında aktif oluyor"
+      - working: true
+        agent: "main"
+        comment: "🔧 RECAPTCHA 'SUNUCU BULUNAMAÐI' HATASI ÇÖZÜLDÜ: Backend'de eksik httpcore>=0.17.0 dependency eklendi, requirements.txt güncellendi ve backend restart edildi. reCAPTCHA endpoint'i artık 200 OK döndürüyor. Frontend'de detaylı error handling eklendi: network error, timeout, server error, auth error kontrolü. Console loglama eklendi troubleshooting için."
 
 metadata:
   created_by: "main_agent"
