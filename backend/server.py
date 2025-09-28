@@ -1242,7 +1242,12 @@ async def login(user_data: UserLogin):
         token = create_jwt_token(user.dict())
         return {
             "token": token,
-            "user": {"id": user.id, "name": user.name, "email": user.email}
+            "user": {
+                "id": user.id, 
+                "name": user.name, 
+                "email": user.email,
+                "user_type": user.user_type
+            }
         }
     
     # Regular user login
