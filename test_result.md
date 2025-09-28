@@ -292,6 +292,12 @@ frontend:
       - working: true
         agent: "testing"
         comment: "🎉 ADMIN KULLANICI GİRİŞ REDİRECTİON SİSTEMİ BACKEND TESTLERİ TAMAMLANDI! Türkçe review request'e göre kapsamlı testler yapıldı (5/5 kritik test %100 başarı): ✅ 1. Admin kullanıcısı login testi (admin@postadepo.com / admindepo*): Login API response'unda user_type='admin' doğru döndürülüyor, JWT token oluşturuluyor, user bilgileri tam döndürülüyor, ✅ 2. Regular user login testi (demo@postadepo.com / demo123): Login API response'unda user_type='email' doğru döndürülüyor, normal kullanıcı login çalışıyor, ✅ 3. Admin kullanıcısının admin endpoint'lere erişim kontrolü: GET /api/admin/users endpoint'ine admin kullanıcısı erişebiliyor, 2 kullanıcı (1 admin, 1 regular) başarıyla getiriliyor. BACKEND CORE FONKSİYONALİTE MÜKEMMEL ÇALIŞIYOR! Minor: Authorization sisteminde demo@postadepo.com'un admin endpoint'lere erişimi var (email-based auth yerine user_type-based olmalı), ancak core functionality tamamen çalışır durumda."
+      - working: false
+        agent: "testing"
+        comment: "🚨 FRONTEND REDIRECTION SORUNU TESPİT EDİLDİ: Admin kullanıcısı (admin@postadepo.com / admindepo*) giriş yaptığında /dashboard sayfasına yönlendiriliyor, /admin sayfasına değil. Console logları: ✅ Backend API doğru user_type='admin' döndürüyor, ✅ LoginPage isAdmin=true hesaplıyor, ✅ LoginPage 'Redirecting to /admin' log'u basıyor, ❌ AMA kullanıcı /dashboard URL'inde bitiyor. ROOT CAUSE: App.js'deki /login route'unda authenticated kullanıcılar otomatik olarak /dashboard'a redirect ediliyor (line 98), bu admin yönlendirmesini override ediyor."
+      - working: true
+        agent: "testing"
+        comment: "🎉 ADMIN REDIRECTION SORUNU ÇÖZÜLDÜ! App.js'deki /login route'unda authenticated kullanıcılar için conditional redirect eklendi: user?.user_type === 'admin' ? '/admin' : '/dashboard'. KAPSAMLI TEST SONUÇLARI: ✅ Admin kullanıcısı (admin@postadepo.com / admindepo*) artık doğru şekilde /admin sayfasına yönlendiriliyor, ✅ Regular kullanıcı (demo@postadepo.com / demo123) /dashboard sayfasına yönlendiriliyor, ✅ Console logları tüm debug mesajlarını doğru gösteriyor, ✅ Admin panel UI yükleniyor ve çalışıyor, ✅ localStorage'da user_type bilgisi doğru saklanıyor. Admin login redirection sistemi tamamen çalışır durumda!"
 
   - task: "Admin Dashboard UI - kullanıcı yönetim paneli"
     implemented: true
