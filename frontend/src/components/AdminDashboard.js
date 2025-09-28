@@ -181,14 +181,6 @@ const AdminDashboard = () => {
             <div className="flex items-center space-x-4">
               <Button
                 variant="outline"
-                onClick={() => navigate('/dashboard')}
-                className="text-slate-600 hover:text-slate-900"
-              >
-                <Settings className="w-4 h-4 mr-2" />
-                Dashboard
-              </Button>
-              <Button
-                variant="outline"
                 onClick={handleLogout}
                 className="text-red-600 hover:text-red-700"
               >
