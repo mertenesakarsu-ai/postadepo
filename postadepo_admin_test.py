@@ -536,7 +536,7 @@ class PostaDepoAdminTester:
         
         # Create another test user for rejection
         import random
-        reject_user_email = f"rejectuser{random.randint(1000, 9999)}@test.com"
+        reject_user_email = f"rejectuser{random.randint(1000, 9999)}@gmail.com"
         
         print(f"📧 Creating user for rejection test: {reject_user_email}")
         
