@@ -278,6 +278,17 @@ frontend:
     priority: "high"
     needs_retesting: false
     status_history:
+  - task: "Admin Dashboard UI - kullanıcı yönetim paneli"
+    implemented: true
+    working: false
+    file: "/app/frontend/src/components/AdminDashboard.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "main"
+        comment: "AdminDashboard component'i oluşturuldu: stats kartları (toplam kullanıcı, onaylı hesaplar, bekleyen onay, toplam e-posta, toplam depolama), kullanıcı listesi tablosu, pending users sekmesi, approve/reject butonları, admin panel routing (/admin) eklendi, Dashboard settings'e admin panel erişim butonu eklendi"
       - working: true
         agent: "main"
         comment: "PostaDepo kurumsal ana sayfa oluşturuldu. Büyük veri yedekleme ve uygun fiyat vurgusu, Türkçe/İngilizce dil desteği, modern tasarım, özellikleri kartları, fiyatlandırma alanı (hazır ama boş), CTA bölümü, footer. Routing güncellendi: / -> HomePage."
