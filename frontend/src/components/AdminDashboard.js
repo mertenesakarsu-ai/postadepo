@@ -138,9 +138,43 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    navigate('/login');
+  const handleLogout = async () => {
+    try {
+      // Loading state göster
+      setLoading(true);
+      
+      // localStorage'ı temizle
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      
+      // State'leri temizle
+      setUsers([]);
+      setPendingUsers([]);
+      setStats({
+        totalUsers: 0,
+        approvedUsers: 0,
+        pendingUsers: 0,
+        totalStorage: 0,
+        totalEmails: 0
+      });
+      
+      // Başarı mesajı göster
+      toast.success('Başarıyla çıkış yapıldı');
+      
+      // Kısa bir delay ile login sayfasına yönlendir
+      setTimeout(() => {
+        navigate('/login', { replace: true });
+      }, 100);
+      
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast.error('Çıkış işlemi sırasında hata oluştu');
+      
+      // Hata olsa da çıkış yap
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      navigate('/login', { replace: true });
+    }
   };
 
   const filteredUsers = users.filter(user => {
