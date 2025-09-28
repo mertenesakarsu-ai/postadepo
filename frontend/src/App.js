@@ -46,7 +46,7 @@ function App() {
       setUser(user);
       
       // Admin kullanıcılarını admin paneline yönlendir
-      const isAdmin = user.email === 'admin@postadepo.com' || user.email === 'demo@postadepo.com';
+      const isAdmin = user.user_type === 'admin';
       return { success: true, isAdmin };
     } catch (error) {
       return { 
