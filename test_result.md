@@ -304,11 +304,11 @@ frontend:
 
   - task: "Admin Dashboard UI - kullanıcı yönetim paneli"
     implemented: true
-    working: false
+    working: true
     file: "/app/frontend/src/components/AdminDashboard.js"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: false
         agent: "main"
@@ -316,6 +316,9 @@ frontend:
       - working: true
         agent: "main"
         comment: "PostaDepo kurumsal ana sayfa oluşturuldu. Büyük veri yedekleme ve uygun fiyat vurgusu, Türkçe/İngilizce dil desteği, modern tasarım, özellikleri kartları, fiyatlandırma alanı (hazır ama boş), CTA bölümü, footer. Routing güncellendi: / -> HomePage."
+      - working: true
+        agent: "main"
+        comment: "🔧 ADMİN PANELİ ÇIKIŞ SORUNU ÇÖZÜLDÜ: Admin panelinde çıkış yaparken hata veren bug düzeltildi. handleLogout fonksiyonu async yapıldı, loading state eklendi, state temizleme işlemleri eklendi, timeout ile güvenli navigation sağlandı, hata yakalama eklendi. Çıkış butonu artık loading durumunu gösteriyor ve buton disable oluyor. reCAPTCHA 'sunucu bulunamadı' hatası çözüldü - eksik httpcore>=0.17.0 dependency eklendi ve backend restart edildi."
 
   - task: "Dil değiştirici (TR/EN) ekleme"
     implemented: true
