@@ -1279,7 +1279,12 @@ async def login(user_data: UserLogin):
     token = create_jwt_token(user_obj.dict())
     return {
         "token": token,
-        "user": {"id": user_obj.id, "name": user_obj.name, "email": user_obj.email}
+        "user": {
+            "id": user_obj.id, 
+            "name": user_obj.name, 
+            "email": user_obj.email,
+            "user_type": user_obj.user_type
+        }
     }
 
 @api_router.post("/auth/outlook-login")
