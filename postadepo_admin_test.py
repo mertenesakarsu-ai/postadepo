@@ -177,7 +177,7 @@ class PostaDepoAdminTester:
         # Generate unique email for test user
         import random
         random_num = random.randint(10000, 99999)
-        self.test_user_email = f"testuser{random_num}@postadepo.test"
+        self.test_user_email = f"testuser{random_num}@gmail.com"
         
         print(f"📧 Creating test user: {self.test_user_email}")
         
