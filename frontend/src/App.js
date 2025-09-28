@@ -6,6 +6,7 @@ import './styles/dark-theme.css';
 import LoginPage from './components/LoginPage';
 import Dashboard from './components/Dashboard';
 import HomePage from './components/HomePage';
+import AdminDashboard from './components/AdminDashboard';
 import OutlookCallback from './components/OutlookCallback';
 import { Toaster } from './components/ui/sonner';
 import { ThemeProvider } from './contexts/ThemeContext';
