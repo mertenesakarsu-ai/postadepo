@@ -44,7 +44,10 @@ function App() {
       localStorage.setItem('user', JSON.stringify(user));
       setIsAuthenticated(true);
       setUser(user);
-      return { success: true };
+      
+      // Admin kullanıcılarını admin paneline yönlendir
+      const isAdmin = user.email === 'admin@postadepo.com' || user.email === 'demo@postadepo.com';
+      return { success: true, isAdmin };
     } catch (error) {
       return { 
         success: false, 
