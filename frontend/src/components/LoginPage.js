@@ -47,6 +47,13 @@ const LoginPage = ({ onLogin }) => {
     
     if (result.success) {
       toast.success(t('auth.loginSuccess'));
+      
+      // Admin kullanıcılarını admin paneline yönlendir
+      if (result.isAdmin) {
+        navigate('/admin');
+      } else {
+        navigate('/dashboard');
+      }
     } else {
       toast.error(result.message);
     }
