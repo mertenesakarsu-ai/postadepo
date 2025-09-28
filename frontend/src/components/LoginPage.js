@@ -48,10 +48,15 @@ const LoginPage = ({ onLogin }) => {
     if (result.success) {
       toast.success(t('auth.loginSuccess'));
       
+      console.log('LoginPage DEBUG - Result:', result);
+      console.log('LoginPage DEBUG - isAdmin:', result.isAdmin);
+      
       // Admin kullanıcılarını admin paneline yönlendir
       if (result.isAdmin) {
+        console.log('LoginPage DEBUG - Redirecting to /admin');
         navigate('/admin');
       } else {
+        console.log('LoginPage DEBUG - Redirecting to /dashboard');
         navigate('/dashboard');
       }
     } else {
