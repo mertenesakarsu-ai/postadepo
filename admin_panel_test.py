@@ -21,8 +21,9 @@ class PostaDepoAdminPanelTester:
         test_headers = {'Content-Type': 'application/json'}
         
         # Use specific token if provided, otherwise use admin token
-        if token:
-            test_headers['Authorization'] = f'Bearer {token}'
+        if token is not None:  # Check for None specifically
+            if token != "":  # Only add Authorization header if token is not empty
+                test_headers['Authorization'] = f'Bearer {token}'
         elif self.admin_token:
             test_headers['Authorization'] = f'Bearer {self.admin_token}'
         
