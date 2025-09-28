@@ -216,6 +216,20 @@ backend:
     needs_retesting: false
     status_history:
       - working: true
+  - task: "Admin panel endpoint'leri - kullanıcı yönetimi"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "GET /api/admin/users (tüm kullanıcılar + storage info), POST /api/admin/reject-user/{user_id} (kullanıcı reddetme), POST /api/admin/create-admin (admin kullanıcısı oluşturma) endpoint'leri eklendi"
+      - working: true
+        agent: "testing"
+        comment: "✅ ADMIN PANEL ENDPOINT'LERİ KAPSAMLI TEST EDİLDİ: GET /api/admin/users tüm kullanıcıları ve storage bilgilerini doğru getiriyor, POST /api/admin/reject-user kullanıcı silme çalışıyor, admin authentication kontrolleri mükemmel çalışıyor, storage info hesaplamaları doğru (totalEmails, totalSize). Tüm admin endpoints production-ready!"
         agent: "testing"
         comment: "🎯 TYRZ MUSAK KULLANICI HESABI BAŞARIYLA OLUŞTURULDU VE TEST EDİLDİ: ✅ POST /api/register ile tyrzmusak@gmail.com hesabı oluşturuldu, ✅ Admin onayı ile approved=true yapıldı (whitelist'e eklendi), ✅ Veritabanında kullanıcının approved=true olduğu doğrulandı, ✅ POST /api/login ile başarılı giriş yapıldı (deneme123 şifresi), ✅ GET /api/emails ile email listesine erişim sağlandı, ✅ GET /api/outlook/status ile Outlook entegrasyon durumu kontrol edildi (API hazır), ✅ user_type: email olarak ayarlandı. Kullanıcı gerçek Outlook hesabını bağlamaya hazır durumda. 7/7 test başarılı - User ID: f6b7cc6a-cbae-441e-a1ef-455ff0e7e388"
 
