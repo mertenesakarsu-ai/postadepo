@@ -216,10 +216,11 @@ const AdminDashboard = () => {
               <Button
                 variant="outline"
                 onClick={handleLogout}
-                className="text-red-600 hover:text-red-700"
+                disabled={loading}
+                className="text-red-600 hover:text-red-700 disabled:opacity-50"
               >
                 <LogOut className="w-4 h-4 mr-2" />
-                Çıkış Yap
+                {loading ? 'Çıkış Yapılıyor...' : 'Çıkış Yap'}
               </Button>
             </div>
           </div>
