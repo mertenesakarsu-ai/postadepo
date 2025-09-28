@@ -3,7 +3,7 @@ import json
 
 class FocusedEmailTester:
     def __init__(self):
-        self.base_url = "https://user-role-redirect.preview.emergentagent.com/api"
+        self.base_url = "https://auth-system-repair-3.preview.emergentagent.com/api"
         self.token = None
         
     def login(self):
