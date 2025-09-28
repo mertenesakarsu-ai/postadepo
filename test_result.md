@@ -278,6 +278,18 @@ frontend:
     priority: "high"
     needs_retesting: false
     status_history:
+  - task: "Admin kullanıcısı otomatik admin panel yönlendirme"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py, /app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Admin kullanıcıları (user_type='admin') giriş yaptığında otomatik olarak /admin paneline yönlendirme sistemi düzeltildi. Backend login endpoint'inde user_type bilgisi response'a eklendi. Frontend'de admin kontrolü email kontrolü yerine user_type kontrolü olarak değiştirildi. Admin kullanıcısı (admin@postadepo.com / admindepo*) database'de oluşturuldu."
+
   - task: "Admin Dashboard UI - kullanıcı yönetim paneli"
     implemented: true
     working: false
