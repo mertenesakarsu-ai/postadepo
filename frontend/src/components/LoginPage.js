@@ -85,6 +85,8 @@ const LoginPage = ({ onLogin }) => {
       try {
         const response = await axios.post(`${API}/verify-recaptcha`, {
           recaptcha_token: token
+        }, {
+          timeout: 10000 // 10 saniye timeout
         });
         
         if (response.data.success) {
@@ -99,7 +101,9 @@ const LoginPage = ({ onLogin }) => {
         setIsRecaptchaVerified(false);
         
         // Daha detaylı hata mesajı
-        if (error.response?.status === 500) {
+        if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
+          toast.error('reCAPTCHA sunucu bağlantısı zaman aşımına uğradı. Lütfen tekrar deneyin.');
+        } else if (error.response?.status === 500) {
           toast.error('Sunucu hatası. Lütfen daha sonra tekrar deneyin.');
         } else if (error.response?.status === 400) {
           toast.error('reCAPTCHA token geçersiz. Lütfen tekrar deneyin.');
@@ -107,6 +111,11 @@ const LoginPage = ({ onLogin }) => {
           toast.error('Ağ bağlantısı hatası. İnternet bağlantınızı kontrol edin.');
         } else {
           toast.error('reCAPTCHA doğrulaması sırasında hata oluştu. Lütfen tekrar deneyin.');
+        }
+        
+        // reCAPTCHA'yı reset et
+        if (recaptchaRef.current) {
+          recaptchaRef.current.reset();
         }
       }
     } else {
