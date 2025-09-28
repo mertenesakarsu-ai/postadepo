@@ -303,7 +303,7 @@ class PostaDepoAdminTester:
         print("📋 Step 1: Creating regular user for authorization test...")
         
         import random
-        regular_user_email = f"regular{random.randint(1000, 9999)}@test.com"
+        regular_user_email = f"regular{random.randint(1000, 9999)}@gmail.com"
         
         # Create regular user
         create_success, create_response = self.run_test(
