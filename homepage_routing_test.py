@@ -16,9 +16,9 @@ from datetime import datetime
 class PostaDepoHomepageRoutingTester:
     def __init__(self):
         # Frontend URL from .env file
-        self.frontend_url = "https://outlook-fix.preview.emergentagent.com"
+        self.frontend_url = "https://outlook-connect.preview.emergentagent.com"
         # Backend API URL from .env file  
-        self.backend_url = "https://outlook-fix.preview.emergentagent.com/api"
+        self.backend_url = "https://outlook-connect.preview.emergentagent.com/api"
         self.token = None
         self.user = None
         self.tests_run = 0
