@@ -523,7 +523,7 @@ def main():
         
         # 5. Güvenlik Testleri
         ("5a. Normal Kullanıcı Admin Erişimi (403)", tester.test_normal_user_admin_access),
-        ("5b. Token Olmadan Admin Erişimi (401)", tester.test_no_token_admin_access),
+        ("5b. Token Olmadan Admin Erişimi (403)", tester.test_no_token_admin_access),
         
         # Bonus
         ("Bonus: Admin Oluşturma Endpoint", tester.test_admin_user_creation_endpoint),
