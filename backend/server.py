@@ -198,6 +198,15 @@ class SyncResponse(BaseModel):
     synced_count: int
     skipped_count: int
     error_count: int
+
+class SystemLog(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    log_type: str  # USER_REGISTER, USER_LOGIN, EMAIL_SYNC, USER_APPROVED, etc.
+    message: str
+    user_email: Optional[str] = None
+    user_name: Optional[str] = None
+    additional_data: Optional[Dict[str, Any]] = None
     sync_timestamp: datetime
     next_sync_token: Optional[str] = None
     
