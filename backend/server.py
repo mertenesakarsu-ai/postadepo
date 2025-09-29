@@ -1586,7 +1586,7 @@ async def get_pending_users(current_user: dict = Depends(get_current_user)):
         cleaned_users.append(user_dict)
     
     return {"pending_users": cleaned_users}
-@api_router.get("/admin/users")
+@api_router.post("/admin/users")
 async def get_all_users(current_user: dict = Depends(get_current_user)):
     """
     Admin endpoint - Tüm kullanıcıları ve storage bilgilerini listeler
