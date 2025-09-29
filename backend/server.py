@@ -1562,7 +1562,7 @@ async def approve_user(user_id: str, current_user: dict = Depends(get_current_us
     
     return {"message": "Kullanıcı başarıyla onaylandı", "user_id": user_id}
 
-@api_router.get("/admin/pending-users")
+@api_router.post("/admin/pending-users")
 async def get_pending_users(current_user: dict = Depends(get_current_user)):
     """
     Admin endpoint - Onay bekleyen kullanıcıları listeler
