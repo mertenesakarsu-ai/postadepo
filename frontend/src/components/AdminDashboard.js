@@ -32,7 +32,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 
 const API = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001/api';
 
-const AdminDashboard = () => {
+const AdminDashboard = ({ onLogout }) => {
   const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [pendingUsers, setPendingUsers] = useState([]);
