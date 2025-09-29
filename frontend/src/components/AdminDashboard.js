@@ -57,39 +57,57 @@ const AdminDashboard = ({ onLogout }) => {
   const loadData = async () => {
     try {
       const token = localStorage.getItem('token');
+      console.log('ADMIN DEBUG - Token exists:', !!token);
+      console.log('ADMIN DEBUG - API URL:', API);
+      
       if (!token) {
+        console.log('ADMIN DEBUG - No token, redirecting to login');
         navigate('/login');
         return;
       }
 
       // Tüm kullanıcıları yükle
+      console.log('ADMIN DEBUG - Loading users from:', `${API}/admin/users`);
       const usersResponse = await axios.get(`${API}/admin/users`, {
         headers: { Authorization: `Bearer ${token}` }
       });
+      console.log('ADMIN DEBUG - Users loaded:', usersResponse.data.users?.length);
       setUsers(usersResponse.data.users);
 
       // Pending kullanıcıları yükle
+      console.log('ADMIN DEBUG - Loading pending users from:', `${API}/admin/pending-users`);
       const pendingResponse = await axios.get(`${API}/admin/pending-users`, {
         headers: { Authorization: `Bearer ${token}` }
       });
+      console.log('ADMIN DEBUG - Pending users loaded:', pendingResponse.data.pending_users?.length);
       setPendingUsers(pendingResponse.data.pending_users);
 
       // Sistem loglarını yükle
       try {
+        console.log('ADMIN DEBUG - Loading system logs from:', `${API}/admin/system-logs`);
         const logsResponse = await axios.get(`${API}/admin/system-logs`, {
           headers: { Authorization: `Bearer ${token}` }
         });
+        console.log('ADMIN DEBUG - System logs loaded:', logsResponse.data.logs?.length);
         setSystemLogs(logsResponse.data.logs);
       } catch (error) {
-        console.error('System logs load error:', error);
+        console.error('ADMIN DEBUG - System logs load error:', error);
         // Log loading hatası kritik değil, devam et
       }
 
       // İstatistikleri hesapla
       calculateStats(usersResponse.data.users, pendingResponse.data.pending_users);
+      console.log('ADMIN DEBUG - Data loading completed successfully');
 
     } catch (error) {
-      console.error('Data load error:', error);
+      console.error('ADMIN DEBUG - Data load error:', error);
+      console.error('ADMIN DEBUG - Error details:', {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        url: error.config?.url
+      });
+      
       if (error.response?.status === 403) {
         toast.error('Admin yetkisi gerekli');
         navigate('/dashboard');
@@ -99,9 +117,12 @@ const AdminDashboard = ({ onLogout }) => {
         navigate('/login');
       } else {
         toast.error('Veriler yüklenirken hata oluştu');
+        console.error('ADMIN DEBUG - Staying on admin page despite error for debugging');
+        // Don't navigate away so we can see the error
       }
     } finally {
       setLoading(false);
+      console.log('ADMIN DEBUG - Loading state set to false');
     }
   };
 
