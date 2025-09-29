@@ -1744,29 +1744,35 @@ async def export_system_logs(current_user: dict = Depends(get_current_user)):
         }
     )
 
+class BulkUserRequest(BaseModel):
+    user_ids: List[str]
+
 @api_router.post("/admin/bulk-approve-users")
-async def bulk_approve_users(current_user: dict = Depends(get_current_user)):
+async def bulk_approve_users(request: BulkUserRequest, current_user: dict = Depends(get_current_user)):
     """
-    Admin endpoint - Tüm bekleyen kullanıcıları toplu onayla
+    Admin endpoint - Belirtilen kullanıcıları toplu onayla
     """
     # Admin yetkisi kontrolü
     if current_user.get("user_type") != "admin":
         raise HTTPException(status_code=403, detail="Bu işlem için admin yetkisi gerekli")
     
-    # Bekleyen kullanıcıları bul
-    pending_users = await db.users.find({"approved": False}).to_list(length=None)
+    if not request.user_ids:
+        return {"message": "Onaylanacak kullanıcı ID'si belirtilmedi", "approved_count": 0, "failed_count": 0}
     
-    if not pending_users:
-        return {"message": "Onaylanacak bekleyen kullanıcı bulunamadı", "approved_count": 0}
+    # Belirtilen kullanıcıları bul
+    users_to_approve = await db.users.find({"id": {"$in": request.user_ids}}).to_list(length=None)
     
-    # Tüm bekleyen kullanıcıları onayla
+    if not users_to_approve:
+        return {"message": "Onaylanacak kullanıcı bulunamadı", "approved_count": 0, "failed_count": len(request.user_ids)}
+    
+    # Kullanıcıları onayla
     result = await db.users.update_many(
-        {"approved": False},
+        {"id": {"$in": request.user_ids}},
         {"$set": {"approved": True}}
     )
     
     # Log ekle
-    user_emails = [user.get('email', 'Email yok') for user in pending_users]
+    user_emails = [user.get('email', 'Email yok') for user in users_to_approve]
     await add_system_log(
         log_type="BULK_USER_APPROVED",
         message=f"Toplu kullanıcı onayı: {result.modified_count} kullanıcı onaylandı - Admin: {current_user.get('name', current_user.get('email'))}",
@@ -1775,7 +1781,12 @@ async def bulk_approve_users(current_user: dict = Depends(get_current_user)):
         additional_data={"approved_count": result.modified_count, "approved_emails": user_emails}
     )
     
-    return {"message": f"{result.modified_count} kullanıcı başarıyla onaylandı", "approved_count": result.modified_count}
+    failed_count = len(request.user_ids) - result.modified_count
+    return {
+        "message": f"{result.modified_count} kullanıcı başarıyla onaylandı", 
+        "approved_count": result.modified_count,
+        "failed_count": failed_count
+    }
 
 @api_router.post("/admin/bulk-reject-users")
 async def bulk_reject_users(current_user: dict = Depends(get_current_user)):
