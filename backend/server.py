@@ -223,7 +223,7 @@ class SystemLog(BaseModel):
     user_email: Optional[str] = None
     user_name: Optional[str] = None
     additional_data: Optional[Dict[str, Any]] = None
-    sync_timestamp: datetime
+    sync_timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     next_sync_token: Optional[str] = None
     
 # Demo attachment generator
