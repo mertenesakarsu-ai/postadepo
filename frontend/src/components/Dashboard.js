@@ -45,8 +45,7 @@ import {
   FileType,
   ArrowLeft,
   ArrowRight,
-  MessageSquare,
-  Shield
+  MessageSquare
 } from 'lucide-react';
 import OutlookConnection from './OutlookConnection';
 
