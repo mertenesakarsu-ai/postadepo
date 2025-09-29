@@ -462,6 +462,175 @@ class PostaDepoAdminPanelTester:
         
         return all_unauthorized
 
+    def test_system_logs_endpoint(self):
+        """GET /api/admin/system-logs - Sistem loglarını listele"""
+        print("\n📋 SYSTEM LOGS ENDPOINT TESTİ")
+        print("=" * 50)
+        
+        success, response = self.run_test(
+            "GET /api/admin/system-logs - Sistem Logları",
+            "GET",
+            "admin/system-logs",
+            200
+        )
+        
+        if success:
+            logs = response.get('logs', [])
+            print(f"   📊 Toplam sistem logu: {len(logs)}")
+            
+            # Log türlerini kontrol et
+            log_types = set()
+            for log in logs[:10]:  # İlk 10 logu kontrol et
+                log_type = log.get('log_type', 'UNKNOWN')
+                log_types.add(log_type)
+                message = log.get('message', '')
+                timestamp = log.get('formatted_timestamp', log.get('timestamp', ''))
+                print(f"   📝 [{log_type}] {message[:60]}... ({timestamp})")
+            
+            print(f"   🏷️  Log türleri: {', '.join(sorted(log_types))}")
+            
+            # Beklenen log türlerini kontrol et
+            expected_types = {'USER_REGISTER', 'USER_LOGIN', 'USER_APPROVED'}
+            found_types = log_types.intersection(expected_types)
+            
+            if found_types:
+                print(f"   ✅ Beklenen log türleri bulundu: {', '.join(found_types)}")
+                return True
+            else:
+                print(f"   ⚠️  Beklenen log türleri bulunamadı, mevcut türler: {', '.join(log_types)}")
+                return len(logs) > 0  # En azından log varsa başarılı say
+        
+        return success
+
+    def test_system_logs_export(self):
+        """GET /api/admin/system-logs/export - JSON export"""
+        success, response = self.run_test(
+            "GET /api/admin/system-logs/export - JSON Export",
+            "GET",
+            "admin/system-logs/export",
+            200
+        )
+        
+        if success:
+            # Export formatını kontrol et
+            if 'logs' in response and 'export_info' in response:
+                logs = response['logs']
+                export_info = response['export_info']
+                
+                print(f"   ✅ Export başarılı: {len(logs)} log")
+                print(f"   📅 Export zamanı: {export_info.get('export_timestamp', 'Bilinmiyor')}")
+                print(f"   📊 Toplam log: {export_info.get('total_logs', 0)}")
+                return True
+            else:
+                print("   ❌ Export formatı hatalı")
+                return False
+        
+        return success
+
+    def test_bulk_approve_users(self):
+        """POST /api/admin/bulk-approve-users - Toplu onay"""
+        print("\n✅ BULK APPROVE USERS TESTİ")
+        print("=" * 50)
+        
+        # Önce test kullanıcıları oluştur
+        test_user_ids = []
+        for i in range(3):
+            test_email = f"bulktest{uuid.uuid4().hex[:6]}@test.com"
+            
+            create_success, create_response = self.run_test(
+                f"Bulk Test Kullanıcısı {i+1} Oluşturma",
+                "POST",
+                "auth/register",
+                200,
+                data={
+                    "name": f"Bulk Test {i+1}",
+                    "email": test_email,
+                    "password": "test123"
+                },
+                token=""
+            )
+            
+            if create_success and create_response.get('user_id'):
+                test_user_ids.append(create_response['user_id'])
+                print(f"   ✅ Bulk test kullanıcısı oluşturuldu: {test_email}")
+        
+        if not test_user_ids:
+            print("   ❌ Bulk test için kullanıcı oluşturulamadı")
+            return False
+        
+        # Toplu onay testi
+        success, response = self.run_test(
+            "POST /api/admin/bulk-approve-users - Toplu Onay",
+            "POST",
+            "admin/bulk-approve-users",
+            200,
+            data={"user_ids": test_user_ids}
+        )
+        
+        if success:
+            approved_count = response.get('approved_count', 0)
+            failed_count = response.get('failed_count', 0)
+            
+            print(f"   ✅ Toplu onay tamamlandı")
+            print(f"   ✅ Onaylanan: {approved_count} kullanıcı")
+            print(f"   ❌ Başarısız: {failed_count} kullanıcı")
+            
+            return approved_count > 0
+        
+        return success
+
+    def test_bulk_reject_users(self):
+        """POST /api/admin/bulk-reject-users - Toplu red"""
+        print("\n❌ BULK REJECT USERS TESTİ")
+        print("=" * 50)
+        
+        # Test kullanıcıları oluştur
+        test_user_ids = []
+        for i in range(2):
+            test_email = f"rejecttest{uuid.uuid4().hex[:6]}@test.com"
+            
+            create_success, create_response = self.run_test(
+                f"Reject Test Kullanıcısı {i+1} Oluşturma",
+                "POST",
+                "auth/register",
+                200,
+                data={
+                    "name": f"Reject Test {i+1}",
+                    "email": test_email,
+                    "password": "test123"
+                },
+                token=""
+            )
+            
+            if create_success and create_response.get('user_id'):
+                test_user_ids.append(create_response['user_id'])
+                print(f"   ✅ Reject test kullanıcısı oluşturuldu: {test_email}")
+        
+        if not test_user_ids:
+            print("   ❌ Reject test için kullanıcı oluşturulamadı")
+            return False
+        
+        # Toplu red testi
+        success, response = self.run_test(
+            "POST /api/admin/bulk-reject-users - Toplu Red",
+            "POST",
+            "admin/bulk-reject-users",
+            200,
+            data={"user_ids": test_user_ids}
+        )
+        
+        if success:
+            rejected_count = response.get('rejected_count', 0)
+            failed_count = response.get('failed_count', 0)
+            
+            print(f"   ✅ Toplu red tamamlandı")
+            print(f"   ❌ Reddedilen: {rejected_count} kullanıcı")
+            print(f"   ❌ Başarısız: {failed_count} kullanıcı")
+            
+            return rejected_count > 0
+        
+        return success
+
     def test_admin_user_creation_endpoint(self):
         """Admin kullanıcısı oluşturma endpoint'ini test et"""
         print("\n🔧 BONUS: Admin Kullanıcısı Oluşturma Endpoint Testi")
