@@ -13,7 +13,7 @@ from datetime import datetime
 from typing import Dict, Any, Optional
 
 # Test configuration
-BACKEND_URL = "https://mail-sync-issue-1.preview.emergentagent.com/api"
+BACKEND_URL = "https://msgraph-oauth-fix.preview.emergentagent.com/api"
 TEST_USER_EMAIL = "tyrzmusak@gmail.com"
 TEST_USER_PASSWORD = "deneme123"
 

@@ -6,7 +6,7 @@ from datetime import datetime
 
 class AdminPanelDataLoadingTester:
     """Focused tester for admin panel data loading issues reported by user"""
-    def __init__(self, base_url="https://mail-sync-issue-1.preview.emergentagent.com/api"):
+    def __init__(self, base_url="https://msgraph-oauth-fix.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.admin_token = None
         self.test_user_id = None
@@ -406,7 +406,7 @@ def run_focused_admin_panel_test():
         return 1
 
 class PostaDepoAdminPanelTester:
-    def __init__(self, base_url="https://mail-sync-issue-1.preview.emergentagent.com/api"):
+    def __init__(self, base_url="https://msgraph-oauth-fix.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.admin_token = None
         self.admin_user = None
