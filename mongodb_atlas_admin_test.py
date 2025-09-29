@@ -394,7 +394,7 @@ class MongoDBAtlasAdminTester:
             "No Token Access Admin Endpoint",
             "GET",
             "admin/users",
-            401,  # Should be unauthorized
+            403,  # Should be forbidden (FastAPI HTTPBearer returns 403 for no token)
             token=None
         )
         
