@@ -117,6 +117,15 @@ const OutlookConnection = ({ user, onAccountsUpdate }) => {
         const detail = error.response.data.detail;
         if (typeof detail === 'string') {
           errorMsg = detail;
+        } else if (Array.isArray(detail)) {
+          // Handle Pydantic validation errors (array of objects)
+          const messages = detail.map(err => {
+            if (err.msg && err.loc) {
+              return `${err.loc.join('.')} - ${err.msg}`;
+            }
+            return err.msg || JSON.stringify(err);
+          });
+          errorMsg = messages.join(', ');
         } else if (typeof detail === 'object' && detail.msg) {
           errorMsg = detail.msg;
         } else if (typeof detail === 'object') {
