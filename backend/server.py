@@ -2687,7 +2687,7 @@ async def get_outlook_auth_url(current_user: dict = Depends(get_current_user)):
         })
         
         # Build authorization URL - try multiple redirect URIs
-        redirect_uri = os.getenv('REDIRECT_URI', 'https://data-dashboard-bug.preview.emergentagent.com/auth/callback')
+        redirect_uri = os.getenv('REDIRECT_URI', 'https://mail-sync-issue-1.preview.emergentagent.com/auth/callback')
         
         auth_url = (
             f"https://login.microsoftonline.com/common/oauth2/v2.0/authorize?"
@@ -2702,7 +2702,7 @@ async def get_outlook_auth_url(current_user: dict = Depends(get_current_user)):
         return {
             "auth_url": auth_url,
             "state": state,
-            "redirect_uri": os.getenv('REDIRECT_URI', 'https://data-dashboard-bug.preview.emergentagent.com/auth/callback')
+            "redirect_uri": os.getenv('REDIRECT_URI', 'https://mail-sync-issue-1.preview.emergentagent.com/auth/callback')
         }
         
     except HTTPException:
@@ -2952,7 +2952,7 @@ async def exchange_code_for_tokens(authorization_code: str) -> Optional[dict]:
         token_url = "https://login.microsoftonline.com/common/oauth2/v2.0/token"
         
         # Use the same redirect URI as in auth URL generation
-        redirect_uri = os.getenv('REDIRECT_URI', 'https://data-dashboard-bug.preview.emergentagent.com/auth/callback')
+        redirect_uri = os.getenv('REDIRECT_URI', 'https://mail-sync-issue-1.preview.emergentagent.com/auth/callback')
         
         data = {
             "client_id": os.getenv('AZURE_CLIENT_ID'),
@@ -2982,7 +2982,7 @@ async def exchange_code_for_tokens(authorization_code: str) -> Optional[dict]:
                     alternative_uris = [
                         "http://localhost:3000/auth/callback",
                         "https://localhost:3000/auth/callback", 
-                        "https://data-dashboard-bug.preview.emergentagent.com/auth/callback",
+                        "https://mail-sync-issue-1.preview.emergentagent.com/auth/callback",
                         "http://localhost:8080/auth/callback"
                     ]
                     
