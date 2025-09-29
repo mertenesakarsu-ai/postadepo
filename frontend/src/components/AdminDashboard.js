@@ -279,10 +279,9 @@ const AdminDashboard = () => {
 
         {/* Main Content */}
         <Tabs defaultValue="users" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="users">Tüm Kullanıcılar</TabsTrigger>
             <TabsTrigger value="pending">Onay Bekleyenler ({stats.pendingUsers})</TabsTrigger>
-            <TabsTrigger value="analytics">Analitikler</TabsTrigger>
             <TabsTrigger value="system">Sistem</TabsTrigger>
           </TabsList>
 
