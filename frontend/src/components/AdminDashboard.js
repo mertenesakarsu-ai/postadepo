@@ -159,19 +159,24 @@ const AdminDashboard = ({ onLogout }) => {
 
   const handleLogout = async () => {
     try {
-      console.log('Çıkış işlemi başlıyor...');
+      console.log('Admin panelinden çıkış işlemi başlıyor...');
       
       // Loading state göster
       setLoading(true);
       
-      // localStorage'ı temizle
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
+      // LocalStorage'ı temizle ve global state'i güncelle
+      if (onLogout) {
+        onLogout(); // Global App.js logout fonksiyonunu çağır
+      } else {
+        // Fallback - manuel olarak temizle
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+      }
       
-      console.log('LocalStorage temizlendi');
+      console.log('LocalStorage temizlendi ve global state güncellendi');
       
       // Başarı mesajı göster
-      toast.success('Başarıyla çıkış yapıldı');
+      toast.success('Admin panelinden başarıyla çıkış yapıldı');
       
       console.log('Login sayfasına yönlendiriliyor...');
       
@@ -179,12 +184,16 @@ const AdminDashboard = ({ onLogout }) => {
       navigate('/login', { replace: true });
       
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error('Admin panel logout error:', error);
       toast.error('Çıkış işlemi sırasında hata oluştu');
       
       // Hata olsa da çıkış yap
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
+      if (onLogout) {
+        onLogout();
+      } else {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+      }
       navigate('/login', { replace: true });
     } finally {
       // Loading state'i her durumda false yap
