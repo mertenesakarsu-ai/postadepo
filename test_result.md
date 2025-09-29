@@ -161,6 +161,9 @@ backend:
       - working: true
         agent: "main"
         comment: "Dashboard.js settings dialog'undaki admin panel erişim butonu tamamen kaldırıldı. demo@postadepo.com ve admin@postadepo.com kullanıcıları artık settings'den admin paneline erişemeyecek. Shield icon import'u da temizlendi."
+      - working: "NA"
+        agent: "testing"
+        comment: "Frontend test kapsamı dışında - backend testleri odaklandı. Admin authentication backend kontrolleri çalışıyor."
 
 frontend:
   - task: "Admin paneli menü yapısı yeniden düzenlenmesi"
