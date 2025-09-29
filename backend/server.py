@@ -1789,29 +1789,31 @@ async def bulk_approve_users(request: BulkUserRequest, current_user: dict = Depe
     }
 
 @api_router.post("/admin/bulk-reject-users")
-async def bulk_reject_users(current_user: dict = Depends(get_current_user)):
+async def bulk_reject_users(request: BulkUserRequest, current_user: dict = Depends(get_current_user)):
     """
-    Admin endpoint - Tüm bekleyen kullanıcıları toplu reddet (sil)
+    Admin endpoint - Belirtilen kullanıcıları toplu reddet (sil)
     """
     # Admin yetkisi kontrolü
     if current_user.get("user_type") != "admin":
         raise HTTPException(status_code=403, detail="Bu işlem için admin yetkisi gerekli")
     
-    # Bekleyen kullanıcıları bul
-    pending_users = await db.users.find({"approved": False}).to_list(length=None)
+    if not request.user_ids:
+        return {"message": "Reddedilecek kullanıcı ID'si belirtilmedi", "rejected_count": 0, "failed_count": 0}
     
-    if not pending_users:
-        return {"message": "Reddedilecek bekleyen kullanıcı bulunamadı", "rejected_count": 0}
+    # Belirtilen kullanıcıları bul
+    users_to_reject = await db.users.find({"id": {"$in": request.user_ids}}).to_list(length=None)
     
-    # Kullanıcı ID'lerini topla
-    user_ids = [user["id"] for user in pending_users]
-    user_emails = [user.get('email', 'Email yok') for user in pending_users]
+    if not users_to_reject:
+        return {"message": "Reddedilecek kullanıcı bulunamadı", "rejected_count": 0, "failed_count": len(request.user_ids)}
+    
+    # Kullanıcı bilgilerini topla
+    user_emails = [user.get('email', 'Email yok') for user in users_to_reject]
     
     # Kullanıcıları sil
-    delete_result = await db.users.delete_many({"approved": False})
+    delete_result = await db.users.delete_many({"id": {"$in": request.user_ids}})
     
     # Kullanıcıların e-postalarını da sil
-    await db.emails.delete_many({"user_id": {"$in": user_ids}})
+    await db.emails.delete_many({"user_id": {"$in": request.user_ids}})
     
     # Log ekle
     await add_system_log(
@@ -1822,7 +1824,12 @@ async def bulk_reject_users(current_user: dict = Depends(get_current_user)):
         additional_data={"rejected_count": delete_result.deleted_count, "rejected_emails": user_emails}
     )
     
-    return {"message": f"{delete_result.deleted_count} kullanıcı başarıyla reddedildi ve silindi", "rejected_count": delete_result.deleted_count}
+    failed_count = len(request.user_ids) - delete_result.deleted_count
+    return {
+        "message": f"{delete_result.deleted_count} kullanıcı başarıyla reddedildi ve silindi", 
+        "rejected_count": delete_result.deleted_count,
+        "failed_count": failed_count
+    }
 
 @api_router.delete("/emails/{email_id}")
 async def delete_email(email_id: str, current_user: dict = Depends(get_current_user)):
