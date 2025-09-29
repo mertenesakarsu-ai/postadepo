@@ -396,7 +396,7 @@ class MongoDBAtlasAdminTester:
             "GET",
             "admin/users",
             403,  # Should be forbidden (FastAPI HTTPBearer returns 403 for no token)
-            token=None
+            token=""  # Empty string to explicitly indicate no token
         )
         
         if success:
