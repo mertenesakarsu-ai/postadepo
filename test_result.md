@@ -358,7 +358,7 @@ frontend:
 
   - task: "Outlook hesap bağlama ve email sync sorunu"
     implemented: true
-    working: false
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 1
     priority: "high"
