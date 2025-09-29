@@ -1705,7 +1705,7 @@ async def get_system_logs(current_user: dict = Depends(get_current_user)):
     
     return {"logs": cleaned_logs}
 
-@api_router.get("/admin/system-logs/export")
+@api_router.post("/admin/system-logs/export")
 async def export_system_logs(current_user: dict = Depends(get_current_user)):
     """
     Admin endpoint - Sistem loglarını JSON formatında indirir
