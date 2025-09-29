@@ -2938,6 +2938,15 @@ from fastapi import Request
 async def oauth_callback(request: Request):
     """OAuth callback endpoint for Microsoft/Outlook"""
     try:
+        # Manually extract query parameters to avoid Pydantic validation errors
+        query_params = dict(request.query_params)
+        code = query_params.get('code')
+        state = query_params.get('state') 
+        error = query_params.get('error')
+        error_description = query_params.get('error_description')
+        
+        print(f"OAuth callback received - code: {'✓' if code else '✗'}, state: {'✓' if state else '✗'}, error: {error}")
+        
         # Check for OAuth errors first
         if error:
             error_message = error_description or error
