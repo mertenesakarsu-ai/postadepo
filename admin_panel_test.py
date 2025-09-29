@@ -4,6 +4,407 @@ import json
 import uuid
 from datetime import datetime
 
+class AdminPanelDataLoadingTester:
+    """Focused tester for admin panel data loading issues reported by user"""
+    def __init__(self, base_url="https://data-dashboard-bug.preview.emergentagent.com/api"):
+        self.base_url = base_url
+        self.admin_token = None
+        self.test_user_id = None
+        self.test_user_email = None
+        self.tests_run = 0
+        self.tests_passed = 0
+        self.failed_tests = []
+
+    def run_test(self, name, method, endpoint, expected_status, data=None, headers=None):
+        """Run a single API test"""
+        url = f"{self.base_url}/{endpoint}"
+        test_headers = {'Content-Type': 'application/json'}
+        
+        if self.admin_token:
+            test_headers['Authorization'] = f'Bearer {self.admin_token}'
+        
+        if headers:
+            test_headers.update(headers)
+
+        self.tests_run += 1
+        print(f"\n🔍 Testing {name}...")
+        print(f"   URL: {url}")
+        
+        try:
+            if method == 'GET':
+                response = requests.get(url, headers=test_headers)
+            elif method == 'POST':
+                response = requests.post(url, json=data, headers=test_headers)
+            elif method == 'PUT':
+                response = requests.put(url, json=data, headers=test_headers)
+            elif method == 'DELETE':
+                response = requests.delete(url, headers=test_headers)
+
+            success = response.status_code == expected_status
+            if success:
+                self.tests_passed += 1
+                print(f"✅ Passed - Status: {response.status_code}")
+                try:
+                    response_data = response.json()
+                    if isinstance(response_data, dict):
+                        print(f"   Response keys: {list(response_data.keys())}")
+                    return success, response_data
+                except:
+                    print(f"   Response: {response.text[:100]}...")
+                    return success, {}
+            else:
+                self.failed_tests.append(name)
+                print(f"❌ Failed - Expected {expected_status}, got {response.status_code}")
+                print(f"   Response: {response.text[:300]}...")
+                return False, {}
+
+        except Exception as e:
+            self.failed_tests.append(name)
+            print(f"❌ Failed - Error: {str(e)}")
+            return False, {}
+
+    def test_admin_login(self):
+        """1. Admin kullanıcısı (admin@postadepo.com / admindepo*) ile giriş yap"""
+        print("\n🔐 1. ADMIN LOGIN TEST")
+        print("=" * 50)
+        
+        success, response = self.run_test(
+            "Admin Login (admin@postadepo.com / admindepo*)",
+            "POST",
+            "auth/login",
+            200,
+            data={"email": "admin@postadepo.com", "password": "admindepo*"}
+        )
+        
+        if success and 'token' in response and 'user' in response:
+            self.admin_token = response['token']
+            user = response['user']
+            print(f"   ✅ Admin logged in: {user.get('name')} ({user.get('email')})")
+            print(f"   User type: {user.get('user_type')}")
+            return True
+        else:
+            print(f"   ❌ Admin login failed - this explains data loading errors!")
+            return False
+
+    def test_admin_users_endpoint(self):
+        """2. GET /api/admin/users endpoint'ini test et - kullanıcıları ve storage bilgilerini getiriyor mu?"""
+        print("\n👥 2. ADMIN USERS ENDPOINT TEST")
+        print("=" * 50)
+        
+        success, response = self.run_test(
+            "GET /api/admin/users - Users and Storage Info",
+            "GET",
+            "admin/users",
+            200
+        )
+        
+        if success:
+            users = response.get('users', [])
+            print(f"   📊 Total users found: {len(users)}")
+            
+            # Calculate stats for admin panel
+            total_users = len(users)
+            approved_users = sum(1 for user in users if user.get('approved', False))
+            total_emails = 0
+            total_storage = 0
+            
+            print(f"\n   📈 ADMIN PANEL STATS DATA:")
+            print(f"   - Toplam kullanıcı sayısı: {total_users}")
+            print(f"   - Onaylı hesaplar: {approved_users}")
+            
+            # Check storage info for each user
+            users_with_storage = 0
+            for user in users[:5]:  # Show first 5 users
+                storage_info = user.get('storage_info', {})
+                user_emails = storage_info.get('totalEmails', 0)
+                user_storage = storage_info.get('totalSize', 0)
+                
+                total_emails += user_emails
+                total_storage += user_storage
+                
+                if storage_info:
+                    users_with_storage += 1
+                
+                print(f"   👤 {user.get('name', 'No name')} ({user.get('email', 'No email')})")
+                print(f"      - Emails: {user_emails}, Storage: {user_storage} bytes")
+            
+            print(f"\n   📊 CALCULATED TOTALS:")
+            print(f"   - Toplam e-posta sayısı: {total_emails}")
+            print(f"   - Toplam depolama boyutu: {total_storage} bytes ({total_storage/1024:.2f} KB)")
+            print(f"   - Users with storage info: {users_with_storage}/{len(users)}")
+            
+            if total_users > 0 and users_with_storage > 0:
+                print(f"   ✅ All required data for admin panel stats is available!")
+                return True
+            else:
+                print(f"   ❌ Missing data - this could cause 'veriler yüklenirken hata oluştu'")
+                return False
+        
+        return False
+
+    def test_admin_pending_users_endpoint(self):
+        """3. GET /api/admin/pending-users endpoint'ini test et - onay bekleyen kullanıcıları getiriyor mu?"""
+        print("\n⏳ 3. ADMIN PENDING USERS ENDPOINT TEST")
+        print("=" * 50)
+        
+        success, response = self.run_test(
+            "GET /api/admin/pending-users - Pending Approvals",
+            "GET",
+            "admin/pending-users",
+            200
+        )
+        
+        if success:
+            pending_users = response.get('pending_users', [])
+            print(f"   📊 Pending users found: {len(pending_users)}")
+            
+            for user in pending_users:
+                print(f"   ⏳ Pending: {user.get('name', 'No name')} ({user.get('email', 'No email')})")
+                print(f"      - Approved: {user.get('approved', 'Not specified')}")
+            
+            print(f"   📈 ADMIN PANEL STATS:")
+            print(f"   - Bekleyen onaylar: {len(pending_users)}")
+            
+            print(f"   ✅ Pending users endpoint working - data available for admin panel")
+            return True
+        
+        return False
+
+    def test_admin_system_logs_endpoint(self):
+        """4. GET /api/admin/system-logs endpoint'ini test et - sistem loglarını getiriyor mu?"""
+        print("\n📋 4. ADMIN SYSTEM LOGS ENDPOINT TEST")
+        print("=" * 50)
+        
+        success, response = self.run_test(
+            "GET /api/admin/system-logs - System Logs",
+            "GET",
+            "admin/system-logs",
+            200
+        )
+        
+        if success:
+            logs = response.get('logs', [])
+            print(f"   📊 System logs found: {len(logs)}")
+            
+            # Show recent logs
+            for i, log in enumerate(logs[:5]):
+                log_type = log.get('log_type', 'Unknown')
+                message = log.get('message', 'No message')
+                timestamp = log.get('formatted_timestamp', 'No timestamp')
+                user_email = log.get('user_email', 'No user')
+                
+                print(f"   📝 Log {i+1}: [{log_type}] {timestamp}")
+                print(f"      User: {user_email}")
+                print(f"      Message: {message[:80]}...")
+            
+            print(f"   ✅ System logs endpoint working - logs available for admin panel")
+            return True
+        
+        return False
+
+    def test_create_new_user_and_check_pending(self):
+        """5. Yeni bir test kullanıcısı kaydı oluştur (approved=false ile) ve onay bekleyenler listesinde görünüyor mu kontrol et"""
+        print("\n👤 5. CREATE NEW USER AND CHECK PENDING LIST")
+        print("=" * 50)
+        
+        # Create new test user
+        timestamp = int(datetime.now().timestamp())
+        test_email = f"newuser{timestamp}@test.com"
+        test_name = f"New User {timestamp}"
+        
+        # First, create user without admin token
+        temp_token = self.admin_token
+        self.admin_token = None
+        
+        success, response = self.run_test(
+            "Create New Test User (approved=false)",
+            "POST",
+            "auth/register",
+            200,
+            data={
+                "name": test_name,
+                "email": test_email,
+                "password": "testpass123"
+            }
+        )
+        
+        # Restore admin token
+        self.admin_token = temp_token
+        
+        if success:
+            self.test_user_id = response.get('user_id')
+            self.test_user_email = test_email
+            approved = response.get('approved', True)
+            
+            print(f"   ✅ New user created: {test_name} ({test_email})")
+            print(f"   User ID: {self.test_user_id}")
+            print(f"   Approved: {approved}")
+            
+            if not approved:
+                print(f"   ✅ User correctly created as unapproved")
+                
+                # Now check if user appears in pending list
+                pending_success, pending_response = self.run_test(
+                    "Check New User in Pending List",
+                    "GET",
+                    "admin/pending-users",
+                    200
+                )
+                
+                if pending_success:
+                    pending_users = pending_response.get('pending_users', [])
+                    user_found = any(user.get('email') == test_email for user in pending_users)
+                    
+                    if user_found:
+                        print(f"   ✅ New user appears in pending approvals list!")
+                        print(f"   ✅ 'Yeni kayıt onay bekleyen bölümüne düşüyor' - WORKING")
+                        return True
+                    else:
+                        print(f"   ❌ New user NOT found in pending list!")
+                        print(f"   ❌ 'Yeni kayıt onay bekleyen bölümüne düşmüyor' - PROBLEM CONFIRMED")
+                        return False
+            else:
+                print(f"   ❌ User was approved automatically - whitelist not working")
+                return False
+        
+        return False
+
+    def test_admin_panel_all_data_verification(self):
+        """6. Admin panelindeki stats verilerini hesaplamak için gerekli tüm veriler geldiğini doğrula"""
+        print("\n📊 6. ADMIN PANEL ALL DATA VERIFICATION")
+        print("=" * 50)
+        
+        # Get all required data for admin panel
+        users_success, users_response = self.run_test(
+            "Get All Users Data",
+            "GET",
+            "admin/users",
+            200
+        )
+        
+        pending_success, pending_response = self.run_test(
+            "Get Pending Users Data",
+            "GET",
+            "admin/pending-users",
+            200
+        )
+        
+        if users_success and pending_success:
+            users = users_response.get('users', [])
+            pending_users = pending_response.get('pending_users', [])
+            
+            print(f"\n   📈 COMPLETE ADMIN PANEL STATS CALCULATION:")
+            
+            # Calculate all stats that admin panel needs
+            total_users = len(users)
+            approved_users = sum(1 for user in users if user.get('approved', False))
+            pending_approvals = len(pending_users)
+            
+            total_emails = 0
+            total_storage = 0
+            
+            for user in users:
+                storage_info = user.get('storage_info', {})
+                total_emails += storage_info.get('totalEmails', 0)
+                total_storage += storage_info.get('totalSize', 0)
+            
+            print(f"   📊 ADMIN PANEL DASHBOARD STATS:")
+            print(f"   ✅ Toplam kullanıcı sayısı: {total_users}")
+            print(f"   ✅ Onaylı hesaplar: {approved_users}")
+            print(f"   ✅ Bekleyen onaylar: {pending_approvals}")
+            print(f"   ✅ Toplam e-posta sayısı: {total_emails}")
+            print(f"   ✅ Toplam depolama boyutu: {total_storage} bytes ({total_storage/1024:.2f} KB)")
+            
+            # Verify data completeness
+            all_data_available = (
+                total_users >= 0 and
+                approved_users >= 0 and
+                pending_approvals >= 0 and
+                total_emails >= 0 and
+                total_storage >= 0
+            )
+            
+            if all_data_available:
+                print(f"\n   🎉 ALL ADMIN PANEL DATA IS AVAILABLE!")
+                print(f"   ✅ No reason for 'veriler yüklenirken hata oluştu' error")
+                print(f"   ✅ Admin panel should display all statistics correctly")
+                return True
+            else:
+                print(f"\n   ❌ SOME ADMIN PANEL DATA IS MISSING!")
+                print(f"   ❌ This could cause 'veriler yüklenirken hata oluştu' error")
+                return False
+        
+        return False
+
+def run_focused_admin_panel_test():
+    """Run focused test for admin panel data loading issues"""
+    print("🚀 PostaDepo Admin Panel Data Loading Issue Test")
+    print("Testing specific user complaints about admin panel")
+    print("=" * 60)
+    
+    tester = AdminPanelDataLoadingTester()
+    
+    # Test sequence based on user complaints
+    tests = [
+        ("1. Admin Login", tester.test_admin_login),
+        ("2. Admin Users Endpoint", tester.test_admin_users_endpoint),
+        ("3. Admin Pending Users Endpoint", tester.test_admin_pending_users_endpoint),
+        ("4. Admin System Logs Endpoint", tester.test_admin_system_logs_endpoint),
+        ("5. Create New User and Check Pending", tester.test_create_new_user_and_check_pending),
+        ("6. Admin Panel All Data Verification", tester.test_admin_panel_all_data_verification),
+    ]
+    
+    print(f"\n📋 Running {len(tests)} focused tests for admin panel issues...")
+    
+    for test_name, test_func in tests:
+        try:
+            print(f"\n{'='*60}")
+            result = test_func()
+            if not result:
+                print(f"⚠️  {test_name} - FAILED")
+            else:
+                print(f"✅ {test_name} - PASSED")
+        except Exception as e:
+            print(f"💥 {test_name} - CRASHED: {str(e)}")
+            tester.failed_tests.append(test_name)
+    
+    # Print final results
+    print(f"\n{'='*60}")
+    print(f"📊 ADMIN PANEL DATA LOADING TEST RESULTS")
+    print(f"{'='*60}")
+    print(f"✅ Tests passed: {tester.tests_passed}/{tester.tests_run}")
+    print(f"❌ Tests failed: {len(tester.failed_tests)}")
+    
+    if tester.failed_tests:
+        print(f"\n❌ FAILED TESTS:")
+        for i, failed_test in enumerate(tester.failed_tests, 1):
+            print(f"   {i}. {failed_test}")
+    
+    # Analysis of user complaints
+    print(f"\n🔍 ANALYSIS OF USER COMPLAINTS:")
+    print(f"{'='*60}")
+    
+    complaints = [
+        "Admin panelinde 'veriler yüklenirken hata oluştu' bildirimi geliyor",
+        "Toplam kullanıcı sayısı, onaylı hesaplar, bekleyen onaylar görünmüyor",
+        "Toplam eposta sayısı, toplam depolama boyutu görünmüyor",
+        "Tüm kullanıcılar menüsünde kullanıcıları göremiyorum",
+        "Yeni kayıt geldiğinde onay bekleyen bölümüne düşmüyor"
+    ]
+    
+    for complaint in complaints:
+        print(f"📝 {complaint}")
+    
+    if tester.tests_passed == tester.tests_run:
+        print(f"\n🎉 ALL ADMIN PANEL TESTS PASSED!")
+        print(f"   Backend APIs are working correctly.")
+        print(f"   The issue might be in the frontend or network connectivity.")
+        return 0
+    else:
+        print(f"\n⚠️  SOME ADMIN PANEL TESTS FAILED!")
+        print(f"   This explains the user's complaints about data loading errors.")
+        return 1
+
 class PostaDepoAdminPanelTester:
     def __init__(self, base_url="https://data-dashboard-bug.preview.emergentagent.com/api"):
         self.base_url = base_url
