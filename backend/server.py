@@ -23,6 +23,7 @@ import asyncio
 
 # Microsoft Graph SDK imports
 try:
+    from kiota_abstractions.base_request_builder import BaseRequestBuilder
     from azure.identity.aio import ClientSecretCredential
     from azure.identity import ClientSecretCredential as SyncClientSecretCredential
     from msgraph import GraphServiceClient
