@@ -1534,6 +1534,11 @@ async def approve_user(user_id: str, current_user: dict = Depends(get_current_us
     if current_user.get("user_type") != "admin":
         raise HTTPException(status_code=403, detail="Bu işlem için admin yetkisi gerekli")
     
+    # Önce kullanıcı bilgilerini al
+    user_to_approve = await db.users.find_one({"id": user_id})
+    if not user_to_approve:
+        raise HTTPException(status_code=404, detail="Kullanıcı bulunamadı")
+    
     # Kullanıcıyı bul ve onayla
     result = await db.users.update_one(
         {"id": user_id},
@@ -1542,6 +1547,15 @@ async def approve_user(user_id: str, current_user: dict = Depends(get_current_us
     
     if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="Kullanıcı bulunamadı")
+    
+    # Log the approval
+    await add_system_log(
+        log_type="USER_APPROVED",
+        message=f"Kullanıcı onaylandı: {user_to_approve.get('name', 'İsimsiz')} ({user_to_approve.get('email', 'Email yok')}) - Admin: {current_user.get('name', current_user.get('email'))}",
+        user_email=user_to_approve.get('email'),
+        user_name=user_to_approve.get('name'),
+        additional_data={"user_id": user_id, "admin_email": current_user.get('email')}
+    )
     
     return {"message": "Kullanıcı başarıyla onaylandı", "user_id": user_id}
 
