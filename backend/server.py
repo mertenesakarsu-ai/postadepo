@@ -1274,6 +1274,16 @@ async def login(user_data: UserLogin):
             user = User(**existing_user)
         
         token = create_jwt_token(user.dict())
+        
+        # Log successful login
+        await add_system_log(
+            log_type="USER_LOGIN",
+            message=f"Demo kullanıcısı başarıyla giriş yaptı: {user.name} ({user.email})",
+            user_email=user.email,
+            user_name=user.name,
+            additional_data={"user_id": user.id, "user_type": user.user_type}
+        )
+        
         return {
             "token": token,
             "user": {
