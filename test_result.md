@@ -358,7 +358,7 @@ frontend:
 
   - task: "Outlook hesap bağlama ve email sync sorunu"
     implemented: true
-    working: true
+    working: false
     file: "/app/backend/server.py"
     stuck_count: 1
     priority: "high"
@@ -379,6 +379,9 @@ frontend:
       - working: true
         agent: "testing"
         comment: "🎯 OUTLOOK OAUTH BACKEND FINAL TEST TAMAMLANDI (5/5 BAŞARILI): ✅ Demo kullanıcısı login (demo@postadepo.com / demo123) mükemmel çalışıyor, ✅ GET /api/outlook/status endpoint: graph_sdk_available=true, credentials_configured=true, client_id_set=true, tenant_id_set=true, message='Outlook API ready', ✅ GET /api/outlook/auth-url endpoint: 445 karakter OAuth URL generation, tüm gerekli OAuth parametreleri mevcut (client_id, response_type, redirect_uri, scope, state), Microsoft login.microsoftonline.com endpoint'i doğru, ✅ Connected accounts endpoint erişilebilir (0 hesap normal), ✅ Backend loglarında MSAL/Graph SDK warning'leri YOK (current session temiz). SONUÇ: Backend tamamen hazır! Kullanıcı artık güvenle Outlook hesabını bağlamayı deneyebilir. OAuth akışı başlayacak ve başarıyla tamamlanacak."
+      - working: false
+        agent: "testing"
+        comment: "🚨 KRİTİK OUTLOOK ENTEGRASYON SORUNU TESPİT EDİLDİ! Kullanıcının 'Outlook bağlandı ama sonra hata veriyor' şikayetinin kök nedeni bulundu (7/7 test tamamlandı): ❌ ROOT CAUSE: Microsoft Graph SDK not available (backend log: 'No module named kiota_abstractions'), ❌ GET /api/outlook/status: graph_sdk_available=false, credentials_configured=false, ❌ GET /api/outlook/auth-url: 503 Service Unavailable 'Azure credentials needed', ❌ GET /api/outlook/accounts: 0 connected accounts, ❌ Database connected_accounts: 0 kayıt, ❌ OAuth states: oluşturulamıyor (503 error), ❌ Backend logs: 'Microsoft Graph SDK not available' warning mevcut. PROBLEM: OAuth akışı başlıyor (kullanıcı 'bağlandı' görüyor) ama Microsoft Graph SDK olmadığı için token processing başarısız, account storage çalışmıyor, sonraki işlemler 404 Account not found veriyor. FIX NEEDED: pip install azure-core azure-identity msgraph-core + backend restart."
 
   - task: "PostaDepo Admin Panel Sistemi"
     implemented: true
