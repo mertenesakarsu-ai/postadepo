@@ -496,6 +496,81 @@ const AdminDashboard = () => {
           </TabsContent>
 
           <TabsContent value="pending" className="space-y-6">
+            {/* Otomatik Kayıt Onayı Ayarı */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Otomatik Kayıt Onayı</CardTitle>
+                <CardDescription>Yeni kullanıcıların otomatik olarak onaylanmasını ayarlayın</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <p className="font-medium">Otomatik Onay</p>
+                    <p className="text-sm text-slate-600">Yeni kullanıcıları otomatik onayla</p>
+                  </div>
+                  <div 
+                    className={`w-12 h-6 ${autoApproval ? 'bg-blue-500' : 'bg-slate-200'} rounded-full relative cursor-pointer transition-colors`}
+                    onClick={handleToggleAutoApproval}
+                  >
+                    <div className={`w-4 h-4 bg-white rounded-full absolute top-1 ${autoApproval ? 'right-1' : 'left-1'} shadow transition-all`}></div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Toplu İşlemler */}
+            {pendingUsers.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Toplu İşlemler</CardTitle>
+                  <CardDescription>Tüm bekleyen kullanıcıları toplu işlemlerle yönetin</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex items-center space-x-4">
+                    <Button 
+                      onClick={handleBulkApprove}
+                      disabled={bulkActionLoading}
+                      className="bg-green-600 hover:bg-green-700 text-white"
+                    >
+                      <UserPlus className="w-4 h-4 mr-2" />
+                      {bulkActionLoading ? 'İşleniyor...' : `Tüm Bekleyen Kullanıcıları Onayla (${pendingUsers.length})`}
+                    </Button>
+                    
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button 
+                          variant="destructive"
+                          disabled={bulkActionLoading}
+                        >
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          Tüm Bekleyen Kullanıcıları Reddet
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Toplu Kullanıcı Reddi</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Bu işlem {pendingUsers.length} bekleyen kullanıcıyı reddedecek ve hesaplarını tamamen silecektir. 
+                            Bu işlem geri alınamaz.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>İptal</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={handleBulkReject}
+                            className="bg-red-600 hover:bg-red-700"
+                          >
+                            {bulkActionLoading ? 'İşleniyor...' : 'Tümünü Reddet ve Sil'}
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Onay Bekleyen Kullanıcılar Tablosu */}
             <Card>
               <CardHeader>
                 <CardTitle>Onay Bekleyen Kullanıcılar</CardTitle>
