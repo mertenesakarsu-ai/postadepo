@@ -102,9 +102,81 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Postadepo projesi için kullanıcı yönetimi ve admin paneli sistemi oluştur. Whitelist kayıt, admin paneli (admin@postadepo.com ve admindepo* şifresi), MongoDB Atlas yönetimi, depolama alanı takibi, güvenlik ve yetkilendirme özellikleri."
+user_problem_statement: "Admin paneli yeniden yapılandırma: Analitikler menüsü kaldırıldı, sistem performansı sistem menüsüne taşındı. Hızlı işlemler menüsü kaldırıldı, toplu onay/red işlemleri onay bekleyenler menüsüne eklendi. Sistem logları için yedekleme butonu eklendi, gerçek log sistemi oluşturuldu. Otomatik kayıt onayı onay bekleyenler menüsüne taşındı. Admin çıkış sorunu düzeltildi."
 
 backend:
+  - task: "Gerçek sistem log sistemi eklenmesi"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "SystemLog modeli ve add_system_log helper fonksiyonu eklendi. User register, login, approve, outlook connection işlemlerinde log kaydı eklendi. MongoDB'da system_logs collection'u kullanılıyor."
+
+  - task: "Admin panel yeni endpoint'leri"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "GET /api/admin/system-logs (log listesi), GET /api/admin/system-logs/export (JSON indirme), POST /api/admin/bulk-approve-users (toplu onay), POST /api/admin/bulk-reject-users (toplu red) endpoint'leri eklendi."
+
+  - task: "Admin paneli çıkış sorunu düzeltmesi"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/AdminDashboard.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "handleLogout fonksiyonunda finally block eklendi, setLoading(false) her durumda çalıştırılıyor. State temizliği kaldırıldı, navigate hemen çağırılıyor. Console log'ları eklendi debug için."
+
+frontend:
+  - task: "Admin paneli menü yapısı yeniden düzenlenmesi"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/AdminDashboard.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Analitikler menüsü kaldırıldı. Sistem performansı sistem menüsüne taşındı. Tab sayısı 4'den 3'e düştü (Kullanıcılar, Onay Bekleyenler, Sistem)."
+
+  - task: "Onay bekleyenler menüsü genişletilmesi"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/AdminDashboard.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Otomatik kayıt onayı toggle'ı eklendi. Toplu onay/red butonları eklendi. handleBulkApprove ve handleBulkReject fonksiyonları eklendi. AlertDialog ile onay sistemi eklendi."
+
+  - task: "Sistem logları görüntüleme ve indirme"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/AdminDashboard.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Sistem logları loadData'da yükleniyor. Gerçek loglar gösteriliyor (fake değil). handleExportLogs fonksiyonu eklendi JSON indirme için. Log type'larına göre ikonlar eklendi."
   - task: "Attachment download API endpoint'i"
     implemented: true
     working: true
