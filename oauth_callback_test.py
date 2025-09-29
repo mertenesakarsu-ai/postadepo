@@ -507,16 +507,6 @@ def main():
 
 if __name__ == "__main__":
     sys.exit(main())
-                elif response.status_code == 404:
-                    print("❌ GET /api/auth/callback endpoint'i bulunamadı (404)")
-                    return False
-                else:
-                    print(f"✅ GET /api/auth/callback endpoint'i mevcut (Status: {response.status_code})")
-                    return True
-                    
-            except Exception as e:
-                print(f"❌ Endpoint varlık kontrolü hatası: {e}")
-                return False
 
     async def test_missing_parameters_validation(self):
         """Test 2: code ve state parametreleri olmadan çağırınca gerekli validation hatası alıyor mu"""
