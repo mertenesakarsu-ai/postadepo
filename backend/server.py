@@ -174,6 +174,9 @@ class RecaptchaVerificationResponse(BaseModel):
     success: bool
     message: Optional[str] = None
 
+class BulkUserRequest(BaseModel):
+    user_ids: List[str]
+
 class AccountConnection(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     user_id: str
