@@ -1673,7 +1673,7 @@ async def create_admin():
     
     return {"message": "Admin kullanıcısı başarıyla oluşturuldu", "email": "admin@postadepo.com"}
 
-@api_router.get("/admin/system-logs")
+@api_router.post("/admin/system-logs")
 async def get_system_logs(current_user: dict = Depends(get_current_user)):
     """
     Admin endpoint - Sistem loglarını listeler
