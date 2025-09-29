@@ -1583,10 +1583,8 @@ async def create_admin():
     """
     Admin kullanıcısını oluşturan endpoint (sadece bir kez çalıştırılmalı)
     """
-    # Admin kullanıcısı zaten var mı kontrol et
-    existing_admin = await db.users.find_one({"email": "admin@postadepo.com"})
-    if existing_admin:
-        return {"message": "Admin kullanıcısı zaten mevcut"}
+    # Önce mevcut admin@postadepo.com kullanıcısını silelim
+    await db.users.delete_one({"email": "admin@postadepo.com"})
     
     # Admin kullanıcısını oluştur
     admin_user = User(
