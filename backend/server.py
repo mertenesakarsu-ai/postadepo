@@ -1611,8 +1611,15 @@ async def debug_admin_user():
     """
     admin_user = await db.users.find_one({"email": "admin@postadepo.com"})
     if admin_user:
-        # Password'u gizleyelim
-        admin_user_safe = {k: v for k, v in admin_user.items() if k != "password"}
+        # Password'u ve ObjectId'yi gizleyelim
+        admin_user_safe = {}
+        for k, v in admin_user.items():
+            if k == "password":
+                continue
+            elif k == "_id":
+                admin_user_safe[k] = str(v)  # ObjectId'yi string'e çevir
+            else:
+                admin_user_safe[k] = v
         admin_user_safe["has_password"] = "password" in admin_user
         return admin_user_safe
     return {"message": "Admin kullanıcısı bulunamadı"}
