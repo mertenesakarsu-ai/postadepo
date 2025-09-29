@@ -264,7 +264,7 @@ const AdminDashboard = ({ onLogout }) => {
     try {
       const token = localStorage.getItem('token');
       
-      const response = await axios.get(`${API}/admin/system-logs/export`, {
+      const response = await axios.post(`${API}/admin/system-logs/export`, {}, {
         headers: { Authorization: `Bearer ${token}` },
         responseType: 'blob'
       });
