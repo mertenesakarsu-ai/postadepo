@@ -187,6 +187,75 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleBulkApprove = async () => {
+    try {
+      setBulkActionLoading(true);
+      const token = localStorage.getItem('token');
+      
+      const response = await axios.post(`${API}/admin/bulk-approve-users`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      toast.success(response.data.message);
+      loadData(); // Verileri yeniden yükle
+    } catch (error) {
+      console.error('Bulk approve error:', error);
+      toast.error('Toplu onaylama sırasında hata oluştu');
+    } finally {
+      setBulkActionLoading(false);
+    }
+  };
+
+  const handleBulkReject = async () => {
+    try {
+      setBulkActionLoading(true);
+      const token = localStorage.getItem('token');
+      
+      const response = await axios.post(`${API}/admin/bulk-reject-users`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      toast.success(response.data.message);
+      loadData(); // Verileri yeniden yükle
+    } catch (error) {
+      console.error('Bulk reject error:', error);
+      toast.error('Toplu reddetme sırasında hata oluştu');
+    } finally {
+      setBulkActionLoading(false);
+    }
+  };
+
+  const handleExportLogs = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      
+      const response = await axios.get(`${API}/admin/system-logs/export`, {
+        headers: { Authorization: `Bearer ${token}` },
+        responseType: 'blob'
+      });
+      
+      // Dosya indirme
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `sistem_loglari_${new Date().toISOString().slice(0,10)}.json`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      
+      toast.success('Sistem logları başarıyla indirildi');
+    } catch (error) {
+      console.error('Export logs error:', error);
+      toast.error('Log indirme sırasında hata oluştu');
+    }
+  };
+
+  const handleToggleAutoApproval = () => {
+    setAutoApproval(!autoApproval);
+    toast.info(autoApproval ? 'Otomatik onay kapatıldı' : 'Otomatik onay açıldı');
+  };
+
   const filteredUsers = users.filter(user => {
     const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          user.email.toLowerCase().includes(searchTerm.toLowerCase());
