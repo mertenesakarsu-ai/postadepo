@@ -12,7 +12,7 @@ from datetime import datetime
 
 class FocusedOutlookTester:
     def __init__(self):
-        self.base_url = "https://missing-field-fix.preview.emergentagent.com/api"
+        self.base_url = "https://code-state-helper.preview.emergentagent.com/api"
         self.token = None
         self.user = None
         self.tests_passed = 0

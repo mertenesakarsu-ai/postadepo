@@ -11,7 +11,7 @@ import uuid
 from datetime import datetime, timezone, timedelta
 
 # Backend URL from environment
-BACKEND_URL = "https://missing-field-fix.preview.emergentagent.com/api"
+BACKEND_URL = "https://code-state-helper.preview.emergentagent.com/api"
 
 class OAuthCallbackTester:
     def __init__(self):

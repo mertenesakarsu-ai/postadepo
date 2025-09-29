@@ -10,7 +10,7 @@ import json
 from datetime import datetime
 
 # Backend URL from environment
-BACKEND_URL = "https://missing-field-fix.preview.emergentagent.com/api"
+BACKEND_URL = "https://code-state-helper.preview.emergentagent.com/api"
 
 class OAuthCallbackComprehensiveTester:
     def __init__(self):
