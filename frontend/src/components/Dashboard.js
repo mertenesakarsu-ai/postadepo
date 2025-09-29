@@ -1151,7 +1151,6 @@ const Dashboard = ({ user, onLogout }) => {
                 <span className="text-slate-800">{formatSize(storageInfo.totalSize)}</span>
               </div>
               
-              {/* Admin Panel Access removed */}
             </div>
 
             <Button 
