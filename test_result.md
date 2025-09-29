@@ -303,6 +303,18 @@ frontend:
         agent: "testing"
         comment: "🎉 ADMIN PANELİ BACKEND SİSTEMİ KAPSAMLI TEST TAMAMLANDI (18/18 test %100 başarı): ✅ Admin kullanıcısı giriş testi (admin@postadepo.com / admindepo*) JWT token doğrulandı, ✅ Admin endpoints testleri tüm endpoints çalışıyor, ✅ Yeni kullanıcı kayıt ve whitelist testi approved=false ile oluşturma doğru, ✅ Storage info testi totalEmails ve totalSize değerleri doğru hesaplanıyor, ✅ Güvenlik testleri normal kullanıcı admin erişimi engellendi (403). Admin panel sistemi tamamen production-ready durumda!"
 
+  - task: "Admin paneli veri yükleme sorunları testi"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "🎉 ADMİN PANELİ VERİ YÜKLEME SORUNLARI KAPSAMLI TEST TAMAMLANDI! Kullanıcının şikayetlerine göre admin panel backend testleri yapıldı (8/8 test %100 başarı): ✅ 1. Admin kullanıcısı giriş (admin@postadepo.com / admindepo*): JWT token başarıyla alındı, user_type='admin' doğrulandı, ✅ 2. GET /api/admin/users endpoint: 28 kullanıcı + storage bilgileri döndürüldü, toplam 50 e-posta ve 258.85 KB depolama hesaplandı, ✅ 3. GET /api/admin/pending-users endpoint: Onay bekleyen kullanıcılar listesi çalışıyor, ✅ 4. GET /api/admin/system-logs endpoint: 32 sistem logu döndürüldü (USER_LOGIN, USER_REGISTER, USER_APPROVED türlerinde), ✅ 5. Yeni kullanıcı kaydı testi: approved=false ile oluşturuldu ve pending listesinde görüldü, ✅ 6. Admin panel stats verileri: Tüm gerekli veriler mevcut (toplam kullanıcı: 28, onaylı: 27, bekleyen: 1, toplam e-posta: 50, depolama: 258.85 KB). SONUÇ: Backend API'ler tamamen çalışıyor, 'veriler yüklenirken hata oluştu' sorunu frontend veya network bağlantısından kaynaklanıyor olabilir."
+
   - task: "Admin kullanıcısı MongoDB Atlas'a ekleme ve giriş sorunu çözme"
     implemented: true
     working: true
