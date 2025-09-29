@@ -2936,8 +2936,7 @@ async def connect_outlook_account(
 @api_router.get("/auth/callback", response_class=HTMLResponse)
 async def oauth_callback(
     code: str = Query(...),
-    state: str = Query(...),
-    current_user: dict = Depends(get_current_user)
+    state: str = Query(...)
 ):
     """OAuth callback endpoint for Microsoft/Outlook"""
     try:
@@ -2947,14 +2946,25 @@ async def oauth_callback(
                 detail="Outlook integration not configured. Azure credentials needed."
             )
         
-        # Verify state parameter
-        oauth_state = await db.oauth_states.find_one({"state": state, "user_id": current_user["id"]})
+        # Extract user_id from state parameter (format: user_id_uuid)
+        try:
+            user_id = state.split('_')[0]
+        except:
+            raise HTTPException(status_code=400, detail="Invalid state format")
+        
+        # Verify state parameter in database
+        oauth_state = await db.oauth_states.find_one({"state": state, "user_id": user_id})
         if not oauth_state:
             raise HTTPException(status_code=400, detail="Invalid or expired state parameter")
         
         # Check if state is expired
         if datetime.now(timezone.utc) > oauth_state["expires_at"]:
             raise HTTPException(status_code=400, detail="Authorization state expired")
+        
+        # Get user info for logging
+        current_user = await db.users.find_one({"id": user_id})
+        if not current_user:
+            raise HTTPException(status_code=400, detail="User not found")
         
         # Exchange authorization code for tokens
         token_data = await exchange_code_for_tokens(code)
@@ -2971,7 +2981,7 @@ async def oauth_callback(
         # Check if account already connected
         existing = await db.connected_accounts.find_one({
             "microsoft_user_id": user_profile["id"],
-            "user_id": current_user["id"]
+            "user_id": user_id
         })
         
         if existing:
@@ -2995,10 +3005,19 @@ async def oauth_callback(
             # Return HTML response that closes the popup and communicates with parent
             return HTMLResponse("""
             <html>
-                <head><title>Outlook Connected</title></head>
-                <body>
-                    <h1>Account Successfully Reconnected!</h1>
-                    <p>Your Outlook account has been reconnected. This window will close automatically.</p>
+                <head><title>Outlook Yeniden Bağlandı</title></head>
+                <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
+                    <h1 style="color: #0078d4;">Hesap Başarıyla Yeniden Bağlandı!</h1>
+                    <p>Outlook hesabınız yeniden bağlandı. Bu pencere otomatik olarak kapanacak.</p>
+                    <div style="margin-top: 20px;">
+                        <div style="display: inline-block; width: 40px; height: 40px; border: 4px solid #0078d4; border-top: 4px solid transparent; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                    </div>
+                    <style>
+                        @keyframes spin {
+                            0% { transform: rotate(0deg); }
+                            100% { transform: rotate(360deg); }
+                        }
+                    </style>
                     <script>
                         if (window.opener) {
                             window.opener.postMessage({
@@ -3006,7 +3025,9 @@ async def oauth_callback(
                                 message: 'Account reconnected successfully'
                             }, '*');
                         }
-                        setTimeout(() => window.close(), 2000);
+                        setTimeout(() => {
+                            window.close();
+                        }, 3000);
                     </script>
                 </body>
             </html>
@@ -3015,7 +3036,7 @@ async def oauth_callback(
         # Create new connection
         connection_data = {
             "id": str(uuid.uuid4()),
-            "user_id": current_user["id"],
+            "user_id": user_id,
             "microsoft_user_id": user_profile["id"],
             "email": user_profile.get("mail") or user_profile.get("userPrincipalName"),
             "display_name": user_profile.get("displayName", ""),
@@ -3052,18 +3073,34 @@ async def oauth_callback(
         # Return HTML response that closes the popup and communicates with parent
         return HTMLResponse("""
         <html>
-            <head><title>Outlook Connected</title></head>
-            <body>
-                <h1>Account Successfully Connected!</h1>
-                <p>Your Outlook account has been connected. This window will close automatically.</p>
+            <head><title>Outlook Bağlandı</title></head>
+            <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
+                <h1 style="color: #0078d4;">Hesap Başarıyla Bağlandı!</h1>
+                <p>Outlook hesabınız başarıyla bağlandı. Bu pencere otomatik olarak kapanacak.</p>
+                <div style="margin-top: 20px;">
+                    <div style="display: inline-block; width: 40px; height: 40px; border: 4px solid #0078d4; border-top: 4px solid transparent; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                </div>
+                <style>
+                    @keyframes spin {
+                        0% { transform: rotate(0deg); }
+                        100% { transform: rotate(360deg); }
+                    }
+                </style>
                 <script>
                     if (window.opener) {
                         window.opener.postMessage({
                             type: 'OUTLOOK_AUTH_SUCCESS',
-                            message: 'Account connected successfully'
+                            message: 'Account connected successfully',
+                            account: {
+                                id: '""" + connection_data["id"] + """',
+                                email: '""" + connection_data["email"] + """',
+                                display_name: '""" + connection_data["display_name"] + """'
+                            }
                         }, '*');
                     }
-                    setTimeout(() => window.close(), 2000);
+                    setTimeout(() => {
+                        window.close();
+                    }, 3000);
                 </script>
             </body>
         </html>
@@ -3073,7 +3110,28 @@ async def oauth_callback(
         raise
     except Exception as e:
         logger.error(f"Error in OAuth callback: {e}")
-        raise HTTPException(status_code=500, detail="OAuth callback failed")
+        # Return error HTML
+        return HTMLResponse(f"""
+        <html>
+            <head><title>Bağlantı Hatası</title></head>
+            <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
+                <h1 style="color: #d13438;">Bağlantı Hatası</h1>
+                <p>Outlook hesabı bağlanırken bir hata oluştu.</p>
+                <p style="color: #666; font-size: 14px;">Hata: {str(e)}</p>
+                <script>
+                    if (window.opener) {{
+                        window.opener.postMessage({{
+                            type: 'OUTLOOK_AUTH_ERROR',
+                            error: '{str(e)}'
+                        }}, '*');
+                    }}
+                    setTimeout(() => {{
+                        window.close();
+                    }}, 5000);
+                </script>
+            </body>
+        </html>
+        """, status_code=500)
 
 @api_router.get("/outlook/accounts")
 async def get_connected_outlook_accounts(current_user: dict = Depends(get_current_user)):
