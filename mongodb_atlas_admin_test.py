@@ -21,9 +21,10 @@ class MongoDBAtlasAdminTester:
         url = f"{self.base_url}/{endpoint}" if endpoint else self.base_url
         test_headers = {'Content-Type': 'application/json'}
         
-        # Use specific token if provided, otherwise use admin token
-        if token:
-            test_headers['Authorization'] = f'Bearer {token}'
+        # Use specific token if provided, otherwise use admin token (but not if token=None explicitly)
+        if token is not None:
+            if token:  # Only add Authorization header if token is not empty
+                test_headers['Authorization'] = f'Bearer {token}'
         elif self.admin_token:
             test_headers['Authorization'] = f'Bearer {self.admin_token}'
         
