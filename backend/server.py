@@ -2822,6 +2822,259 @@ async def connect_outlook_account(
         logger.error(f"Error connecting Outlook account: {e}")
         raise HTTPException(status_code=500, detail="Failed to connect account")
 
+@api_router.post("/outlook/connect-account")
+async def connect_outlook_account(
+    code: str = Query(...),
+    state: str = Query(...),
+    current_user: dict = Depends(get_current_user)
+):
+    """Connect user's Outlook account with OAuth2 code"""
+    try:
+        if not outlook_auth_service.is_configured():
+            raise HTTPException(
+                status_code=503, 
+                detail="Outlook integration not configured. Azure credentials needed."
+            )
+        
+        # Verify state parameter
+        oauth_state = await db.oauth_states.find_one({"state": state, "user_id": current_user["id"]})
+        if not oauth_state:
+            raise HTTPException(status_code=400, detail="Invalid or expired state parameter")
+        
+        # Check if state is expired
+        if datetime.now(timezone.utc) > oauth_state["expires_at"]:
+            raise HTTPException(status_code=400, detail="Authorization state expired")
+        
+        # Exchange authorization code for tokens
+        token_data = await exchange_code_for_tokens(code)
+        
+        if not token_data:
+            raise HTTPException(status_code=400, detail="Failed to exchange code for tokens")
+        
+        # Get user profile from Microsoft Graph
+        user_profile = await get_user_profile_from_graph(token_data["access_token"])
+        
+        if not user_profile:
+            raise HTTPException(status_code=400, detail="Failed to get user profile")
+        
+        # Check if account already connected
+        existing = await db.connected_accounts.find_one({
+            "microsoft_user_id": user_profile["id"],
+            "user_id": current_user["id"]
+        })
+        
+        if existing:
+            # Update existing connection with new tokens
+            await db.connected_accounts.update_one(
+                {"_id": existing["_id"]},
+                {"$set": {
+                    "access_token": token_data["access_token"],
+                    "refresh_token": token_data.get("refresh_token"),
+                    "token_expires_at": datetime.now(timezone.utc).replace(
+                        second=datetime.now(timezone.utc).second + token_data.get("expires_in", 3600)
+                    ),
+                    "last_connected": datetime.now(timezone.utc),
+                    "is_connected": True
+                }}
+            )
+            return {"message": "Account reconnected successfully", "account": existing}
+        
+        # Create new connection
+        connection_data = {
+            "id": str(uuid.uuid4()),
+            "user_id": current_user["id"],
+            "microsoft_user_id": user_profile["id"],
+            "email": user_profile.get("mail") or user_profile.get("userPrincipalName"),
+            "display_name": user_profile.get("displayName", ""),
+            "account_type": "outlook",
+            "is_connected": True,
+            "connected_at": datetime.now(timezone.utc),
+            "last_sync": None,
+            "access_token": token_data["access_token"],
+            "refresh_token": token_data.get("refresh_token"),
+            "token_expires_at": datetime.now(timezone.utc).replace(
+                second=datetime.now(timezone.utc).second + token_data.get("expires_in", 3600)
+            ),
+            "scopes": token_data.get("scope", "").split(" ")
+        }
+        
+        await db.connected_accounts.insert_one(connection_data)
+        
+        # Log the email account connection
+        await add_system_log(
+            log_type="EMAIL_ACCOUNT_CONNECTED",
+            message=f"E-posta hesabı başarıyla bağlandı: {connection_data['email']} - Kullanıcı: {current_user.get('name', current_user.get('email'))}",
+            user_email=current_user.get('email'),
+            user_name=current_user.get('name'),
+            additional_data={
+                "connected_email": connection_data['email'],
+                "account_type": "outlook",
+                "display_name": connection_data['display_name']
+            }
+        )
+        
+        # Clean up used state
+        await db.oauth_states.delete_one({"state": state})
+        
+        return {
+            "message": "Outlook account connected successfully",
+            "account": {
+                "id": connection_data["id"],
+                "email": connection_data["email"],
+                "display_name": connection_data["display_name"],
+                "connected_at": connection_data["connected_at"]
+            }
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error connecting Outlook account: {e}")
+        raise HTTPException(status_code=500, detail="Failed to connect account")
+
+# Add alternative GET endpoint for OAuth callback (Microsoft typically uses GET)
+@api_router.get("/auth/callback")
+async def oauth_callback(
+    code: str = Query(...),
+    state: str = Query(...),
+    current_user: dict = Depends(get_current_user)
+):
+    """OAuth callback endpoint for Microsoft/Outlook"""
+    try:
+        if not outlook_auth_service.is_configured():
+            raise HTTPException(
+                status_code=503, 
+                detail="Outlook integration not configured. Azure credentials needed."
+            )
+        
+        # Verify state parameter
+        oauth_state = await db.oauth_states.find_one({"state": state, "user_id": current_user["id"]})
+        if not oauth_state:
+            raise HTTPException(status_code=400, detail="Invalid or expired state parameter")
+        
+        # Check if state is expired
+        if datetime.now(timezone.utc) > oauth_state["expires_at"]:
+            raise HTTPException(status_code=400, detail="Authorization state expired")
+        
+        # Exchange authorization code for tokens
+        token_data = await exchange_code_for_tokens(code)
+        
+        if not token_data:
+            raise HTTPException(status_code=400, detail="Failed to exchange code for tokens")
+        
+        # Get user profile from Microsoft Graph
+        user_profile = await get_user_profile_from_graph(token_data["access_token"])
+        
+        if not user_profile:
+            raise HTTPException(status_code=400, detail="Failed to get user profile")
+        
+        # Check if account already connected
+        existing = await db.connected_accounts.find_one({
+            "microsoft_user_id": user_profile["id"],
+            "user_id": current_user["id"]
+        })
+        
+        if existing:
+            # Update existing connection with new tokens
+            await db.connected_accounts.update_one(
+                {"_id": existing["_id"]},
+                {"$set": {
+                    "access_token": token_data["access_token"],
+                    "refresh_token": token_data.get("refresh_token"),
+                    "token_expires_at": datetime.now(timezone.utc).replace(
+                        second=datetime.now(timezone.utc).second + token_data.get("expires_in", 3600)
+                    ),
+                    "last_connected": datetime.now(timezone.utc),
+                    "is_connected": True
+                }}
+            )
+            
+            # Clean up used state
+            await db.oauth_states.delete_one({"state": state})
+            
+            # Return HTML response that closes the popup and communicates with parent
+            return """
+            <html>
+                <head><title>Outlook Connected</title></head>
+                <body>
+                    <h1>Account Successfully Reconnected!</h1>
+                    <p>Your Outlook account has been reconnected. This window will close automatically.</p>
+                    <script>
+                        if (window.opener) {
+                            window.opener.postMessage({
+                                type: 'OUTLOOK_AUTH_SUCCESS',
+                                message: 'Account reconnected successfully'
+                            }, '*');
+                        }
+                        setTimeout(() => window.close(), 2000);
+                    </script>
+                </body>
+            </html>
+            """
+        
+        # Create new connection
+        connection_data = {
+            "id": str(uuid.uuid4()),
+            "user_id": current_user["id"],
+            "microsoft_user_id": user_profile["id"],
+            "email": user_profile.get("mail") or user_profile.get("userPrincipalName"),
+            "display_name": user_profile.get("displayName", ""),
+            "account_type": "outlook",
+            "is_connected": True,
+            "connected_at": datetime.now(timezone.utc),
+            "last_sync": None,
+            "access_token": token_data["access_token"],
+            "refresh_token": token_data.get("refresh_token"),
+            "token_expires_at": datetime.now(timezone.utc).replace(
+                second=datetime.now(timezone.utc).second + token_data.get("expires_in", 3600)
+            ),
+            "scopes": token_data.get("scope", "").split(" ")
+        }
+        
+        await db.connected_accounts.insert_one(connection_data)
+        
+        # Log the email account connection
+        await add_system_log(
+            log_type="EMAIL_ACCOUNT_CONNECTED",
+            message=f"E-posta hesabı başarıyla bağlandı: {connection_data['email']} - Kullanıcı: {current_user.get('name', current_user.get('email'))}",
+            user_email=current_user.get('email'),
+            user_name=current_user.get('name'),
+            additional_data={
+                "connected_email": connection_data['email'],
+                "account_type": "outlook",
+                "display_name": connection_data['display_name']
+            }
+        )
+        
+        # Clean up used state
+        await db.oauth_states.delete_one({"state": state})
+        
+        # Return HTML response that closes the popup and communicates with parent
+        return """
+        <html>
+            <head><title>Outlook Connected</title></head>
+            <body>
+                <h1>Account Successfully Connected!</h1>
+                <p>Your Outlook account has been connected. This window will close automatically.</p>
+                <script>
+                    if (window.opener) {
+                        window.opener.postMessage({
+                            type: 'OUTLOOK_AUTH_SUCCESS',
+                            message: 'Account connected successfully'
+                        }, '*');
+                    }
+                    setTimeout(() => window.close(), 2000);
+                </script>
+            </body>
+        </html>
+        """
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error in OAuth callback: {e}")
+        raise HTTPException(status_code=500, detail="OAuth callback failed")
+
 @api_router.get("/outlook/accounts")
 async def get_connected_outlook_accounts(current_user: dict = Depends(get_current_user)):
     """Get user's connected Outlook accounts"""
