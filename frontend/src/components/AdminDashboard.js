@@ -140,6 +140,8 @@ const AdminDashboard = () => {
 
   const handleLogout = async () => {
     try {
+      console.log('Çıkış işlemi başlıyor...');
+      
       // Loading state göster
       setLoading(true);
       
@@ -147,24 +149,15 @@ const AdminDashboard = () => {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       
-      // State'leri temizle
-      setUsers([]);
-      setPendingUsers([]);
-      setStats({
-        totalUsers: 0,
-        approvedUsers: 0,
-        pendingUsers: 0,
-        totalStorage: 0,
-        totalEmails: 0
-      });
+      console.log('LocalStorage temizlendi');
       
       // Başarı mesajı göster
       toast.success('Başarıyla çıkış yapıldı');
       
-      // Kısa bir delay ile login sayfasına yönlendir
-      setTimeout(() => {
-        navigate('/login', { replace: true });
-      }, 100);
+      console.log('Login sayfasına yönlendiriliyor...');
+      
+      // Hemen yönlendir
+      navigate('/login', { replace: true });
       
     } catch (error) {
       console.error('Logout error:', error);
@@ -174,6 +167,9 @@ const AdminDashboard = () => {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       navigate('/login', { replace: true });
+    } finally {
+      // Loading state'i her durumda false yap
+      setLoading(false);
     }
   };
 
