@@ -568,9 +568,8 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Outlook hesap bağlama ve email sync sorunu"
-  stuck_tasks:
-    - "Outlook hesap bağlama ve email sync sorunu"
+    - "Admin paneli veri yükleme sorunları testi"
+  stuck_tasks: []
   test_all: false
   test_priority: "high_first"
 
