@@ -1670,6 +1670,149 @@ async def create_admin():
     
     return {"message": "Admin kullanıcısı başarıyla oluşturuldu", "email": "admin@postadepo.com"}
 
+@api_router.get("/admin/system-logs")
+async def get_system_logs(current_user: dict = Depends(get_current_user)):
+    """
+    Admin endpoint - Sistem loglarını listeler
+    """
+    # Admin yetkisi kontrolü
+    if current_user.get("user_type") != "admin":
+        raise HTTPException(status_code=403, detail="Bu işlem için admin yetkisi gerekli")
+    
+    # Son 100 sistem logunu getir (tarih sırasına göre en yeni önce)
+    logs_cursor = db.system_logs.find({}).sort("timestamp", -1).limit(100)
+    logs = await logs_cursor.to_list(length=None)
+    
+    # Logları temizle
+    cleaned_logs = []
+    for log in logs:
+        log_dict = dict(log)
+        if "_id" in log_dict:
+            del log_dict["_id"]
+        # ISO format timestamp'i Türkçe formatına çevir
+        if "timestamp" in log_dict:
+            try:
+                timestamp = log_dict["timestamp"]
+                if isinstance(timestamp, str):
+                    timestamp = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
+                log_dict["formatted_timestamp"] = timestamp.strftime("%d.%m.%Y %H:%M:%S")
+            except:
+                log_dict["formatted_timestamp"] = "Bilinmeyen"
+        cleaned_logs.append(log_dict)
+    
+    return {"logs": cleaned_logs}
+
+@api_router.get("/admin/system-logs/export")
+async def export_system_logs(current_user: dict = Depends(get_current_user)):
+    """
+    Admin endpoint - Sistem loglarını JSON formatında indirir
+    """
+    # Admin yetkisi kontrolü
+    if current_user.get("user_type") != "admin":
+        raise HTTPException(status_code=403, detail="Bu işlem için admin yetkisi gerekli")
+    
+    # Tüm sistem loglarını getir
+    logs_cursor = db.system_logs.find({}).sort("timestamp", -1)
+    logs = await logs_cursor.to_list(length=None)
+    
+    # Logları temizle ve formatla
+    export_data = {
+        "export_info": {
+            "generated_at": datetime.now(timezone.utc).isoformat(),
+            "generated_by": current_user.get("email"),
+            "total_logs": len(logs)
+        },
+        "logs": []
+    }
+    
+    for log in logs:
+        log_dict = dict(log)
+        if "_id" in log_dict:
+            del log_dict["_id"]
+        export_data["logs"].append(log_dict)
+    
+    # JSON response olarak dön
+    import json
+    json_content = json.dumps(export_data, indent=2, ensure_ascii=False, default=str)
+    
+    from fastapi.responses import Response
+    return Response(
+        content=json_content,
+        media_type="application/json",
+        headers={
+            "Content-Disposition": f"attachment; filename=system_logs_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        }
+    )
+
+@api_router.post("/admin/bulk-approve-users")
+async def bulk_approve_users(current_user: dict = Depends(get_current_user)):
+    """
+    Admin endpoint - Tüm bekleyen kullanıcıları toplu onayla
+    """
+    # Admin yetkisi kontrolü
+    if current_user.get("user_type") != "admin":
+        raise HTTPException(status_code=403, detail="Bu işlem için admin yetkisi gerekli")
+    
+    # Bekleyen kullanıcıları bul
+    pending_users = await db.users.find({"approved": False}).to_list(length=None)
+    
+    if not pending_users:
+        return {"message": "Onaylanacak bekleyen kullanıcı bulunamadı", "approved_count": 0}
+    
+    # Tüm bekleyen kullanıcıları onayla
+    result = await db.users.update_many(
+        {"approved": False},
+        {"$set": {"approved": True}}
+    )
+    
+    # Log ekle
+    user_emails = [user.get('email', 'Email yok') for user in pending_users]
+    await add_system_log(
+        log_type="BULK_USER_APPROVED",
+        message=f"Toplu kullanıcı onayı: {result.modified_count} kullanıcı onaylandı - Admin: {current_user.get('name', current_user.get('email'))}",
+        user_email=current_user.get('email'),
+        user_name=current_user.get('name'),
+        additional_data={"approved_count": result.modified_count, "approved_emails": user_emails}
+    )
+    
+    return {"message": f"{result.modified_count} kullanıcı başarıyla onaylandı", "approved_count": result.modified_count}
+
+@api_router.post("/admin/bulk-reject-users")
+async def bulk_reject_users(current_user: dict = Depends(get_current_user)):
+    """
+    Admin endpoint - Tüm bekleyen kullanıcıları toplu reddet (sil)
+    """
+    # Admin yetkisi kontrolü
+    if current_user.get("user_type") != "admin":
+        raise HTTPException(status_code=403, detail="Bu işlem için admin yetkisi gerekli")
+    
+    # Bekleyen kullanıcıları bul
+    pending_users = await db.users.find({"approved": False}).to_list(length=None)
+    
+    if not pending_users:
+        return {"message": "Reddedilecek bekleyen kullanıcı bulunamadı", "rejected_count": 0}
+    
+    # Kullanıcı ID'lerini topla
+    user_ids = [user["id"] for user in pending_users]
+    user_emails = [user.get('email', 'Email yok') for user in pending_users]
+    
+    # Kullanıcıları sil
+    delete_result = await db.users.delete_many({"approved": False})
+    
+    # Kullanıcıların e-postalarını da sil
+    await db.emails.delete_many({"user_id": {"$in": user_ids}})
+    
+    # Log ekle
+    await add_system_log(
+        log_type="BULK_USER_REJECTED",
+        message=f"Toplu kullanıcı reddi: {delete_result.deleted_count} kullanıcı reddedildi ve silindi - Admin: {current_user.get('name', current_user.get('email'))}",
+        user_email=current_user.get('email'),
+        user_name=current_user.get('name'),
+        additional_data={"rejected_count": delete_result.deleted_count, "rejected_emails": user_emails}
+    )
+    
+    return {"message": f"{delete_result.deleted_count} kullanıcı başarıyla reddedildi ve silindi", "rejected_count": delete_result.deleted_count}
+
 @api_router.delete("/emails/{email_id}")
 async def delete_email(email_id: str, current_user: dict = Depends(get_current_user)):
     result = await db.emails.delete_one(
