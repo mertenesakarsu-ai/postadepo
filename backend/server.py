@@ -49,6 +49,22 @@ mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
+# Log helper function
+async def add_system_log(log_type: str, message: str, user_email: str = None, user_name: str = None, additional_data: dict = None):
+    """Sistem loglarına yeni bir kayıt ekler"""
+    try:
+        log_entry = SystemLog(
+            log_type=log_type,
+            message=message,
+            user_email=user_email,
+            user_name=user_name,
+            additional_data=additional_data
+        )
+        await db.system_logs.insert_one(log_entry.dict())
+        print(f"System log added: {log_type} - {message}")
+    except Exception as e:
+        print(f"Failed to add system log: {e}")
+
 # Create the main app without a prefix
 app = FastAPI(title="PostaDepo API", description="E-posta Yönetim Sistemi API")
 
