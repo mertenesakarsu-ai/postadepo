@@ -2935,11 +2935,73 @@ async def connect_outlook_account(
 # Add alternative GET endpoint for OAuth callback (Microsoft typically uses GET)
 @api_router.get("/auth/callback", response_class=HTMLResponse)
 async def oauth_callback(
-    code: str = Query(...),
-    state: str = Query(...)
+    code: str = Query(None, description="OAuth authorization code from Microsoft"),
+    state: str = Query(None, description="OAuth state parameter"),
+    error: str = Query(None, description="OAuth error code"),
+    error_description: str = Query(None, description="OAuth error description")
 ):
     """OAuth callback endpoint for Microsoft/Outlook"""
     try:
+        # Check for OAuth errors first
+        if error:
+            error_message = error_description or error
+            print(f"OAuth error received: {error} - {error_description}")
+            return HTMLResponse(f"""
+            <html>
+                <head><title>Outlook Bağlantı Hatası</title></head>
+                <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
+                    <h1 style="color: #d13438;">Bağlantı Hatası</h1>
+                    <p>Outlook hesabı bağlantısında hata oluştu: {error_message}</p>
+                    <p>Lütfen tekrar deneyiniz veya destek ekibine başvurunuz.</p>
+                    <button onclick="window.close()" style="padding: 10px 20px; background-color: #0078d4; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                        Pencereyi Kapat
+                    </button>
+                    <script>
+                        if (window.opener) {{
+                            window.opener.postMessage({{
+                                type: 'OUTLOOK_AUTH_ERROR',
+                                error: '{error}',
+                                error_description: '{error_message}'
+                            }}, '*');
+                        }}
+                    </script>
+                </body>
+            </html>
+            """, status_code=400)
+        
+        # Check for missing required parameters
+        if not code or not state:
+            missing_params = []
+            if not code:
+                missing_params.append('code')
+            if not state:
+                missing_params.append('state')
+            
+            print(f"OAuth callback missing required parameters: {missing_params}")
+            return HTMLResponse(f"""
+            <html>
+                <head><title>Outlook Bağlantı Hatası</title></head>
+                <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
+                    <h1 style="color: #d13438;">Bağlantı Parametresi Hatası</h1>
+                    <p>Outlook bağlantısı için gerekli parametreler eksik: {', '.join(missing_params)}</p>
+                    <p>Bu genellikle OAuth akışının yarıda kesilmesi durumunda olur.</p>
+                    <p>Lütfen baştan başlayarak Outlook hesabınızı bağlamaya tekrar deneyiniz.</p>
+                    <button onclick="window.close()" style="padding: 10px 20px; background-color: #0078d4; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                        Pencereyi Kapat
+                    </button>
+                    <script>
+                        if (window.opener) {{
+                            window.opener.postMessage({{
+                                type: 'OUTLOOK_AUTH_ERROR',
+                                error: 'missing_parameters',
+                                error_description: 'Gerekli OAuth parametreleri eksik'
+                            }}, '*');
+                        }}
+                    </script>
+                </body>
+            </html>
+            """, status_code=400)
+        
         if not outlook_auth_service.is_configured():
             raise HTTPException(
                 status_code=503, 
