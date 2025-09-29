@@ -343,8 +343,8 @@ class OAuthCallbackComprehensiveTester:
         # 4. Pydantic specific error
         if validation_fixed:
             print(f"4. Pydantic hatası çözüldü: ✅ EVET")
-            print(f"   - [{'type':'missing','loc':['query','code'],'msg':'Field required'}] ✓")
-            print(f"   - [{'type':'missing','loc':['query','state'],'msg':'Field required'}] ✓")
+            print("   - [{'type':'missing','loc':['query','code'],'msg':'Field required'}] ✓")
+            print("   - [{'type':'missing','loc':['query','state'],'msg':'Field required'}] ✓")
         else:
             print(f"4. Pydantic hatası çözüldü: ❌ HAYIR")
         
