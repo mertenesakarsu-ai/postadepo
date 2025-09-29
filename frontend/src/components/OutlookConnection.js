@@ -110,7 +110,20 @@ const OutlookConnection = ({ user, onAccountsUpdate }) => {
       
     } catch (error) {
       console.error('Error connecting account:', error);
-      const errorMsg = error.response?.data?.detail || 'Hesap bağlantısı başarısız';
+      let errorMsg = 'Hesap bağlantısı başarısız';
+      
+      if (error.response?.data?.detail) {
+        // Handle both string and object error responses
+        const detail = error.response.data.detail;
+        if (typeof detail === 'string') {
+          errorMsg = detail;
+        } else if (typeof detail === 'object' && detail.msg) {
+          errorMsg = detail.msg;
+        } else if (typeof detail === 'object') {
+          errorMsg = JSON.stringify(detail);
+        }
+      }
+      
       toast.error(errorMsg);
     } finally {
       setLoading(false);
