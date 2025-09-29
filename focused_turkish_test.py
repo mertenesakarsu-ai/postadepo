@@ -9,7 +9,7 @@ import sys
 import json
 
 class FocusedTurkishTest:
-    def __init__(self, base_url="https://postadepo-admin.preview.emergentagent.com/api"):
+    def __init__(self, base_url="https://panel-restructure.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.admin_token = None
         self.results = []
