@@ -1219,6 +1219,15 @@ async def register(user_data: UserCreate):
     user_dict["password"] = hashed_password
     await db.users.insert_one(user_dict)
     
+    # Log the registration
+    await add_system_log(
+        log_type="USER_REGISTER",
+        message=f"Yeni kullanıcı kaydı oluşturuldu: {user_data.name} ({user_data.email})",
+        user_email=user_data.email,
+        user_name=user_data.name,
+        additional_data={"user_id": new_user.id, "approved": False}
+    )
+    
     return {
         "message": "Kullanıcı kaydı oluşturuldu. Admin onayı bekleniyor.", 
         "user_id": new_user.id,
