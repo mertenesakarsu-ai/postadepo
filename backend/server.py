@@ -2933,7 +2933,7 @@ async def connect_outlook_account(
         raise HTTPException(status_code=500, detail="Failed to connect account")
 
 # Add alternative GET endpoint for OAuth callback (Microsoft typically uses GET)
-@api_router.get("/auth/callback")
+@api_router.get("/auth/callback", response_class=HTMLResponse)
 async def oauth_callback(
     code: str = Query(...),
     state: str = Query(...),
@@ -2993,7 +2993,7 @@ async def oauth_callback(
             await db.oauth_states.delete_one({"state": state})
             
             # Return HTML response that closes the popup and communicates with parent
-            return """
+            return HTMLResponse("""
             <html>
                 <head><title>Outlook Connected</title></head>
                 <body>
@@ -3010,7 +3010,7 @@ async def oauth_callback(
                     </script>
                 </body>
             </html>
-            """
+            """)
         
         # Create new connection
         connection_data = {
@@ -3050,7 +3050,7 @@ async def oauth_callback(
         await db.oauth_states.delete_one({"state": state})
         
         # Return HTML response that closes the popup and communicates with parent
-        return """
+        return HTMLResponse("""
         <html>
             <head><title>Outlook Connected</title></head>
             <body>
@@ -3067,7 +3067,7 @@ async def oauth_callback(
                 </script>
             </body>
         </html>
-        """
+        """)
         
     except HTTPException:
         raise
