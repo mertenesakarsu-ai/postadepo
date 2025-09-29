@@ -1604,6 +1604,19 @@ async def create_admin():
     
     return {"message": "Admin kullanıcısı başarıyla oluşturuldu", "email": "admin@postadepo.com"}
 
+@api_router.get("/debug/admin-user")
+async def debug_admin_user():
+    """
+    Admin kullanıcısının debug bilgilerini getirir
+    """
+    admin_user = await db.users.find_one({"email": "admin@postadepo.com"})
+    if admin_user:
+        # Password'u gizleyelim
+        admin_user_safe = {k: v for k, v in admin_user.items() if k != "password"}
+        admin_user_safe["has_password"] = "password" in admin_user
+        return admin_user_safe
+    return {"message": "Admin kullanıcısı bulunamadı"}
+
 @api_router.delete("/emails/{email_id}")
 async def delete_email(email_id: str, current_user: dict = Depends(get_current_user)):
     result = await db.emails.delete_one(
