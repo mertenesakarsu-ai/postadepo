@@ -667,32 +667,38 @@ def main():
     
     tester = PostaDepoAdminPanelTester()
     
-    # Test sequence for admin panel
+    # Test sequence for admin panel - Turkish Review Request Focus
     tests = [
         # Hazırlık
         ("Admin Kullanıcısı Hazırlama", tester.test_create_admin_user),
         
-        # 1. Admin Kullanıcısı Giriş Testi
+        # 1. Admin Kullanıcısı Giriş Testi (admin@postadepo.com / admindepo*)
         ("1. Admin Kullanıcısı Giriş Testi", tester.test_admin_login),
         ("Admin Endpoints Erişim Kontrolü", tester.test_admin_endpoints_access),
         
-        # 2. Admin Endpoints Testleri
-        ("2a. GET /api/admin/users", tester.test_admin_get_all_users),
-        ("2b. GET /api/admin/pending-users", tester.test_admin_get_pending_users),
+        # 2. Gerçek Sistem Log Sistemi Testleri
+        ("2a. Yeni Test Kullanıcısı Oluşturma (Log için)", tester.test_create_test_user),
+        ("2b. Onaylanmamış Kullanıcı Giriş Testi", tester.test_unapproved_user_login),
+        ("2c. POST /api/admin/approve-user (Log için)", tester.test_admin_approve_user),
+        ("2d. Onaylanan Kullanıcı Giriş Testi (Log için)", tester.test_approved_user_login),
         
-        # 3. Yeni Kullanıcı Kayıt ve Whitelist Testi
-        ("3a. Yeni Test Kullanıcısı Oluşturma", tester.test_create_test_user),
-        ("3b. Onaylanmamış Kullanıcı Giriş Testi", tester.test_unapproved_user_login),
-        ("3c. POST /api/admin/approve-user", tester.test_admin_approve_user),
-        ("3d. Onaylanan Kullanıcı Giriş Testi", tester.test_approved_user_login),
-        ("3e. POST /api/admin/reject-user", tester.test_admin_reject_user),
+        # 3. Yeni Admin Endpoint'leri Testleri
+        ("3a. GET /api/admin/system-logs - Log Listesi", tester.test_system_logs_endpoint),
+        ("3b. GET /api/admin/system-logs/export - JSON Export", tester.test_system_logs_export),
+        ("3c. POST /api/admin/bulk-approve-users - Toplu Onay", tester.test_bulk_approve_users),
+        ("3d. POST /api/admin/bulk-reject-users - Toplu Red", tester.test_bulk_reject_users),
         
-        # 4. Storage Info Testi
-        ("4. Storage Info Hesaplama Testi", tester.test_storage_info_calculation),
+        # 4. Admin Yetkisi Kontrolleri
+        ("4a. Normal Kullanıcı Admin Erişimi (403)", tester.test_normal_user_admin_access),
+        ("4b. Token Olmadan Admin Erişimi (403)", tester.test_no_token_admin_access),
         
-        # 5. Güvenlik Testleri
-        ("5a. Normal Kullanıcı Admin Erişimi (403)", tester.test_normal_user_admin_access),
-        ("5b. Token Olmadan Admin Erişimi (403)", tester.test_no_token_admin_access),
+        # 5. Diğer Admin Endpoints
+        ("5a. GET /api/admin/users", tester.test_admin_get_all_users),
+        ("5b. GET /api/admin/pending-users", tester.test_admin_get_pending_users),
+        ("5c. POST /api/admin/reject-user", tester.test_admin_reject_user),
+        
+        # 6. Storage Info Testi
+        ("6. Storage Info Hesaplama Testi", tester.test_storage_info_calculation),
         
         # Bonus
         ("Bonus: Admin Oluşturma Endpoint", tester.test_admin_user_creation_endpoint),
