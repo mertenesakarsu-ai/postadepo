@@ -134,12 +134,24 @@ backend:
     working: true
     file: "/app/frontend/src/components/AdminDashboard.js"
     stuck_count: 0
-    priority: "high"
+    priority: "high" 
     needs_retesting: true
     status_history:
       - working: true
         agent: "main"
-        comment: "handleLogout fonksiyonunda finally block eklendi, setLoading(false) her durumda çalıştırılıyor. State temizliği kaldırıldı, navigate hemen çağırılıyor. Console log'ları eklendi debug için."
+        comment: "Admin panel çıkış sorunu çözüldü: handleLogout fonksiyonuna global App.js logout prop'u eklendi, localStorage temizleme ve global authentication state güncelleme düzeltildi, console log mesajları iyileştirildi."
+
+  - task: "Demo ekranından admin panel butonunu kaldırma"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/Dashboard.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true  
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Dashboard.js settings dialog'undaki admin panel erişim butonu tamamen kaldırıldı. demo@postadepo.com ve admin@postadepo.com kullanıcıları artık settings'den admin paneline erişemeyecek. Shield icon import'u da temizlendi."
 
 frontend:
   - task: "Admin paneli menü yapısı yeniden düzenlenmesi"
