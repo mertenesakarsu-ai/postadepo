@@ -207,7 +207,22 @@ backend:
         agent: "testing"
         comment: "🎉 ADMIN PANELİ BACKEND SİSTEMİ KAPSAMLI TEST TAMAMLANDI (18/18 test %100 başarı): ✅ Admin kullanıcısı giriş testi (admin@postadepo.com / admindepo*) JWT token doğrulandı, ✅ Admin endpoints testleri tüm endpoints çalışıyor, ✅ Yeni kullanıcı kayıt ve whitelist testi approved=false ile oluşturma doğru, ✅ Storage info testi totalEmails ve totalSize değerleri doğru hesaplanıyor, ✅ Güvenlik testleri normal kullanıcı admin erişimi engellendi (403). Admin panel sistemi tamamen production-ready durumda!"
 
-  - task: "Tyrz Musak kullanıcı hesabı oluşturma ve test"
+  - task: "Admin kullanıcısı MongoDB Atlas'a ekleme ve giriş sorunu çözme"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py, /app/backend/.env"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "testing"
+        comment: "🚨 KRİTİK MONGODB ATLAS BAĞLANTI SORUNU TESPİT EDİLDİ! SSL handshake failed hatası nedeniyle admin login başarısız"
+      - working: true
+        agent: "main"
+        comment: "🔧 MONGODB ATLAS BAĞLANTI VE ADMİN GİRİŞ SORUNU ÇÖZÜLDÜ: 1) MongoDB Atlas connection string'inde ssl=true yerine tls=true kullanıldı (troubleshoot agent önerisi), 2) Yanlış oluşturulmuş admin kullanıcısı (approved=false, user_type=email) silindi ve doğru parametrelerle yeniden oluşturuldu (approved=true, user_type=admin), 3) Admin login testi başarılı: admin@postadepo.com / admindepo* ile JWT token alındı, 4) Admin panel endpoint'lerine erişim test edildi ve çalıştı. MongoDB Atlas bağlantısı tamamen çalışır durumda ve admin kullanıcısı başarıyla kaydedildi."
+
+  - task: "Türkiye Musak kullanıcı hesabı oluşturma ve test"
     implemented: true
     working: true
     file: "/app/backend/server.py"
