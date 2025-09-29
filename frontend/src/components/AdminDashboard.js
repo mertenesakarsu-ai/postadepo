@@ -15,7 +15,12 @@ import {
   LogOut,
   Settings,
   Search,
-  Filter
+  Filter,
+  Download,
+  UserPlus,
+  Trash2,
+  Clock,
+  Activity
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
