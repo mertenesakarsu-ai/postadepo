@@ -3,7 +3,7 @@ import json
 
 class FocusedEmailTester:
     def __init__(self):
-        self.base_url = "https://signup-admin-view.preview.emergentagent.com/api"
+        self.base_url = "https://mongodb-auth-fix-2.preview.emergentagent.com/api"
         self.token = None
         
     def login(self):
