@@ -5,7 +5,7 @@ import uuid
 from datetime import datetime
 
 class PostaDepoAdminTester:
-    def __init__(self, base_url="https://login-redirect-fix-6.preview.emergentagent.com/api"):
+    def __init__(self, base_url="https://data-dashboard-bug.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.admin_token = None
         self.admin_user = None
