@@ -1496,8 +1496,8 @@ async def get_pending_users(current_user: dict = Depends(get_current_user)):
     """
     Admin endpoint - Onay bekleyen kullanıcıları listeler
     """
-    # Admin yetkisi kontrolü
-    if current_user["email"] not in ["demo@postadepo.com", "admin@postadepo.com"]:
+    # Admin yetkisi kontrolü - sadece user_type="admin" olanlar erişebilir
+    if current_user.get("user_type") != "admin":
         raise HTTPException(status_code=403, detail="Bu işlem için admin yetkisi gerekli")
     
     # Onay bekleyen kullanıcıları getir
