@@ -21,7 +21,7 @@ import subprocess
 import os
 
 class OutlookIntegrationTester:
-    def __init__(self, base_url="https://code-state-helper.preview.emergentagent.com/api"):
+    def __init__(self, base_url="https://outlook-connector.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.token = None
         self.user = None
@@ -494,7 +494,7 @@ class OutlookIntegrationTester:
 def main():
     """Main test execution"""
     print(f"🚀 Starting Outlook Integration Test Suite...")
-    print(f"   Target: https://code-state-helper.preview.emergentagent.com/api")
+    print(f"   Target: https://outlook-connector.preview.emergentagent.com/api")
     print(f"   Focus: Türk kullanıcının Outlook entegrasyonu sorunu")
     
     tester = OutlookIntegrationTester()
@@ -529,7 +529,7 @@ import json
 from datetime import datetime
 
 class OutlookIntegrationTester:
-    def __init__(self, base_url="https://code-state-helper.preview.emergentagent.com/api"):
+    def __init__(self, base_url="https://outlook-connector.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.token = None
         self.user = None
