@@ -34,6 +34,9 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all'); // all, approved, pending, admin
+  const [systemLogs, setSystemLogs] = useState([]);
+  const [bulkActionLoading, setBulkActionLoading] = useState(false);
+  const [autoApproval, setAutoApproval] = useState(false);
   const [stats, setStats] = useState({
     totalUsers: 0,
     approvedUsers: 0,
