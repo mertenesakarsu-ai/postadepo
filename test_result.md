@@ -552,7 +552,7 @@ test_plan:
 
 agent_communication:
   - agent: "main"
-    message: "🎨 MODERN MAVİ-MOR GRADIENT UI TASARIMI TAMAMLANDI! ✅ E-posta detay modalı tamamen yeniden tasarlandı: gradient arka planlar, şeffaf kartlar, modern animasyonlar, backdrop blur efektleri, kalıcı sil butonu footer'a taşındı, download butonları işlevsel hale getirildi. Professional ve modern görünüm elde edildi. Kullanıcı manuel test edecek."
+    message: "🎯 YENİ İSTEKLER TAMAMLANDI! ✅ 1. Demo ekranından admin panel butonu kaldırıldı: Dashboard.js settings dialog'undaki admin panel erişim butonu tamamen çıkarıldı, Shield icon import'u da temizlendi. ✅ 2. Admin panel çıkış sorunu düzeltildi: handleLogout fonksiyonuna global App.js logout prop'u eklendi, localStorage temizleme ve global authentication state güncelleme sağlandı. ✅ 3. Onay bekleyenler menüsü zaten mevcut: Toplu onay/red seçenekleri ve manuel approve/reject butonları halihazırda çalışır durumda. Backend endpoint'leri (bulk-approve-users, bulk-reject-users) mevcuttur. Sistem kullanıma hazır!"
   - agent: "testing"
     message: "🎯 ATTACHMENT DOWNLOAD API TESTİ BAŞARILI! 7/7 test passed. Unicode dosya adları (Türkçe karakterler) mükemmel çalışıyor, farklı dosya tipleri destekli, unique ID generation aktif, base64 decode doğru, hata durumları düzgün. API production-ready durumda."
   - agent: "testing"
