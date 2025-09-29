@@ -1,53 +1,108 @@
 #!/usr/bin/env python3
 """
-OAuth Callback Endpoint Test Suite
-Test OAuth callback endpoint functionality based on Turkish review request
+OAuth Callback Endpoint Fix Validation Test
+
+PROBLEM FIXED: OAuth callback endpoint'inde code ve state parametreleri eksik olduğunda 
+Pydantic validation hatası veriyor, kullanıcı dostu mesaj yerine JSON error mesajı gösteriyordu.
+
+FIX APPLIED: OAuth callback endpoint'i güncellendi:
+1. code ve state parametreleri opsiyonel yapıldı (Query(None))  
+2. Eksik parametreler kontrolü eklendi
+3. Türkçe hata mesajları eklendi
+4. OAuth error handling eklendi
+5. JavaScript postMessage ile parent window iletişimi eklendi
+
+TEST PLAN:
+✅ Test 1: OAuth callback without parameters - should return user-friendly Turkish error message
+✅ Test 2: OAuth callback with error parameter - should handle OAuth errors properly 
+✅ Test 3: OAuth callback with missing code - should report missing code parameter
+✅ Test 4: OAuth callback with missing state - should report missing state parameter
+✅ Test 5: Normal OAuth flow endpoints should still work (auth-url generation)
+✅ Test 6: Verify backend logs are clean and informative
 """
 
-import asyncio
-import httpx
+import requests
+import sys
 import json
-import uuid
-from datetime import datetime, timezone, timedelta
-
-# Backend URL from environment
-BACKEND_URL = "https://code-state-helper.preview.emergentagent.com/api"
+import re
+from datetime import datetime
 
 class OAuthCallbackTester:
-    def __init__(self):
-        self.backend_url = BACKEND_URL
-        self.demo_user_token = None
-        self.demo_user_id = None
+    def __init__(self, base_url="https://code-state-helper.preview.emergentagent.com/api"):
+        self.base_url = base_url
+        self.token = None
+        self.user = None
+        self.tests_run = 0
+        self.tests_passed = 0
+
+    def run_test(self, name, method, endpoint, expected_status, data=None, headers=None, params=None):
+        """Run a single API test"""
+        url = f"{self.base_url}/{endpoint}" if not endpoint.startswith('http') else endpoint
+        test_headers = {'Content-Type': 'application/json'}
         
-    async def setup_demo_user(self):
-        """Demo kullanıcısı ile giriş yap ve token al"""
-        async with httpx.AsyncClient() as client:
-            try:
-                login_data = {
-                    "email": "demo@postadepo.com",
-                    "password": "demo123"
-                }
+        if self.token:
+            test_headers['Authorization'] = f'Bearer {self.token}'
+        
+        if headers:
+            test_headers.update(headers)
+
+        self.tests_run += 1
+        print(f"\n🔍 Testing {name}...")
+        print(f"   URL: {url}")
+        
+        try:
+            if method == 'GET':
+                response = requests.get(url, headers=test_headers, params=params)
+            elif method == 'POST':
+                response = requests.post(url, json=data, headers=test_headers, params=params)
+            elif method == 'PUT':
+                response = requests.put(url, json=data, headers=test_headers, params=params)
+            elif method == 'DELETE':
+                response = requests.delete(url, headers=test_headers, params=params)
+
+            success = response.status_code == expected_status
+            if success:
+                self.tests_passed += 1
+                print(f"✅ Passed - Status: {response.status_code}")
                 
-                response = await client.post(f"{self.backend_url}/auth/login", json=login_data)
-                
-                if response.status_code == 200:
-                    data = response.json()
-                    self.demo_user_token = data["token"]
-                    self.demo_user_id = data["user"]["id"]
-                    print(f"✅ Demo kullanıcısı giriş başarılı - User ID: {self.demo_user_id}")
-                    return True
+                # For HTML responses, show content preview
+                if 'text/html' in response.headers.get('Content-Type', ''):
+                    content_preview = response.text[:200].replace('\n', ' ').strip()
+                    print(f"   HTML Response preview: {content_preview}...")
                 else:
-                    print(f"❌ Demo kullanıcısı giriş başarısız: {response.status_code} - {response.text}")
-                    return False
-                    
-            except Exception as e:
-                print(f"❌ Demo kullanıcısı giriş hatası: {e}")
-                return False
-    
-    async def create_oauth_state(self):
-        """Demo kullanıcısı için OAuth state oluştur"""
-        if not self.demo_user_token or not self.demo_user_id:
-            print("❌ Demo kullanıcısı token'ı bulunamadı")
+                    try:
+                        response_data = response.json()
+                        print(f"   Response keys: {list(response_data.keys()) if isinstance(response_data, dict) else 'Non-dict response'}")
+                    except:
+                        print(f"   Response: {response.text[:100]}...")
+            else:
+                print(f"❌ Failed - Expected {expected_status}, got {response.status_code}")
+                print(f"   Response: {response.text[:300]}...")
+
+            return success, response
+
+        except Exception as e:
+            print(f"❌ Failed - Error: {str(e)}")
+            return False, None
+
+    def test_login(self):
+        """Test demo user login to get authentication token"""
+        success, response = self.run_test(
+            "Demo User Login",
+            "POST",
+            "auth/login",
+            200,
+            data={"email": "demo@postadepo.com", "password": "demo123"}
+        )
+        
+        if success and response:
+            response_data = response.json()
+            if 'token' in response_data and 'user' in response_data:
+                self.token = response_data['token']
+                self.user = response_data['user']
+                print(f"   Logged in as: {self.user.get('email')}")
+                return True
+        return False
             return None
             
         async with httpx.AsyncClient() as client:
