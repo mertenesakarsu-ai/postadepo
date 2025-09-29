@@ -68,7 +68,7 @@ const AdminDashboard = ({ onLogout }) => {
 
       // Tüm kullanıcıları yükle
       console.log('ADMIN DEBUG - Loading users from:', `${API}/admin/users`);
-      const usersResponse = await axios.get(`${API}/admin/users`, {
+      const usersResponse = await axios.post(`${API}/admin/users`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
       console.log('ADMIN DEBUG - Users loaded:', usersResponse.data.users?.length);
@@ -76,7 +76,7 @@ const AdminDashboard = ({ onLogout }) => {
 
       // Pending kullanıcıları yükle
       console.log('ADMIN DEBUG - Loading pending users from:', `${API}/admin/pending-users`);
-      const pendingResponse = await axios.get(`${API}/admin/pending-users`, {
+      const pendingResponse = await axios.post(`${API}/admin/pending-users`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
       console.log('ADMIN DEBUG - Pending users loaded:', pendingResponse.data.pending_users?.length);
@@ -85,7 +85,7 @@ const AdminDashboard = ({ onLogout }) => {
       // Sistem loglarını yükle
       try {
         console.log('ADMIN DEBUG - Loading system logs from:', `${API}/admin/system-logs`);
-        const logsResponse = await axios.get(`${API}/admin/system-logs`, {
+        const logsResponse = await axios.post(`${API}/admin/system-logs`, {}, {
           headers: { Authorization: `Bearer ${token}` }
         });
         console.log('ADMIN DEBUG - System logs loaded:', logsResponse.data.logs?.length);
