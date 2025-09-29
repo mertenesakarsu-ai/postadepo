@@ -2933,13 +2933,9 @@ async def connect_outlook_account(
         raise HTTPException(status_code=500, detail="Failed to connect account")
 
 # Add alternative GET endpoint for OAuth callback (Microsoft typically uses GET)
+from fastapi import Request
 @api_router.get("/auth/callback", response_class=HTMLResponse)
-async def oauth_callback(
-    code: str = Query(None, description="OAuth authorization code from Microsoft"),
-    state: str = Query(None, description="OAuth state parameter"),
-    error: str = Query(None, description="OAuth error code"),
-    error_description: str = Query(None, description="OAuth error description")
-):
+async def oauth_callback(request: Request):
     """OAuth callback endpoint for Microsoft/Outlook"""
     try:
         # Check for OAuth errors first
