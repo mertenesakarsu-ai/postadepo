@@ -69,6 +69,17 @@ const AdminDashboard = () => {
       });
       setPendingUsers(pendingResponse.data.pending_users);
 
+      // Sistem loglarını yükle
+      try {
+        const logsResponse = await axios.get(`${API}/admin/system-logs`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setSystemLogs(logsResponse.data.logs);
+      } catch (error) {
+        console.error('System logs load error:', error);
+        // Log loading hatası kritik değil, devam et
+      }
+
       // İstatistikleri hesapla
       calculateStats(usersResponse.data.users, pendingResponse.data.pending_users);
 
