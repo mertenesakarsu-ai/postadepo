@@ -2625,6 +2625,19 @@ async def connect_outlook_account(
         
         await db.connected_accounts.insert_one(connection_data)
         
+        # Log the email account connection
+        await add_system_log(
+            log_type="EMAIL_ACCOUNT_CONNECTED",
+            message=f"E-posta hesabı başarıyla bağlandı: {connection_data['email']} - Kullanıcı: {current_user.get('name', current_user.get('email'))}",
+            user_email=current_user.get('email'),
+            user_name=current_user.get('name'),
+            additional_data={
+                "connected_email": connection_data['email'],
+                "account_type": "outlook",
+                "display_name": connection_data['display_name']
+            }
+        )
+        
         # Clean up used state
         await db.oauth_states.delete_one({"state": state})
         
