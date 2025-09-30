@@ -2986,6 +2986,14 @@ async def unified_oauth_callback(request: Request):
     query_params = dict(request.query_params)
     logger.info(f"OAuth callback received: method={method}, query_params={list(query_params.keys())}")
     
+    # Handle CORS preflight requests
+    if method == "OPTIONS":
+        response = JSONResponse({"message": "OK"})
+        response.headers["Access-Control-Allow-Origin"] = "*"
+        response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+        response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+        return response
+    
     try:
         # Handle both GET query params and POST JSON body
         if method == "GET":
