@@ -2927,7 +2927,7 @@ async def connect_outlook_account(
         )
         
         # Clean up used state
-        await db.oauth_states.delete_one({"state": state})
+        await db.oauth_states.delete_one({"state": oauth_data.state})
         
         return {
             "message": "Outlook account connected successfully",
@@ -3036,7 +3036,7 @@ async def connect_outlook_account(
         )
         
         # Clean up used state
-        await db.oauth_states.delete_one({"state": state})
+        await db.oauth_states.delete_one({"state": oauth_data.state})
         
         return {
             "message": "Outlook account connected successfully",
@@ -3189,7 +3189,7 @@ async def oauth_callback(request: Request):
             )
             
             # Clean up used state
-            await db.oauth_states.delete_one({"state": state})
+            await db.oauth_states.delete_one({"state": oauth_data.state})
             
             # Return HTML response that closes the popup and communicates with parent
             return HTMLResponse("""
@@ -3257,7 +3257,7 @@ async def oauth_callback(request: Request):
         )
         
         # Clean up used state
-        await db.oauth_states.delete_one({"state": state})
+        await db.oauth_states.delete_one({"state": oauth_data.state})
         
         # Return HTML response that closes the popup and communicates with parent
         return HTMLResponse("""
