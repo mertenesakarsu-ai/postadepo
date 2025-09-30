@@ -6,7 +6,7 @@ import uuid
 import time
 
 class AdminPanelBulkOperationsTester:
-    def __init__(self, base_url="https://mail-sync-fix.preview.emergentagent.com/api"):
+    def __init__(self, base_url="https://mail-sync-repair-1.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.admin_token = None
         self.admin_user = None
@@ -415,7 +415,7 @@ class AdminPanelBulkOperationsTester:
             return 1
 
 class OutlookIntegrationTester:
-    def __init__(self, base_url="https://mail-sync-fix.preview.emergentagent.com/api"):
+    def __init__(self, base_url="https://mail-sync-repair-1.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.demo_token = None
         self.demo_user = None
