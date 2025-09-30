@@ -2850,7 +2850,7 @@ async def connect_outlook_account(
             )
         
         # Verify state parameter
-        oauth_state = await db.oauth_states.find_one({"state": state, "user_id": current_user["id"]})
+        oauth_state = await db.oauth_states.find_one({"state": oauth_data.state, "user_id": current_user["id"]})
         if not oauth_state:
             raise HTTPException(status_code=400, detail="Invalid or expired state parameter")
         
@@ -2959,7 +2959,7 @@ async def connect_outlook_account(
             )
         
         # Verify state parameter
-        oauth_state = await db.oauth_states.find_one({"state": state, "user_id": current_user["id"]})
+        oauth_state = await db.oauth_states.find_one({"state": oauth_data.state, "user_id": current_user["id"]})
         if not oauth_state:
             raise HTTPException(status_code=400, detail="Invalid or expired state parameter")
         
