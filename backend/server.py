@@ -1842,6 +1842,65 @@ async def bulk_reject_users(request: BulkUserRequest, current_user: dict = Depen
         "failed_count": failed_count
     }
 
+# Admin Settings Endpoints
+
+@api_router.post("/admin/settings/get")
+async def get_admin_setting(current_user: dict = Depends(get_current_user)):
+    """
+    Admin endpoint - Admin sistem ayarlarını getirir
+    """
+    # Admin yetkisi kontrolü
+    if current_user.get("user_type") != "admin":
+        raise HTTPException(status_code=403, detail="Bu işlem için admin yetkisi gerekli")
+    
+    # Otomatik onay ayarını getir
+    auto_approval_setting = await db.admin_settings.find_one({"setting_key": "auto_approval"})
+    
+    settings = {
+        "auto_approval": auto_approval_setting.get("setting_value", False) if auto_approval_setting else False
+    }
+    
+    return {"settings": settings}
+
+@api_router.post("/admin/settings/update")
+async def update_admin_setting(setting_data: dict, current_user: dict = Depends(get_current_user)):
+    """
+    Admin endpoint - Admin sistem ayarlarını günceller
+    """
+    # Admin yetkisi kontrolü
+    if current_user.get("user_type") != "admin":
+        raise HTTPException(status_code=403, detail="Bu işlem için admin yetkisi gerekli")
+    
+    if "auto_approval" in setting_data:
+        auto_approval_value = bool(setting_data["auto_approval"])
+        
+        # Ayarı güncelle veya oluştur
+        await db.admin_settings.update_one(
+            {"setting_key": "auto_approval"},
+            {
+                "$set": {
+                    "setting_key": "auto_approval",
+                    "setting_value": auto_approval_value,
+                    "updated_at": datetime.now(timezone.utc),
+                    "updated_by": current_user["id"]
+                }
+            },
+            upsert=True
+        )
+        
+        # Log ekle
+        await add_system_log(
+            log_type="ADMIN_SETTING_CHANGED",
+            message=f"Otomatik onay ayarı değiştirildi: {'Açık' if auto_approval_value else 'Kapalı'} - Admin: {current_user.get('name', current_user.get('email'))}",
+            user_email=current_user.get('email'),
+            user_name=current_user.get('name'),
+            additional_data={"setting_key": "auto_approval", "new_value": auto_approval_value}
+        )
+        
+        return {"message": f"Otomatik onay ayarı {'açıldı' if auto_approval_value else 'kapatıldı'}", "auto_approval": auto_approval_value}
+    
+    return {"message": "Güncellenecek ayar bulunamadı"}
+
 @api_router.delete("/emails/{email_id}")
 async def delete_email(email_id: str, current_user: dict = Depends(get_current_user)):
     result = await db.emails.delete_one(
