@@ -610,7 +610,8 @@ metadata:
 
 test_plan:
   current_focus:
-    - "OAuth callback endpoint fix validation test"
+    - "Undefined variable hatalarının düzeltilmesi"
+    - "Outlook OAuth callback endpoint test"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
