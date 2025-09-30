@@ -2945,11 +2945,7 @@ async def connect_outlook_account(
         logger.error(f"Error connecting Outlook account: {e}")
         raise HTTPException(status_code=500, detail="Failed to connect account")
 
-@api_router.post("/outlook/connect-account")
-async def connect_outlook_account(
-    oauth_data: OAuthConnectRequest,
-    current_user: dict = Depends(get_current_user)
-):
+# Duplicate endpoint removed - using the first one above
     """Connect user's Outlook account with OAuth2 code - accepts JSON body"""
     try:
         if not outlook_auth_service.is_configured():
