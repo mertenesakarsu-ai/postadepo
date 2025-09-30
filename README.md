@@ -14,6 +14,9 @@ PostaDepo, kullanıcıların Outlook maillerini kolayca yedeklemelerine ve gerek
 
 * **Mail Yedekleme** – Outlook maillerinizi `.pst` ve `.ost` formatlarında yedekleyin.
 * **İçe/Dışa Aktarım** – Oluşturduğunuz yedekleri kolayca geri yükleyin.
+  - ZIP Format (.zip) – Tüm mailler paketlenmiş şekilde.
+  - EML Format (.eml) – Tek tek e-posta dosyaları.
+  - JSON Format (.json) – Mail içeriklerini yapılandırılmış JSON olarak.
 * **Güvenli Saklama** – Yedekler güvenli şekilde depolanır; erişim JWT ile korunur.
 * **Modern, Responsive Arayüz** – React + Tailwind ile kullanıcı dostu tasarım.
 * **OAuth & Outlook Entegrasyonu** – Outlook hesaplarıyla güvenli bağlantı ve yetkilendirme.
@@ -28,6 +31,7 @@ PostaDepo, kullanıcıların Outlook maillerini kolayca yedeklemelerine ve gerek
 * **Express.js**: HTTP server ve API route yönetimi.
 * **MongoDB**: Veritabanı.
 * **bcrypt**: Şifre hashleme işlemleri.
+* **Python** – Mail yedeklerini işleme ve farklı formatlara dönüştürme işlemleri için.
 
 ### Frontend
 
@@ -42,6 +46,7 @@ PostaDepo, kullanıcıların Outlook maillerini kolayca yedeklemelerine ve gerek
 **Gereksinimler**
 
 * Node.js (v16 veya üzeri)
+* Python (v3.10 veya üzeri)
 * MongoDB (yerel ya da Atlas)
 
 **Adımlar**
@@ -58,10 +63,15 @@ npm install
 cd ../frontend
 npm install
 
-# 4. Backend'i başlatın (backend klasöründe)
+# 4. Python bağımlılıklarını yükleyin
+cd ../backend
+pip install -r requirements.txt
+
+# 5. Backend'i başlatın
 npm start
 
-# 5. Frontend'i başlatın (frontend klasöründe)
+# 6. Frontend'i başlatın
+cd ../frontend
 npm start
 ```
 
@@ -80,7 +90,8 @@ OUTLOOK_CLIENT_SECRET=<azure-app-client-secret>
 OUTLOOK_REDIRECT_URI=https://yourdomain.com/api/auth/callback
 ```
 
-> Not: Gerçek client secret ve Mongo bağlantı stringlerini asla herkese açık repoya eklemeyin.
+> [!WARNING] 
+>  Uyarı: Gerçek client secret ve Mongo bağlantı stringlerini asla herkese açık repoya eklemeyin.
 
 ---
 
@@ -113,4 +124,3 @@ Katkılar memnuniyetle kabul edilir:
 
 Bu proje MIT Lisansı ile lisanslanmıştır.
 
-*README, repository içeriğine göre güncellenmiştir ve frontend/backend teknolojileri doğru şekilde belirtilmiştir.*
