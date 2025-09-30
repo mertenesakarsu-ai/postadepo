@@ -2774,7 +2774,7 @@ async def outlook_status():
     }
 
 @api_router.get("/outlook/auth-url")
-async def get_outlook_auth_url(current_user: dict = Depends(get_current_user)):
+async def get_outlook_auth_url(request: Request, current_user: dict = Depends(get_current_user)):
     """Get Microsoft OAuth2 authorization URL"""
     try:
         if not outlook_auth_service.is_configured():
