@@ -313,7 +313,10 @@ const AdminDashboard = ({ onLogout }) => {
       console.log('ADMIN DEBUG - Updating auto approval setting:', newValue);
       const response = await axios.post(`${API}/admin/settings/update`, 
         { auto_approval: newValue }, 
-        { headers: { Authorization: `Bearer ${token}` } }
+        { 
+          headers: { Authorization: `Bearer ${token}` },
+          timeout: 10000 // 10 saniye timeout
+        }
       );
       
       console.log('ADMIN DEBUG - Auto approval updated:', response.data);
@@ -321,7 +324,11 @@ const AdminDashboard = ({ onLogout }) => {
       toast.success(response.data.message || (newValue ? 'Otomatik onay açıldı' : 'Otomatik onay kapatıldı'));
     } catch (error) {
       console.error('ADMIN DEBUG - Auto approval update error:', error);
-      toast.error('Otomatik onay ayarı güncellenirken hata oluştu');
+      if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
+        toast.error('İstek zaman aşımına uğradı. Lütfen tekrar deneyin.');
+      } else {
+        toast.error('Otomatik onay ayarı güncellenirken hata oluştu');
+      }
     }
   };
 
