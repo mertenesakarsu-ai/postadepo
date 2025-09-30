@@ -2028,10 +2028,18 @@ def main():
             # Run Outlook callback endpoint tests
             tester = OutlookCallbackTester()
             return tester.run_comprehensive_callback_test()
+        elif sys.argv[1] == "undefined-fix":
+            # Run Outlook OAuth undefined variable fix tests
+            tester = OutlookUndefinedVariableFixTester()
+            return tester.run_comprehensive_undefined_variable_fix_test()
+        else:
+            # Run admin panel bulk operations tests
+            tester = AdminPanelBulkOperationsTester()
+            return tester.run_comprehensive_test()
     else:
-        # Run admin panel bulk operations tests (default)
-        tester = AdminPanelBulkOperationsTester()
-        return tester.run_comprehensive_test()
+        # Default: run undefined variable fix tests based on current focus in test_result.md
+        tester = OutlookUndefinedVariableFixTester()
+        return tester.run_comprehensive_undefined_variable_fix_test()
 
 if __name__ == "__main__":
     sys.exit(main())
