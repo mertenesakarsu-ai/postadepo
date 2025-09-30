@@ -138,8 +138,12 @@ class UserCreate(BaseModel):
         return validate_email(v)
 
 class UserLogin(BaseModel):
-    email: EmailStr
+    email: str
     password: str
+    
+    @validator('email')
+    def validate_email_field(cls, v):
+        return validate_email(v)
 
 class User(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
