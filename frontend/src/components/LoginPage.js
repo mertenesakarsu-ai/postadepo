@@ -218,7 +218,7 @@ const LoginPage = ({ onLogin }) => {
             <CardTitle className="text-2xl text-slate-800 mb-0">{t('auth.loginTitle')}</CardTitle>
           </CardHeader>
           <CardContent className="px-6 pb-6">
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form onSubmit={handleSubmit} className="space-y-5" noValidate>
               <div className="space-y-4">
                 <div className="relative">
                   <Mail className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
