@@ -27,4 +27,4 @@ in all copies or substantial portions of the Software.
 **SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.**
 </br>
 
-<img width="691" height="361" alt="Image" src="https://github.com/user-attachments/assets/2c7d2ffa-4740-464e-89f3-1e7ba998b3af" />
+<img width="691" height="361" alt="PostaDepo" src="https://github.com/user-attachments/assets/37b865c9-2813-443d-b361-ebc60190dec9" />
