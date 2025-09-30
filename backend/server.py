@@ -2823,7 +2823,7 @@ async def get_outlook_auth_url(current_user: dict = Depends(get_current_user)):
         return {
             "auth_url": auth_url,
             "state": state,
-            "redirect_uri": os.getenv('REDIRECT_URI', 'https://outlook-sync-debug.preview.emergentagent.com/auth/callback')
+            "redirect_uri": redirect_uri
         }
         
     except HTTPException:
