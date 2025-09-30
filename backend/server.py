@@ -148,9 +148,13 @@ class UserLogin(BaseModel):
 class User(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     name: str
-    email: EmailStr
+    email: str
     approved: bool = False  # Whitelist durumu - sadece true olanlar giriş yapabilir
     user_type: str = "email"  # "email" for regular signup, "outlook" for OAuth users
+    
+    @validator('email')
+    def validate_email_field(cls, v):
+        return validate_email(v)
 
 class OutlookUser(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
