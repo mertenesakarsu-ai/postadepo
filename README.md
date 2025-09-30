@@ -6,7 +6,7 @@
     <a href="https://github.com/mertenesakarsu-ai/postadepo/actions"><img src="https://github.com/mertenesakarsu-ai/postadepo/actions/workflows/build.yml/badge.svg" alt="Build Status"></a>
 </p>
 
-PostaDepo, kullanıcıların Outlook maillerini kolayca yedeklemelerine ve gerektiğinde geri yüklemelerine olanak tanıyan modern bir web uygulamasıdır. Proje, React.js ile hazırlanmış bir frontend ve Node.js/Express tabanlı bir backend içerir.
+PostaDepo, kullanıcıların Outlook maillerini **kolayca yedeklemelerine**, farklı formatlarda **dışa aktarmalarına** ve gerektiğinde **geri yüklemelerine** olanak tanıyan modern bir web uygulamasıdır. Proje, **React.js** tabanlı frontend ve **Node.js/Express** tabanlı backend içerir. Bazı yedekleme ve format dönüşümü işlemleri için **Python** betikleri kullanılır.
 
 ---
 
