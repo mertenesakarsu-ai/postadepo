@@ -59,7 +59,9 @@ jobs:
           cache-dependency-path: frontend/yarn.lock
 
       - name: Install frontend dependencies
-        run: yarn install --check-files
+        run: |
+          yarn cache clean
+          yarn install
         working-directory: frontend
 
       - name: Run frontend linting
