@@ -2798,8 +2798,17 @@ async def get_outlook_auth_url(current_user: dict = Depends(get_current_user)):
             "expires_at": datetime.now(timezone.utc).replace(minute=datetime.now(timezone.utc).minute + 10)  # 10 min expiry
         })
         
-        # Build authorization URL - try multiple redirect URIs
-        redirect_uri = os.getenv('REDIRECT_URI', 'https://outlook-sync-debug.preview.emergentagent.com/auth/callback')
+        # Build authorization URL - use dynamic redirect URI based on current environment
+        # Try to get base URL from headers or fallback to environment variable
+        base_url = request.headers.get('origin') or request.headers.get('referer', '').rstrip('/')
+        if base_url and base_url.startswith('http'):
+            # Use the same domain as the frontend request
+            dynamic_redirect_uri = f"{base_url}/api/auth/callback"
+        else:
+            # Fallback to environment variable
+            dynamic_redirect_uri = os.getenv('REDIRECT_URI', 'https://outlook-sync-debug.preview.emergentagent.com/api/auth/callback')
+        
+        redirect_uri = dynamic_redirect_uri
         
         auth_url = (
             f"https://login.microsoftonline.com/common/oauth2/v2.0/authorize?"
