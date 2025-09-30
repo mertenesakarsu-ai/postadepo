@@ -2841,7 +2841,7 @@ async def connect_outlook_account(
     oauth_data: OAuthConnectRequest,
     current_user: dict = Depends(get_current_user)
 ):
-    """Connect user's Outlook account with OAuth2 code"""
+    """Connect user's Outlook account with OAuth2 code - accepts JSON body"""
     try:
         if not outlook_auth_service.is_configured():
             raise HTTPException(
@@ -2950,7 +2950,7 @@ async def connect_outlook_account(
     oauth_data: OAuthConnectRequest,
     current_user: dict = Depends(get_current_user)
 ):
-    """Connect user's Outlook account with OAuth2 code"""
+    """Connect user's Outlook account with OAuth2 code - accepts JSON body"""
     try:
         if not outlook_auth_service.is_configured():
             raise HTTPException(
