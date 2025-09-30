@@ -69,7 +69,8 @@ const AdminDashboard = ({ onLogout }) => {
       // Tüm kullanıcıları yükle
       console.log('ADMIN DEBUG - Loading users from:', `${API}/admin/users`);
       const usersResponse = await axios.post(`${API}/admin/users`, {}, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
+        timeout: 10000 // 10 saniye timeout
       });
       console.log('ADMIN DEBUG - Users loaded:', usersResponse.data.users?.length);
       setUsers(usersResponse.data.users);
@@ -77,7 +78,8 @@ const AdminDashboard = ({ onLogout }) => {
       // Pending kullanıcıları yükle
       console.log('ADMIN DEBUG - Loading pending users from:', `${API}/admin/pending-users`);
       const pendingResponse = await axios.post(`${API}/admin/pending-users`, {}, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
+        timeout: 10000 // 10 saniye timeout
       });
       console.log('ADMIN DEBUG - Pending users loaded:', pendingResponse.data.pending_users?.length);
       setPendingUsers(pendingResponse.data.pending_users);
@@ -86,7 +88,8 @@ const AdminDashboard = ({ onLogout }) => {
       try {
         console.log('ADMIN DEBUG - Loading system logs from:', `${API}/admin/system-logs`);
         const logsResponse = await axios.post(`${API}/admin/system-logs`, {}, {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${token}` },
+          timeout: 10000 // 10 saniye timeout
         });
         console.log('ADMIN DEBUG - System logs loaded:', logsResponse.data.logs?.length);
         setSystemLogs(logsResponse.data.logs);
@@ -102,7 +105,8 @@ const AdminDashboard = ({ onLogout }) => {
       try {
         console.log('ADMIN DEBUG - Loading admin settings from:', `${API}/admin/settings/get`);
         const settingsResponse = await axios.post(`${API}/admin/settings/get`, {}, {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${token}` },
+          timeout: 10000 // 10 saniye timeout
         });
         console.log('ADMIN DEBUG - Admin settings loaded:', settingsResponse.data.settings);
         setAutoApproval(settingsResponse.data.settings.auto_approval);
