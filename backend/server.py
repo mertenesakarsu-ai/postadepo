@@ -2838,8 +2838,7 @@ async def get_outlook_auth_url(current_user: dict = Depends(get_current_user)):
 
 @api_router.post("/outlook/connect-account")
 async def connect_outlook_account(
-    code: str = Query(...),
-    state: str = Query(...),
+    oauth_data: OAuthConnectRequest,
     current_user: dict = Depends(get_current_user)
 ):
     """Connect user's Outlook account with OAuth2 code"""
@@ -2948,8 +2947,7 @@ async def connect_outlook_account(
 
 @api_router.post("/outlook/connect-account")
 async def connect_outlook_account(
-    code: str = Query(...),
-    state: str = Query(...),
+    oauth_data: OAuthConnectRequest,
     current_user: dict = Depends(get_current_user)
 ):
     """Connect user's Outlook account with OAuth2 code"""
