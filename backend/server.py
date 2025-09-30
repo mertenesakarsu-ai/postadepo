@@ -229,6 +229,13 @@ class SystemLog(BaseModel):
     additional_data: Optional[Dict[str, Any]] = None
     sync_timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     next_sync_token: Optional[str] = None
+
+class AdminSettings(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    setting_key: str
+    setting_value: Any
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_by: Optional[str] = None  # admin user id
     
 # Demo attachment generator
 def generate_demo_attachments():
