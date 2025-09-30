@@ -4,7 +4,7 @@ import json
 from datetime import datetime
 
 class AdminRedirectionTester:
-    def __init__(self, base_url="https://outlook-connector.preview.emergentagent.com/api"):
+    def __init__(self, base_url="https://yaml-doctor.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.admin_token = None
         self.regular_token = None
