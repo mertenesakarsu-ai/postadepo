@@ -1221,9 +1221,13 @@ async def register(user_data: UserCreate):
     if existing_user:
         raise HTTPException(status_code=400, detail="Bu e-posta adresi zaten kayıtlı")
     
-    # Create new user with approved=False (whitelist sistemi)
+    # Otomatik onay ayarını kontrol et
+    auto_approval_setting = await db.admin_settings.find_one({"setting_key": "auto_approval"})
+    auto_approval_enabled = auto_approval_setting.get("setting_value", False) if auto_approval_setting else False
+    
+    # Create new user - otomatik onay ayarına göre approved değerini ayarla
     hashed_password = hash_password(user_data.password)
-    new_user = User(name=user_data.name, email=user_data.email, approved=False)
+    new_user = User(name=user_data.name, email=user_data.email, approved=auto_approval_enabled)
     
     # Save user to database
     user_dict = new_user.dict()
@@ -1233,17 +1237,24 @@ async def register(user_data: UserCreate):
     # Log the registration
     await add_system_log(
         log_type="USER_REGISTER",
-        message=f"Yeni kullanıcı kaydı oluşturuldu: {user_data.name} ({user_data.email})",
+        message=f"Yeni kullanıcı kaydı oluşturuldu: {user_data.name} ({user_data.email}) - {'Otomatik onaylandı' if auto_approval_enabled else 'Admin onayı bekleniyor'}",
         user_email=user_data.email,
         user_name=user_data.name,
-        additional_data={"user_id": new_user.id, "approved": False}
+        additional_data={"user_id": new_user.id, "approved": auto_approval_enabled, "auto_approval": auto_approval_enabled}
     )
     
-    return {
-        "message": "Kullanıcı kaydı oluşturuldu. Admin onayı bekleniyor.", 
-        "user_id": new_user.id,
-        "approved": False
-    }
+    if auto_approval_enabled:
+        return {
+            "message": "Kullanıcı kaydı oluşturuldu ve otomatik olarak onaylandı. Şimdi giriş yapabilirsiniz.", 
+            "user_id": new_user.id,
+            "approved": True
+        }
+    else:
+        return {
+            "message": "Kullanıcı kaydı oluşturuldu. Admin onayı bekleniyor.", 
+            "user_id": new_user.id,
+            "approved": False
+        }
 
 @api_router.post("/auth/login")
 async def login(user_data: UserLogin):
