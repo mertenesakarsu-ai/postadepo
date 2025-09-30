@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Admin paneli yeniden yapılandırma: Analitikler menüsü kaldırıldı, sistem performansı sistem menüsüne taşındı. Hızlı işlemler menüsü kaldırıldı, toplu onay/red işlemleri onay bekleyenler menüsüne eklendi. Sistem logları için yedekleme butonu eklendi, gerçek log sistemi oluşturuldu. Otomatik kayıt onayı onay bekleyenler menüsüne taşındı. Admin çıkış sorunu düzeltildi."
+user_problem_statement: "Outlook bağlantı hatası düzeltme: GitHub Action'da undefined variable hataları tespit edildi (oauth_data ve request). Bu hatalar Backend'de Outlook OAuth callback endpoint'lerinde undefined variables nedeniyle ortaya çıkıyor. Kullanıcı 'Outlook bağlandı' mesajı alıyor ama sonradan frontend'de hata oluşuyor."
 
 backend:
   - task: "Gerçek sistem log sistemi eklenmesi"
