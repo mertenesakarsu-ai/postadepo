@@ -2839,8 +2839,6 @@ async def get_outlook_auth_url(request: Request, current_user: dict = Depends(ge
 # Unified callback endpoint handles both GET and POST requests - old duplicate endpoints removed
 
 # Unified OAuth callback endpoint - handles both GET query params and POST JSON body
-from fastapi import Request
-from fastapi.responses import JSONResponse
 
 async def process_oauth_callback(code: str, state: str, user_id: str = None):
     """Common OAuth processing logic"""
