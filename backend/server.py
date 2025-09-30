@@ -2976,7 +2976,8 @@ async def process_oauth_callback(code: str, state: str, user_id: str = None):
         raise HTTPException(status_code=500, detail=f"OAuth processing failed: {str(e)}")
 
 @api_router.get("/auth/callback")
-@api_router.post("/auth/callback")
+@api_router.post("/auth/callback") 
+@api_router.options("/auth/callback")
 async def unified_oauth_callback(request: Request):
     """Unified OAuth callback endpoint - handles both GET query params and POST JSON body"""
     
