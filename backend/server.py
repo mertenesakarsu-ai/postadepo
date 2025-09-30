@@ -1803,9 +1803,6 @@ async def export_system_logs(current_user: dict = Depends(get_current_user)):
         }
     )
 
-class BulkUserRequest(BaseModel):
-    user_ids: List[str]
-
 @api_router.post("/admin/bulk-approve-users")
 async def bulk_approve_users(request: BulkUserRequest, current_user: dict = Depends(get_current_user)):
     """
