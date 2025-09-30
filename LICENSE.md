@@ -25,3 +25,6 @@ in all copies or substantial portions of the Software.
 **CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,**  
 **TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE**  
 **SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.**
+</br>
+
+<img width="691" height="361" alt="Image" src="https://github.com/user-attachments/assets/2c7d2ffa-4740-464e-89f3-1e7ba998b3af" />
