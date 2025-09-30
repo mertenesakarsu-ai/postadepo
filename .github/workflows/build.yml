@@ -19,13 +19,25 @@ jobs:
         with:
           node-version: 18
 
-      - name: Install dependencies
+      # --- BACKEND ---
+      - name: Install backend dependencies
         run: npm install
+        working-directory: backend
 
-      # Eğer package.json içinde "test" script yoksa hata vermesin diye true ekledim
-      - name: Run tests (if exists)
+      - name: Run backend tests (if any)
         run: npm test || true
+        working-directory: backend
 
-      # Sunucunun ayağa kalkabildiğini kontrol etmek için
-      - name: Verify app starts
+      # Optional: verify backend starts
+      - name: Verify backend starts
         run: node index.js --help || true
+        working-directory: backend
+
+      # --- FRONTEND ---
+      - name: Install frontend dependencies
+        run: npm install
+        working-directory: frontend
+
+      - name: Build frontend (if build script exists)
+        run: npm run build --if-present || true
+        working-directory: frontend
