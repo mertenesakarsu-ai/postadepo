@@ -2947,47 +2947,216 @@ async def connect_outlook_account(
 
 # Duplicate endpoint removed - cleaned up
 
-# Add alternative GET endpoint for OAuth callback (Microsoft typically uses GET)
+# Unified OAuth callback endpoint - handles both GET query params and POST JSON body
 from fastapi import Request
-@api_router.get("/auth/callback", response_class=HTMLResponse)
-async def oauth_callback(request: Request):
-    """OAuth callback endpoint for Microsoft/Outlook"""
+from fastapi.responses import JSONResponse
+
+async def process_oauth_callback(code: str, state: str, user_id: str = None):
+    """Common OAuth processing logic"""
     try:
-        # Manually extract query parameters to avoid Pydantic validation errors
-        query_params = dict(request.query_params)
-        code = query_params.get('code')
-        state = query_params.get('state') 
-        error = query_params.get('error')
-        error_description = query_params.get('error_description')
+        if not outlook_auth_service.is_configured():
+            raise HTTPException(
+                status_code=503, 
+                detail="Outlook integration not configured. Azure credentials needed."
+            )
         
-        print(f"OAuth callback received - code: {'✓' if code else '✗'}, state: {'✓' if state else '✗'}, error: {error}")
+        # Extract user_id from state parameter if not provided (format: user_id_uuid)
+        if not user_id:
+            try:
+                user_id = state.split('_')[0]
+            except:
+                raise HTTPException(status_code=400, detail="Invalid state format")
+        
+        # Verify state parameter in database
+        oauth_state = await db.oauth_states.find_one({"state": state, "user_id": user_id})
+        if not oauth_state:
+            raise HTTPException(status_code=400, detail="Invalid or expired state parameter")
+        
+        # Check if state is expired
+        if datetime.now(timezone.utc) > oauth_state["expires_at"]:
+            raise HTTPException(status_code=400, detail="Authorization state expired")
+        
+        # Get user info for logging
+        current_user = await db.users.find_one({"id": user_id})
+        if not current_user:
+            raise HTTPException(status_code=400, detail="User not found")
+        
+        # Exchange authorization code for tokens
+        token_data = await exchange_code_for_tokens(code)
+        
+        if not token_data:
+            raise HTTPException(status_code=400, detail="Failed to exchange code for tokens")
+        
+        # Get user profile from Microsoft Graph
+        user_profile = await get_user_profile_from_graph(token_data["access_token"])
+        
+        if not user_profile:
+            raise HTTPException(status_code=400, detail="Failed to get user profile")
+        
+        # Check if account already connected
+        existing = await db.connected_accounts.find_one({
+            "microsoft_user_id": user_profile["id"],
+            "user_id": user_id
+        })
+        
+        if existing:
+            # Update existing connection with new tokens
+            await db.connected_accounts.update_one(
+                {"_id": existing["_id"]},
+                {"$set": {
+                    "access_token": token_data["access_token"],
+                    "refresh_token": token_data.get("refresh_token"),
+                    "token_expires_at": datetime.now(timezone.utc).replace(
+                        second=datetime.now(timezone.utc).second + token_data.get("expires_in", 3600)
+                    ),
+                    "last_connected": datetime.now(timezone.utc),
+                    "is_connected": True
+                }}
+            )
+            
+            # Clean up used state
+            await db.oauth_states.delete_one({"state": state})
+            
+            return {
+                "success": True,
+                "message": "Account reconnected successfully", 
+                "account": {
+                    "id": existing["id"],
+                    "email": existing["email"],
+                    "display_name": existing.get("display_name", ""),
+                    "connected_at": existing.get("connected_at"),
+                    "is_reconnected": True
+                }
+            }
+        
+        # Create new connection
+        connection_data = {
+            "id": str(uuid.uuid4()),
+            "user_id": user_id,
+            "microsoft_user_id": user_profile["id"],
+            "email": user_profile.get("mail") or user_profile.get("userPrincipalName"),
+            "display_name": user_profile.get("displayName", ""),
+            "account_type": "outlook",
+            "is_connected": True,
+            "connected_at": datetime.now(timezone.utc),
+            "last_sync": None,
+            "access_token": token_data["access_token"],
+            "refresh_token": token_data.get("refresh_token"),
+            "token_expires_at": datetime.now(timezone.utc).replace(
+                second=datetime.now(timezone.utc).second + token_data.get("expires_in", 3600)
+            ),
+            "scopes": token_data.get("scope", "").split(" ")
+        }
+        
+        await db.connected_accounts.insert_one(connection_data)
+        
+        # Log the email account connection
+        await add_system_log(
+            log_type="EMAIL_ACCOUNT_CONNECTED",
+            message=f"E-posta hesabı başarıyla bağlandı: {connection_data['email']} - Kullanıcı: {current_user.get('name', current_user.get('email'))}",
+            user_email=current_user.get('email'),
+            user_name=current_user.get('name'),
+            additional_data={
+                "connected_email": connection_data['email'],
+                "account_type": "outlook",
+                "display_name": connection_data['display_name']
+            }
+        )
+        
+        # Clean up used state
+        await db.oauth_states.delete_one({"state": state})
+        
+        return {
+            "success": True,
+            "message": "Outlook account connected successfully",
+            "account": {
+                "id": connection_data["id"],
+                "email": connection_data["email"],
+                "display_name": connection_data["display_name"],
+                "connected_at": connection_data["connected_at"],
+                "is_reconnected": False
+            }
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error in OAuth processing: {e}")
+        raise HTTPException(status_code=500, detail=f"OAuth processing failed: {str(e)}")
+
+@api_router.get("/auth/callback")
+@api_router.post("/auth/callback")
+async def unified_oauth_callback(request: Request):
+    """Unified OAuth callback endpoint - handles both GET query params and POST JSON body"""
+    
+    # Log incoming request details
+    method = request.method
+    query_params = dict(request.query_params)
+    logger.info(f"OAuth callback received: method={method}, query_params={list(query_params.keys())}")
+    
+    try:
+        # Handle both GET query params and POST JSON body
+        if method == "GET":
+            code = query_params.get('code')
+            state = query_params.get('state')
+            error = query_params.get('error')
+            error_description = query_params.get('error_description')
+            
+            logger.info(f"GET OAuth callback - code: {'✓' if code else '✗'}, state: {'✓' if state else '✗'}, error: {error}")
+            
+        elif method == "POST":
+            try:
+                json_data = await request.json()
+                code = json_data.get('code') or query_params.get('code')
+                state = json_data.get('state') or query_params.get('state')
+                error = json_data.get('error') or query_params.get('error')
+                error_description = json_data.get('error_description') or query_params.get('error_description')
+                
+                logger.info(f"POST OAuth callback - code: {'✓' if code else '✗'}, state: {'✓' if state else '✗'}, error: {error}")
+                
+            except Exception as json_error:
+                # Fallback to query params if JSON parsing fails
+                logger.warning(f"JSON parsing failed, using query params: {json_error}")
+                code = query_params.get('code')
+                state = query_params.get('state')
+                error = query_params.get('error')
+                error_description = query_params.get('error_description')
         
         # Check for OAuth errors first
         if error:
             error_message = error_description or error
-            print(f"OAuth error received: {error} - {error_description}")
-            return HTMLResponse(f"""
-            <html>
-                <head><title>Outlook Bağlantı Hatası</title></head>
-                <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
-                    <h1 style="color: #d13438;">Bağlantı Hatası</h1>
-                    <p>Outlook hesabı bağlantısında hata oluştu: {error_message}</p>
-                    <p>Lütfen tekrar deneyiniz veya destek ekibine başvurunuz.</p>
-                    <button onclick="window.close()" style="padding: 10px 20px; background-color: #0078d4; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                        Pencereyi Kapat
-                    </button>
-                    <script>
-                        if (window.opener) {{
-                            window.opener.postMessage({{
-                                type: 'OUTLOOK_AUTH_ERROR',
-                                error: '{error}',
-                                error_description: '{error_message}'
-                            }}, '*');
-                        }}
-                    </script>
-                </body>
-            </html>
-            """, status_code=400)
+            logger.error(f"OAuth error received: {error} - {error_description}")
+            
+            error_response = {
+                "success": False,
+                "error": error,
+                "error_description": error_message,
+                "message": f"Outlook hesabı bağlantısında hata oluştu: {error_message}"
+            }
+            
+            # For GET requests (popup window), return HTML with postMessage
+            if method == "GET":
+                return HTMLResponse(f"""
+                <html>
+                    <head><title>Outlook Bağlantı Hatası</title></head>
+                    <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
+                        <h1 style="color: #d13438;">Bağlantı Hatası</h1>
+                        <p>Outlook hesabı bağlantısında hata oluştu: {error_message}</p>
+                        <p>Lütfen tekrar deneyiniz veya destek ekibine başvurunuz.</p>
+                        <button onclick="window.close()" style="padding: 10px 20px; background-color: #0078d4; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                            Pencereyi Kapat
+                        </button>
+                        <script>
+                            if (window.opener) {{
+                                window.opener.postMessage({str(error_response).replace("'", '"')}, '*');
+                            }}
+                        </script>
+                    </body>
+                </html>
+                """, status_code=400)
+            else:
+                # For POST requests, return JSON
+                return JSONResponse(error_response, status_code=400)
         
         # Check for missing required parameters
         if not code or not state:
@@ -2997,30 +3166,39 @@ async def oauth_callback(request: Request):
             if not state:
                 missing_params.append('state')
             
-            print(f"OAuth callback missing required parameters: {missing_params}")
-            return HTMLResponse(f"""
-            <html>
-                <head><title>Outlook Bağlantı Hatası</title></head>
-                <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
-                    <h1 style="color: #d13438;">Bağlantı Parametresi Hatası</h1>
-                    <p>Outlook bağlantısı için gerekli parametreler eksik: {', '.join(missing_params)}</p>
-                    <p>Bu genellikle OAuth akışının yarıda kesilmesi durumunda olur.</p>
-                    <p>Lütfen baştan başlayarak Outlook hesabınızı bağlamaya tekrar deneyiniz.</p>
-                    <button onclick="window.close()" style="padding: 10px 20px; background-color: #0078d4; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                        Pencereyi Kapat
-                    </button>
-                    <script>
-                        if (window.opener) {{
-                            window.opener.postMessage({{
-                                type: 'OUTLOOK_AUTH_ERROR',
-                                error: 'missing_parameters',
-                                error_description: 'Gerekli OAuth parametreleri eksik'
-                            }}, '*');
-                        }}
-                    </script>
-                </body>
-            </html>
-            """, status_code=400)
+            logger.error(f"OAuth callback missing required parameters: {missing_params}")
+            
+            error_response = {
+                "success": False,
+                "error": "missing_parameters", 
+                "error_description": f"Gerekli OAuth parametreleri eksik: {', '.join(missing_params)}",
+                "message": f"Outlook bağlantısı için gerekli parametreler eksik: {', '.join(missing_params)}"
+            }
+            
+            # For GET requests (popup window), return HTML with postMessage
+            if method == "GET":
+                return HTMLResponse(f"""
+                <html>
+                    <head><title>Outlook Bağlantı Hatası</title></head>
+                    <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
+                        <h1 style="color: #d13438;">Bağlantı Parametresi Hatası</h1>
+                        <p>Outlook bağlantısı için gerekli parametreler eksik: {', '.join(missing_params)}</p>
+                        <p>Bu genellikle OAuth akışının yarıda kesilmesi durumunda olur.</p>
+                        <p>Lütfen baştan başlayarak Outlook hesabınızı bağlamaya tekrar deneyiniz.</p>
+                        <button onclick="window.close()" style="padding: 10px 20px; background-color: #0078d4; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                            Pencereyi Kapat
+                        </button>
+                        <script>
+                            if (window.opener) {{
+                                window.opener.postMessage({str(error_response).replace("'", '"')}, '*');
+                            }}
+                        </script>
+                    </body>
+                </html>
+                """, status_code=400)
+            else:
+                # For POST requests, return JSON
+                return JSONResponse(error_response, status_code=400)
         
         if not outlook_auth_service.is_configured():
             raise HTTPException(
