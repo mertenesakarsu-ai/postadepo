@@ -275,7 +275,17 @@ const AdminDashboard = ({ onLogout }) => {
       setBulkActionLoading(true);
       const token = localStorage.getItem('token');
       
-      const response = await axios.post(`${API}/admin/bulk-reject-users`, {}, {
+      // Tüm pending kullanıcıların ID'lerini al
+      const userIds = pendingUsers.map(user => user.id);
+      
+      if (userIds.length === 0) {
+        toast.error('Reddedilecek kullanıcı bulunamadı');
+        return;
+      }
+      
+      const response = await axios.post(`${API}/admin/bulk-reject-users`, {
+        user_ids: userIds
+      }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
@@ -283,7 +293,7 @@ const AdminDashboard = ({ onLogout }) => {
       loadData(); // Verileri yeniden yükle
     } catch (error) {
       console.error('Bulk reject error:', error);
-      toast.error('Toplu reddetme sırasında hata oluştu');
+      toast.error(error.response?.data?.detail || 'Toplu reddetme sırasında hata oluştu');
     } finally {
       setBulkActionLoading(false);
     }
