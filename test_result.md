@@ -189,6 +189,9 @@ frontend:
       - working: true
         agent: "main"
         comment: "Otomatik kayıt onayı toggle'ı eklendi. Toplu onay/red butonları eklendi. handleBulkApprove ve handleBulkReject fonksiyonları eklendi. AlertDialog ile onay sistemi eklendi."
+      - working: true
+        agent: "main"
+        comment: "SORUN ÇÖZÜLDÜ: Admin panelindeki toplu onay/red butonları çalışmıyordu çünkü frontend API çağrısında user_ids parametresi gönderilmiyordu. Backend BulkUserRequest model'i user_ids: List[str] beklerken frontend boş obje {} gönderiyordu. FIX: handleBulkApprove ve handleBulkReject fonksiyonlarında pendingUsers.map(user => user.id) ile user_ids array'i oluşturuldu ve API'ye gönderildi. Hata mesajları iyileştirildi."
 
   - task: "Sistem logları görüntüleme ve indirme"
     implemented: true
