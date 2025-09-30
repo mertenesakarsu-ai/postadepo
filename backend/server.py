@@ -130,8 +130,12 @@ def validate_email(email: str) -> str:
 # Models
 class UserCreate(BaseModel):
     name: str
-    email: EmailStr
+    email: str
     password: str
+    
+    @validator('email')
+    def validate_email_field(cls, v):
+        return validate_email(v)
 
 class UserLogin(BaseModel):
     email: EmailStr
