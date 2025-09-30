@@ -3200,198 +3200,90 @@ async def unified_oauth_callback(request: Request):
                 # For POST requests, return JSON
                 return JSONResponse(error_response, status_code=400)
         
-        if not outlook_auth_service.is_configured():
-            raise HTTPException(
-                status_code=503, 
-                detail="Outlook integration not configured. Azure credentials needed."
-            )
+        # Process OAuth callback using shared logic
+        result = await process_oauth_callback(code, state)
         
-        # Extract user_id from state parameter (format: user_id_uuid)
-        try:
-            user_id = state.split('_')[0]
-        except:
-            raise HTTPException(status_code=400, detail="Invalid state format")
-        
-        # Verify state parameter in database
-        oauth_state = await db.oauth_states.find_one({"state": state, "user_id": user_id})
-        if not oauth_state:
-            raise HTTPException(status_code=400, detail="Invalid or expired state parameter")
-        
-        # Check if state is expired
-        if datetime.now(timezone.utc) > oauth_state["expires_at"]:
-            raise HTTPException(status_code=400, detail="Authorization state expired")
-        
-        # Get user info for logging
-        current_user = await db.users.find_one({"id": user_id})
-        if not current_user:
-            raise HTTPException(status_code=400, detail="User not found")
-        
-        # Exchange authorization code for tokens
-        token_data = await exchange_code_for_tokens(oauth_data.code)
-        
-        if not token_data:
-            raise HTTPException(status_code=400, detail="Failed to exchange code for tokens")
-        
-        # Get user profile from Microsoft Graph
-        user_profile = await get_user_profile_from_graph(token_data["access_token"])
-        
-        if not user_profile:
-            raise HTTPException(status_code=400, detail="Failed to get user profile")
-        
-        # Check if account already connected
-        existing = await db.connected_accounts.find_one({
-            "microsoft_user_id": user_profile["id"],
-            "user_id": user_id
-        })
-        
-        if existing:
-            # Update existing connection with new tokens
-            await db.connected_accounts.update_one(
-                {"_id": existing["_id"]},
-                {"$set": {
-                    "access_token": token_data["access_token"],
-                    "refresh_token": token_data.get("refresh_token"),
-                    "token_expires_at": datetime.now(timezone.utc).replace(
-                        second=datetime.now(timezone.utc).second + token_data.get("expires_in", 3600)
-                    ),
-                    "last_connected": datetime.now(timezone.utc),
-                    "is_connected": True
-                }}
-            )
+        # For GET requests (popup window), return HTML with postMessage
+        if method == "GET":
+            account_info = result.get("account", {})
+            is_reconnected = account_info.get("is_reconnected", False)
             
-            # Clean up used state
-            await db.oauth_states.delete_one({"state": oauth_data.state})
+            title = "Outlook Yeniden Bağlandı" if is_reconnected else "Outlook Bağlandı"
+            message = "Hesap Başarıyla Yeniden Bağlandı!" if is_reconnected else "Hesap Başarıyla Bağlandı!"
             
-            # Return HTML response that closes the popup and communicates with parent
-            return HTMLResponse("""
+            return HTMLResponse(f"""
             <html>
-                <head><title>Outlook Yeniden Bağlandı</title></head>
+                <head><title>{title}</title></head>
                 <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
-                    <h1 style="color: #0078d4;">Hesap Başarıyla Yeniden Bağlandı!</h1>
-                    <p>Outlook hesabınız yeniden bağlandı. Bu pencere otomatik olarak kapanacak.</p>
+                    <h1 style="color: #0078d4;">{message}</h1>
+                    <p>Outlook hesabınız başarıyla bağlandı. Bu pencere otomatik olarak kapanacak.</p>
                     <div style="margin-top: 20px;">
                         <div style="display: inline-block; width: 40px; height: 40px; border: 4px solid #0078d4; border-top: 4px solid transparent; border-radius: 50%; animation: spin 1s linear infinite;"></div>
                     </div>
                     <style>
-                        @keyframes spin {
-                            0% { transform: rotate(0deg); }
-                            100% { transform: rotate(360deg); }
-                        }
+                        @keyframes spin {{
+                            0% {{ transform: rotate(0deg); }}
+                            100% {{ transform: rotate(360deg); }}
+                        }}
                     </style>
                     <script>
-                        if (window.opener) {
-                            window.opener.postMessage({
-                                type: 'OUTLOOK_AUTH_SUCCESS',
-                                message: 'Account reconnected successfully'
-                            }, '*');
-                        }
-                        setTimeout(() => {
+                        if (window.opener) {{
+                            window.opener.postMessage({str(result).replace("'", '"')}, '*');
+                        }}
+                        setTimeout(() => {{
                             window.close();
-                        }, 3000);
+                        }}, 3000);
                     </script>
                 </body>
             </html>
             """)
-        
-        # Create new connection
-        connection_data = {
-            "id": str(uuid.uuid4()),
-            "user_id": user_id,
-            "microsoft_user_id": user_profile["id"],
-            "email": user_profile.get("mail") or user_profile.get("userPrincipalName"),
-            "display_name": user_profile.get("displayName", ""),
-            "account_type": "outlook",
-            "is_connected": True,
-            "connected_at": datetime.now(timezone.utc),
-            "last_sync": None,
-            "access_token": token_data["access_token"],
-            "refresh_token": token_data.get("refresh_token"),
-            "token_expires_at": datetime.now(timezone.utc).replace(
-                second=datetime.now(timezone.utc).second + token_data.get("expires_in", 3600)
-            ),
-            "scopes": token_data.get("scope", "").split(" ")
-        }
-        
-        await db.connected_accounts.insert_one(connection_data)
-        
-        # Log the email account connection
-        await add_system_log(
-            log_type="EMAIL_ACCOUNT_CONNECTED",
-            message=f"E-posta hesabı başarıyla bağlandı: {connection_data['email']} - Kullanıcı: {current_user.get('name', current_user.get('email'))}",
-            user_email=current_user.get('email'),
-            user_name=current_user.get('name'),
-            additional_data={
-                "connected_email": connection_data['email'],
-                "account_type": "outlook",
-                "display_name": connection_data['display_name']
-            }
-        )
-        
-        # Clean up used state
-        await db.oauth_states.delete_one({"state": oauth_data.state})
-        
-        # Return HTML response that closes the popup and communicates with parent
-        return HTMLResponse("""
-        <html>
-            <head><title>Outlook Bağlandı</title></head>
-            <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
-                <h1 style="color: #0078d4;">Hesap Başarıyla Bağlandı!</h1>
-                <p>Outlook hesabınız başarıyla bağlandı. Bu pencere otomatik olarak kapanacak.</p>
-                <div style="margin-top: 20px;">
-                    <div style="display: inline-block; width: 40px; height: 40px; border: 4px solid #0078d4; border-top: 4px solid transparent; border-radius: 50%; animation: spin 1s linear infinite;"></div>
-                </div>
-                <style>
-                    @keyframes spin {
-                        0% { transform: rotate(0deg); }
-                        100% { transform: rotate(360deg); }
-                    }
-                </style>
-                <script>
-                    if (window.opener) {
-                        window.opener.postMessage({
-                            type: 'OUTLOOK_AUTH_SUCCESS',
-                            message: 'Account connected successfully',
-                            account: {
-                                id: '""" + connection_data["id"] + """',
-                                email: '""" + connection_data["email"] + """',
-                                display_name: '""" + connection_data["display_name"] + """'
-                            }
-                        }, '*');
-                    }
-                    setTimeout(() => {
-                        window.close();
-                    }, 3000);
-                </script>
-            </body>
-        </html>
-        """)
+        else:
+            # For POST requests, return JSON with CORS headers
+            response = JSONResponse(result)
+            response.headers["Access-Control-Allow-Origin"] = "*"
+            response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+            response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+            return response
         
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Error in OAuth callback: {e}")
-        # Return error HTML
-        return HTMLResponse(f"""
-        <html>
-            <head><title>Bağlantı Hatası</title></head>
-            <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
-                <h1 style="color: #d13438;">Bağlantı Hatası</h1>
-                <p>Outlook hesabı bağlanırken bir hata oluştu.</p>
-                <p style="color: #666; font-size: 14px;">Hata: {str(e)}</p>
-                <script>
-                    if (window.opener) {{
-                        window.opener.postMessage({{
-                            type: 'OUTLOOK_AUTH_ERROR',
-                            error: '{str(e)}'
-                        }}, '*');
-                    }}
-                    setTimeout(() => {{
-                        window.close();
-                    }}, 5000);
-                </script>
-            </body>
-        </html>
-        """, status_code=500)
+        logger.error(f"Error in unified OAuth callback: {e}")
+        
+        error_response = {
+            "success": False,
+            "error": "internal_error",
+            "error_description": f"OAuth callback processing failed: {str(e)}",
+            "message": f"Outlook hesabı bağlanırken bir hata oluştu: {str(e)}"
+        }
+        
+        # For GET requests (popup window), return HTML with postMessage
+        if request.method == "GET":
+            return HTMLResponse(f"""
+            <html>
+                <head><title>Bağlantı Hatası</title></head>
+                <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
+                    <h1 style="color: #d13438;">Bağlantı Hatası</h1>
+                    <p>Outlook hesabı bağlanırken bir hata oluştu.</p>
+                    <p style="color: #666; font-size: 14px;">Hata: {str(e)}</p>
+                    <script>
+                        if (window.opener) {{
+                            window.opener.postMessage({str(error_response).replace("'", '"')}, '*');
+                        }}
+                        setTimeout(() => {{
+                            window.close();
+                        }}, 5000);
+                    </script>
+                </body>
+            </html>
+            """, status_code=500)
+        else:
+            # For POST requests, return JSON with CORS headers
+            response = JSONResponse(error_response, status_code=500)
+            response.headers["Access-Control-Allow-Origin"] = "*"
+            response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+            response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+            return response
 
 @api_router.get("/outlook/accounts")
 async def get_connected_outlook_accounts(current_user: dict = Depends(get_current_user)):
