@@ -107,6 +107,26 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
         raise HTTPException(status_code=401, detail="User not found")
     return user
 
+# Email validation function that supports Turkish characters
+def validate_email(email: str) -> str:
+    """
+    Custom email validation that supports Turkish characters (ı, ğ, ü, ş, ö, ç)
+    """
+    if not email:
+        raise ValueError("Email adresi boş olamaz")
+    
+    # Turkish characters support email pattern
+    # Allow Turkish characters in local part: ç, ğ, ı, ö, ş, ü and their uppercase versions
+    pattern = r'^[a-zA-ZçğıöşüÇĞIİÖŞÜ0-9._-]+@[a-zA-ZçğıöşüÇĞIİÖŞÜ0-9.-]+\.[a-zA-Z]{2,}$'
+    
+    if not re.match(pattern, email):
+        raise ValueError("Geçersiz email formatı")
+    
+    if len(email) > 254:
+        raise ValueError("Email adresi çok uzun")
+    
+    return email.lower()
+
 # Models
 class UserCreate(BaseModel):
     name: str
