@@ -3451,7 +3451,14 @@ async def exchange_code_for_tokens(authorization_code: str) -> Optional[dict]:
         token_url = "https://login.microsoftonline.com/common/oauth2/v2.0/token"
         
         # Use the same redirect URI as in auth URL generation
-        redirect_uri = os.getenv('REDIRECT_URI', 'https://outlook-sync-debug.preview.emergentagent.com/auth/callback')
+        # Try both API endpoint and original callback patterns
+        base_url_env = os.getenv('REDIRECT_URI', 'https://outlook-sync-debug.preview.emergentagent.com/api/auth/callback')
+        if '/api/auth/callback' not in base_url_env:
+            # Convert old format to new API format
+            base_url = base_url_env.replace('/auth/callback', '/api/auth/callback')
+            redirect_uri = base_url
+        else:
+            redirect_uri = base_url_env
         
         data = {
             "client_id": os.getenv('AZURE_CLIENT_ID'),
