@@ -6,7 +6,7 @@
     <a href="https://github.com/mertenesakarsu-ai/postadepo/actions"><img src="https://github.com/mertenesakarsu-ai/postadepo/actions/workflows/build.yml/badge.svg" alt="Build Status"></a>
 </p>
 
-**PostaDepo** is a modern web application that allows users to **easily backup** their Outlook emails, **export them in different formats**, and **restore them when needed**. The project includes a **React.js** frontend and a **Node.js/Express** backend. Some backup and format conversion processes use **Python** scripts.
+<p align="center">PostaDepo is a modern web application that allows users to easily backup their<br /> Outlook emails, export them in different formats, and restore them when needed.<br /> The project includes a React.js frontend and a Node.js/Express backend. <br />Some backup and format conversion processes use Python scripts.</p>
 
 ---
 
