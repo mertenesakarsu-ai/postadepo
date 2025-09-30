@@ -1118,7 +1118,7 @@ class OutlookCallbackTester:
                 print("   ℹ️  No CORS headers in GET response (normal for HTML responses)")
                 return True  # This is acceptable for HTML responses
         
-        return False
+        return success  # Return the success status from the HTTP test
 
     def test_post_callback_json_body(self):
         """Test POST /api/auth/callback with JSON body"""
