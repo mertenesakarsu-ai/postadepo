@@ -301,9 +301,24 @@ const AdminDashboard = ({ onLogout }) => {
     }
   };
 
-  const handleToggleAutoApproval = () => {
-    setAutoApproval(!autoApproval);
-    toast.info(autoApproval ? 'Otomatik onay kapatıldı' : 'Otomatik onay açıldı');
+  const handleToggleAutoApproval = async () => {
+    try {
+      const newValue = !autoApproval;
+      const token = localStorage.getItem('token');
+      
+      console.log('ADMIN DEBUG - Updating auto approval setting:', newValue);
+      const response = await axios.post(`${API}/admin/settings/update`, 
+        { auto_approval: newValue }, 
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      
+      console.log('ADMIN DEBUG - Auto approval updated:', response.data);
+      setAutoApproval(newValue);
+      toast.success(response.data.message || (newValue ? 'Otomatik onay açıldı' : 'Otomatik onay kapatıldı'));
+    } catch (error) {
+      console.error('ADMIN DEBUG - Auto approval update error:', error);
+      toast.error('Otomatik onay ayarı güncellenirken hata oluştu');
+    }
   };
 
   const filteredUsers = users.filter(user => {
