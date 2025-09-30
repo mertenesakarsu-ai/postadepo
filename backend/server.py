@@ -7,9 +7,10 @@ from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
 from pathlib import Path
-from pydantic import BaseModel, Field, EmailStr
+from pydantic import BaseModel, Field, validator
 from typing import List, Optional, Dict, Any
 import uuid
+import re
 from datetime import datetime, timezone
 import hashlib
 import jwt
