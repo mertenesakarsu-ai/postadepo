@@ -97,6 +97,21 @@ const AdminDashboard = ({ onLogout }) => {
 
       // İstatistikleri hesapla
       calculateStats(usersResponse.data.users, pendingResponse.data.pending_users);
+      
+      // Admin ayarlarını yükle
+      try {
+        console.log('ADMIN DEBUG - Loading admin settings from:', `${API}/admin/settings/get`);
+        const settingsResponse = await axios.post(`${API}/admin/settings/get`, {}, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        console.log('ADMIN DEBUG - Admin settings loaded:', settingsResponse.data.settings);
+        setAutoApproval(settingsResponse.data.settings.auto_approval);
+      } catch (error) {
+        console.error('ADMIN DEBUG - Admin settings load error:', error);
+        // Settings loading hatası kritik değil, default false kullan
+        setAutoApproval(false);
+      }
+      
       console.log('ADMIN DEBUG - Data loading completed successfully');
 
     } catch (error) {
