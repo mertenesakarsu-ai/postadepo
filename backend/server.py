@@ -158,10 +158,14 @@ class User(BaseModel):
 
 class OutlookUser(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    email: EmailStr
+    email: str
     display_name: str
     microsoft_user_id: str
     tenant_id: str
+    
+    @validator('email')
+    def validate_email_field(cls, v):
+        return validate_email(v)
     approved: bool = True  # Outlook users auto-approved
     user_type: str = "outlook"
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
