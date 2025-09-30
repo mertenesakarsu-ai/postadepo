@@ -1,7 +1,7 @@
 # PostaDepo
 
 <p align="center">
-    <img width="450" alt="PostaDepo Logo" src="https://github.com/mertenesakarsu-ai/postadepo/blob/main/readmelogo.png" /><br />
+    <img width="450" alt="PostaDepo Logo" src="https://github.com/mertenesakarsu-ai/postadepo/blob/main/logo_ready.png" /><br />
     <a href="https://github.com/mertenesakarsu-ai/postadepo/releases"><img src="https://img.shields.io/github/release/mertenesakarsu-ai/postadepo" alt="Latest Release"></a>
     <a href="https://github.com/mertenesakarsu-ai/postadepo/actions"><img src="https://github.com/mertenesakarsu-ai/postadepo/actions/workflows/build.yml/badge.svg" alt="Build Status"></a>
 </p>
