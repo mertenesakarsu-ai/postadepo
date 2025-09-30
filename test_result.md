@@ -105,6 +105,18 @@
 user_problem_statement: "Outlook bağlantı hatası düzeltme: GitHub Action'da undefined variable hataları tespit edildi (oauth_data ve request). Bu hatalar Backend'de Outlook OAuth callback endpoint'lerinde undefined variables nedeniyle ortaya çıkıyor. Kullanıcı 'Outlook bağlandı' mesajı alıyor ama sonradan frontend'de hata oluşuyor."
 
 backend:
+  - task: "Undefined variable hatalarının düzeltilmesi"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "GitHub Action'da tespit edilen F821 undefined variable hatalarını düzelttim: Line 1418'de 'oauth_data.code' yerine 'code' kullandım, Line 2777'de get_outlook_auth_url fonksiyonuna 'request: Request' parametresini ekledim, Request ve JSONResponse import'larını ana import bloğuna taşıdım. Flake8 kontrolü başarılı (0 hata), backend restart edildi."
+
   - task: "Gerçek sistem log sistemi eklenmesi"
     implemented: true
     working: true
