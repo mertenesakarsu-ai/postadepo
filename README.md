@@ -105,7 +105,7 @@ OUTLOOK_REDIRECT_URI=https://yourdomain.com/api/auth/callback
 
 ## Author
 
-This project was developed by @mertenesakarsu .
+This project was developed by [**@mertenesakarsu**](https://github.com/mertenesakarsu).
 
 ---
 
