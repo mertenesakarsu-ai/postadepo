@@ -106,7 +106,7 @@ OUTLOOK_REDIRECT_URI=https://yourdomain.com/api/auth/callback
 ## Author
 
 This project was developed                         
-<a href="https://github.com/mertenesakarsu"><img width="100" height="100" alt="PostaDepo Logo" src="https://github.com/user-attachments/assets/80b54475-23c7-406b-a265-8e34f990f09a" /></a>
+<a href="https://github.com/mertenesakarsu"><img width="100" height="150" alt="PostaDepo Logo" src="https://github.com/user-attachments/assets/80b54475-23c7-406b-a265-8e34f990f09a" /></a>
 by [**@mertenesakarsu**](https://github.com/mertenesakarsu).  
 
 ---
