@@ -2794,12 +2794,13 @@ async def get_outlook_auth_url(request: Request, current_user: dict = Depends(ge
         # State parameter for security (CSRF protection)
         state = f"{current_user['id']}_{str(uuid.uuid4())}"
         
-        # Store state in database for later verification
+        # Store state in database for later verification  
+        from datetime import timedelta
         await db.oauth_states.insert_one({
             "state": state,
             "user_id": current_user["id"],
             "created_at": datetime.now(timezone.utc),
-            "expires_at": datetime.now(timezone.utc).replace(minute=datetime.now(timezone.utc).minute + 10)  # 10 min expiry
+            "expires_at": datetime.now(timezone.utc) + timedelta(minutes=10)  # 10 min expiry
         })
         
         # Build authorization URL - use dynamic redirect URI based on current environment
