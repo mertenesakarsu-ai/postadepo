@@ -2810,7 +2810,7 @@ async def get_outlook_auth_url(request: Request, current_user: dict = Depends(ge
             dynamic_redirect_uri = f"{base_url}/api/auth/callback"
         else:
             # Fallback to environment variable
-            dynamic_redirect_uri = os.getenv('REDIRECT_URI', 'https://mail-auth-debug.preview.emergentagent.com/api/auth/callback')
+            dynamic_redirect_uri = os.getenv('REDIRECT_URI', 'https://oauth-debug-center.preview.emergentagent.com/api/auth/callback')
         
         redirect_uri = dynamic_redirect_uri
         
@@ -3315,7 +3315,7 @@ async def exchange_code_for_tokens(authorization_code: str) -> Optional[dict]:
         
         # Use the same redirect URI as in auth URL generation
         # Try both API endpoint and original callback patterns
-        base_url_env = os.getenv('REDIRECT_URI', 'https://mail-auth-debug.preview.emergentagent.com/api/auth/callback')
+        base_url_env = os.getenv('REDIRECT_URI', 'https://oauth-debug-center.preview.emergentagent.com/api/auth/callback')
         if '/api/auth/callback' not in base_url_env:
             # Convert old format to new API format
             base_url = base_url_env.replace('/auth/callback', '/api/auth/callback')
@@ -3351,7 +3351,7 @@ async def exchange_code_for_tokens(authorization_code: str) -> Optional[dict]:
                     alternative_uris = [
                         "http://localhost:3000/auth/callback",
                         "https://localhost:3000/auth/callback", 
-                        "https://mail-auth-debug.preview.emergentagent.com/auth/callback",
+                        "https://oauth-debug-center.preview.emergentagent.com/auth/callback",
                         "http://localhost:8080/auth/callback"
                     ]
                     
