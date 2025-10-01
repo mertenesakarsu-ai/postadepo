@@ -1415,7 +1415,7 @@ async def outlook_login(code: str, state: str):
             )
         
         # Exchange authorization code for tokens
-        token_data = await exchange_code_for_tokens(code)
+        token_data = await exchange_code_for_tokens(code, state)
         
         if not token_data:
             raise HTTPException(status_code=400, detail="Failed to exchange code for tokens")
@@ -2875,7 +2875,7 @@ async def process_oauth_callback(code: str, state: str, user_id: str = None):
             raise HTTPException(status_code=400, detail="User not found")
         
         # Exchange authorization code for tokens
-        token_data = await exchange_code_for_tokens(code)
+        token_data = await exchange_code_for_tokens(code, state)
         
         if not token_data:
             raise HTTPException(status_code=400, detail="Failed to exchange code for tokens")
