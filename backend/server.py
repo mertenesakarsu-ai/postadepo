@@ -2803,23 +2803,17 @@ async def get_outlook_auth_url(request: Request, current_user: dict = Depends(ge
             "expires_at": datetime.now(timezone.utc) + timedelta(minutes=10)  # 10 min expiry
         })
         
-        # Build authorization URL - for local testing, always use production redirect URI
-        # This avoids Azure App Registration redirect_uri mismatch issues
-        
-        # For local testing, force production URI to avoid Azure registration issues
-        if request.headers.get('origin') == 'http://localhost:3000':
-            # Use production URI for local testing to avoid Azure App Registration issues  
-            dynamic_redirect_uri = os.getenv('REDIRECT_URI', 'https://oauth-debug-center.preview.emergentagent.com/api/auth/callback')
-            logger.info(f"Local testing detected, using production redirect URI: {dynamic_redirect_uri}")
+        # Build authorization URL - use dynamic redirect URI based on current environment
+        # Try to get base URL from headers or fallback to environment variable
+        base_url = request.headers.get('origin') or request.headers.get('referer', '').rstrip('/')
+        if base_url and base_url.startswith('http'):
+            # Use the same domain as the frontend request
+            dynamic_redirect_uri = f"{base_url}/api/auth/callback"
+            logger.info(f"Using dynamic redirect URI based on origin: {dynamic_redirect_uri}")
         else:
-            # For production, use dynamic URI based on request origin
-            base_url = request.headers.get('origin') or request.headers.get('referer', '').rstrip('/')
-            if base_url and base_url.startswith('http'):
-                # Use the same domain as the frontend request
-                dynamic_redirect_uri = f"{base_url}/api/auth/callback"
-            else:
-                # Fallback to environment variable
-                dynamic_redirect_uri = os.getenv('REDIRECT_URI', 'https://oauth-debug-center.preview.emergentagent.com/api/auth/callback')
+            # Fallback to environment variable
+            dynamic_redirect_uri = os.getenv('REDIRECT_URI', 'https://oauth-debug-center.preview.emergentagent.com/api/auth/callback')
+            logger.info(f"Using fallback redirect URI: {dynamic_redirect_uri}")
         
         redirect_uri = dynamic_redirect_uri
         
