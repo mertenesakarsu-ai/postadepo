@@ -3312,20 +3312,28 @@ async def disconnect_outlook_account(
 
 # ============== HELPER FUNCTIONS FOR OAUTH2 ==============
 
-async def exchange_code_for_tokens(authorization_code: str) -> Optional[dict]:
+async def exchange_code_for_tokens(authorization_code: str, state: str = None) -> Optional[dict]:
     """Exchange authorization code for access and refresh tokens"""
     try:
         token_url = "https://login.microsoftonline.com/common/oauth2/v2.0/token"
         
-        # Use the same redirect URI as in auth URL generation
-        # Try both API endpoint and original callback patterns
-        base_url_env = os.getenv('REDIRECT_URI', 'https://oauth-debug-center.preview.emergentagent.com/api/auth/callback')
-        if '/api/auth/callback' not in base_url_env:
-            # Convert old format to new API format
-            base_url = base_url_env.replace('/auth/callback', '/api/auth/callback')
-            redirect_uri = base_url
-        else:
-            redirect_uri = base_url_env
+        # Get redirect URI from oauth state if available
+        redirect_uri = None
+        if state:
+            oauth_state = await db.oauth_states.find_one({"state": state})
+            if oauth_state and oauth_state.get("redirect_uri"):
+                redirect_uri = oauth_state["redirect_uri"]
+                logger.info(f"Using redirect URI from oauth state: {redirect_uri}")
+        
+        # Fallback to environment variable if no state or no stored URI
+        if not redirect_uri:
+            base_url_env = os.getenv('REDIRECT_URI', 'https://oauth-debug-center.preview.emergentagent.com/api/auth/callback')
+            if '/api/auth/callback' not in base_url_env:
+                # Convert old format to new API format
+                redirect_uri = base_url_env.replace('/auth/callback', '/api/auth/callback')
+            else:
+                redirect_uri = base_url_env
+            logger.info(f"Using fallback redirect URI: {redirect_uri}")
         
         data = {
             "client_id": os.getenv('AZURE_CLIENT_ID'),
