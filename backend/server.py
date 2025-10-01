@@ -2800,7 +2800,8 @@ async def get_outlook_auth_url(request: Request, current_user: dict = Depends(ge
             "state": state,
             "user_id": current_user["id"],
             "created_at": datetime.now(timezone.utc),
-            "expires_at": datetime.now(timezone.utc) + timedelta(minutes=10)  # 10 min expiry
+            "expires_at": datetime.now(timezone.utc) + timedelta(minutes=10),  # 10 min expiry
+            "redirect_uri": dynamic_redirect_uri  # Store for token exchange
         })
         
         # Build authorization URL - use dynamic redirect URI based on current environment
