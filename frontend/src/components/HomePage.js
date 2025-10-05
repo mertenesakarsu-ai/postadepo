@@ -77,7 +77,7 @@ const HomePage = () => {
             {/* Logo */}
             <div className="flex items-center space-x-3">
               <img 
-                src="https://customer-assets.emergentagent.com/job_4338b971-040d-400e-9544-183651a406e5/artifacts/g6inru6i_postadepo_logo_transparent.png" 
+                src="https://i.hizliresim.com/9a0rpdc.png" 
                 alt="PostaDepo"
                 className="h-12 w-auto"
               />
@@ -259,7 +259,7 @@ const HomePage = () => {
             <span className="text-xl font-bold">{t('homepage.title')}</span>
           </div>
           <p className="text-slate-400">
-            © 2024 PostaDepo. {t('homepage.subtitle')}.
+            © 2025 PostaDepo. {t('homepage.subtitle')}.
           </p>
         </div>
       </footer>
