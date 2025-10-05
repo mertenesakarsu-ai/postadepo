@@ -1501,6 +1501,434 @@ class OutlookCallbackTester:
             print("⚠️  OUTLOOK CALLBACK ENDPOINT NEEDS ATTENTION")
             return 1
 
+class PostaDepoOutlookTester:
+    def __init__(self, base_url="https://sync-delete-tool.preview.emergentagent.com/api"):
+        self.base_url = base_url
+        self.demo_token = None
+        self.demo_user = None
+        self.tests_run = 0
+        self.tests_passed = 0
+        self.test_results = []
+
+    def log_test_result(self, name, success, details=""):
+        """Log test result for reporting"""
+        self.test_results.append({
+            "name": name,
+            "success": success,
+            "details": details,
+            "timestamp": datetime.now().isoformat()
+        })
+
+    def run_test(self, name, method, endpoint, expected_status, data=None, headers=None, description="", params=None):
+        """Run a single API test"""
+        url = f"{self.base_url}/{endpoint}" if not endpoint.startswith('http') else endpoint
+        test_headers = {'Content-Type': 'application/json'}
+        
+        if self.demo_token:
+            test_headers['Authorization'] = f'Bearer {self.demo_token}'
+        
+        if headers:
+            test_headers.update(headers)
+
+        self.tests_run += 1
+        print(f"\n🔍 Test {self.tests_run}: {name}")
+        if description:
+            print(f"   📝 {description}")
+        print(f"   🌐 {method} {url}")
+        if params:
+            print(f"   📋 Params: {params}")
+        
+        try:
+            if method == 'GET':
+                response = requests.get(url, headers=test_headers, timeout=30, params=params)
+            elif method == 'POST':
+                response = requests.post(url, json=data, headers=test_headers, timeout=30, params=params)
+            elif method == 'DELETE':
+                response = requests.delete(url, headers=test_headers, timeout=30, params=params)
+
+            success = response.status_code == expected_status
+            
+            if success:
+                self.tests_passed += 1
+                print(f"✅ PASSED - Status: {response.status_code}")
+                try:
+                    if response.headers.get('content-type', '').startswith('application/json'):
+                        response_data = response.json()
+                        if isinstance(response_data, dict):
+                            print(f"   📊 Response keys: {list(response_data.keys())}")
+                            # Log important response details
+                            if 'message' in response_data:
+                                print(f"   💬 Message: {response_data['message']}")
+                            if 'accounts' in response_data:
+                                print(f"   📧 Accounts count: {len(response_data['accounts'])}")
+                            if 'emails' in response_data:
+                                print(f"   📨 Emails count: {len(response_data['emails'])}")
+                            if 'folderCounts' in response_data:
+                                print(f"   📁 Folder counts: {response_data['folderCounts']}")
+                        else:
+                            print(f"   📄 Response type: {type(response_data)}")
+                    else:
+                        print(f"   📄 Response: {response.text[:100]}...")
+                except:
+                    print(f"   📄 Response: {response.text[:100]}...")
+                
+                self.log_test_result(name, True, f"Status {response.status_code}")
+            else:
+                print(f"❌ FAILED - Expected {expected_status}, got {response.status_code}")
+                print(f"   📄 Response: {response.text[:300]}...")
+                self.log_test_result(name, False, f"Expected {expected_status}, got {response.status_code}")
+
+            return success, response.json() if response.text and response.headers.get('content-type', '').startswith('application/json') else {"text": response.text}
+
+        except Exception as e:
+            print(f"❌ FAILED - Error: {str(e)}")
+            self.log_test_result(name, False, f"Exception: {str(e)}")
+            return False, {}
+
+    def test_demo_user_login(self):
+        """Test demo user login (demo@postadepo.com / demo123)"""
+        print("\n" + "="*60)
+        print("🔐 DEMO USER LOGIN TEST")
+        print("="*60)
+        
+        success, response = self.run_test(
+            "Demo User Login",
+            "POST",
+            "auth/login",
+            200,
+            data={"email": "demo@postadepo.com", "password": "demo123"},
+            description="Testing demo user credentials for PostaDepo Outlook integration"
+        )
+        
+        if success and 'token' in response and 'user' in response:
+            self.demo_token = response['token']
+            self.demo_user = response['user']
+            print(f"   👤 Logged in as: {self.demo_user.get('email')} (Type: {self.demo_user.get('user_type')})")
+            return True
+        else:
+            print("   ❌ Demo user login failed - cannot proceed with Outlook tests")
+            return False
+
+    def test_outlook_connected_accounts(self):
+        """Test GET /api/outlook/accounts - bağlı hesapları listeleme"""
+        print("\n" + "="*60)
+        print("📧 OUTLOOK CONNECTED ACCOUNTS TEST")
+        print("="*60)
+        
+        success, response = self.run_test(
+            "Get Connected Outlook Accounts",
+            "GET",
+            "outlook/accounts",
+            200,
+            description="Testing GET /api/outlook/accounts endpoint to list connected accounts"
+        )
+        
+        if success and isinstance(response, dict) and 'accounts' in response:
+            accounts = response['accounts']
+            print(f"   📊 Connected accounts found: {len(accounts)}")
+            
+            if len(accounts) == 0:
+                print("   ℹ️  No connected accounts (expected for demo user)")
+            else:
+                print("   📧 Connected accounts details:")
+                for i, account in enumerate(accounts, 1):
+                    print(f"      {i}. Email: {account.get('email', 'Unknown')}")
+                    print(f"         Type: {account.get('account_type', 'Unknown')}")
+                    print(f"         Connected: {account.get('is_connected', False)}")
+                    print(f"         ID: {account.get('id', 'Unknown')}")
+            
+            return True
+        else:
+            print("   ❌ Failed to get connected accounts or unexpected response format")
+            return False
+
+    def test_outlook_sync_no_account(self):
+        """Test POST /api/outlook/sync without account_id parameter"""
+        print("\n" + "="*60)
+        print("🔄 OUTLOOK SYNC TEST (No Account)")
+        print("="*60)
+        
+        success, response = self.run_test(
+            "Outlook Sync - No Account ID",
+            "POST",
+            "outlook/sync",
+            404,  # Expected since no account_id provided
+            description="Testing POST /api/outlook/sync without account_id parameter"
+        )
+        
+        if success:
+            print("   ✅ Correctly returns 404 when no account_id is provided")
+            return True
+        else:
+            print("   ❌ Unexpected response when no account_id provided")
+            return False
+
+    def test_outlook_sync_with_fake_account(self):
+        """Test POST /api/outlook/sync with fake account_id"""
+        print("\n" + "="*60)
+        print("🔄 OUTLOOK SYNC TEST (Fake Account)")
+        print("="*60)
+        
+        fake_account_id = "fake-account-id-12345"
+        
+        success, response = self.run_test(
+            "Outlook Sync - Fake Account ID",
+            "POST",
+            "outlook/sync",
+            404,  # Expected since account doesn't exist
+            params={"account_id": fake_account_id},
+            description=f"Testing POST /api/outlook/sync with fake account_id: {fake_account_id}"
+        )
+        
+        if success:
+            print("   ✅ Correctly returns 404 for non-existent account")
+            return True
+        else:
+            print("   ❌ Unexpected response for fake account ID")
+            return False
+
+    def test_outlook_delete_account_fake(self):
+        """Test DELETE /api/outlook/accounts/ID with fake account ID"""
+        print("\n" + "="*60)
+        print("🗑️ OUTLOOK DELETE ACCOUNT TEST (Fake Account)")
+        print("="*60)
+        
+        fake_account_id = "fake-account-id-12345"
+        
+        success, response = self.run_test(
+            "Delete Outlook Account - Fake ID",
+            "DELETE",
+            f"outlook/accounts/{fake_account_id}",
+            404,  # Expected since account doesn't exist
+            description=f"Testing DELETE /api/outlook/accounts/{fake_account_id}"
+        )
+        
+        if success:
+            print("   ✅ Correctly returns 404 for non-existent account deletion")
+            return True
+        else:
+            print("   ❌ Unexpected response for fake account deletion")
+            return False
+
+    def test_email_content_type_field(self):
+        """Test Email model content_type field in demo emails"""
+        print("\n" + "="*60)
+        print("📨 EMAIL CONTENT_TYPE FIELD TEST")
+        print("="*60)
+        
+        success, response = self.run_test(
+            "Get Demo Emails - Check content_type",
+            "GET",
+            "emails",
+            200,
+            params={"folder": "inbox"},
+            description="Testing if demo emails have content_type field set to 'text'"
+        )
+        
+        if success and isinstance(response, dict) and 'emails' in response:
+            emails = response['emails']
+            print(f"   📊 Found {len(emails)} emails")
+            
+            content_type_stats = {"text": 0, "html": 0, "missing": 0, "other": 0}
+            
+            for i, email in enumerate(emails[:10]):  # Check first 10 emails
+                content_type = email.get('content_type')
+                if content_type == 'text':
+                    content_type_stats['text'] += 1
+                elif content_type == 'html':
+                    content_type_stats['html'] += 1
+                elif content_type is None:
+                    content_type_stats['missing'] += 1
+                else:
+                    content_type_stats['other'] += 1
+                
+                if i < 3:  # Show details for first 3 emails
+                    print(f"      Email {i+1}: content_type='{content_type}', subject='{email.get('subject', 'No subject')[:50]}...'")
+            
+            print(f"   📊 Content type statistics (first 10 emails):")
+            for ct_type, count in content_type_stats.items():
+                print(f"      - {ct_type}: {count}")
+            
+            # Check if demo emails have content_type set to "text"
+            if content_type_stats['text'] > 0:
+                print("   ✅ Demo emails have content_type field set to 'text'")
+                return True
+            else:
+                print("   ❌ Demo emails missing content_type='text' field")
+                return False
+        else:
+            print("   ❌ Failed to get emails or unexpected response format")
+            return False
+
+    def test_email_list_content_type_visibility(self):
+        """Test if content_type field is visible in email list response"""
+        print("\n" + "="*60)
+        print("👁️ EMAIL LIST CONTENT_TYPE VISIBILITY TEST")
+        print("="*60)
+        
+        success, response = self.run_test(
+            "Email List - content_type Visibility",
+            "GET",
+            "emails",
+            200,
+            params={"folder": "all"},
+            description="Testing if content_type field is visible in email list API response"
+        )
+        
+        if success and isinstance(response, dict) and 'emails' in response:
+            emails = response['emails']
+            print(f"   📊 Checking {len(emails)} emails for content_type field visibility")
+            
+            emails_with_content_type = 0
+            sample_emails = []
+            
+            for email in emails[:5]:  # Check first 5 emails
+                if 'content_type' in email:
+                    emails_with_content_type += 1
+                    sample_emails.append({
+                        'subject': email.get('subject', 'No subject')[:30],
+                        'content_type': email.get('content_type'),
+                        'sender': email.get('sender', 'Unknown')[:30]
+                    })
+            
+            print(f"   📊 Emails with content_type field: {emails_with_content_type}/{min(5, len(emails))}")
+            
+            if sample_emails:
+                print("   📋 Sample emails with content_type:")
+                for i, email in enumerate(sample_emails, 1):
+                    print(f"      {i}. '{email['subject']}...' | Type: {email['content_type']} | From: {email['sender']}...")
+            
+            if emails_with_content_type > 0:
+                print("   ✅ content_type field is visible in email list API response")
+                return True
+            else:
+                print("   ❌ content_type field is NOT visible in email list API response")
+                return False
+        else:
+            print("   ❌ Failed to get email list or unexpected response format")
+            return False
+
+    def test_outlook_api_endpoints_accessibility(self):
+        """Test accessibility of all Outlook API endpoints"""
+        print("\n" + "="*60)
+        print("🔗 OUTLOOK API ENDPOINTS ACCESSIBILITY TEST")
+        print("="*60)
+        
+        endpoints_to_test = [
+            ("GET /api/outlook/accounts", "GET", "outlook/accounts", 200),
+            ("POST /api/outlook/sync", "POST", "outlook/sync", 404),  # 404 expected without account_id
+            ("DELETE /api/outlook/accounts/test", "DELETE", "outlook/accounts/test-id", 404),  # 404 expected for fake ID
+        ]
+        
+        all_accessible = True
+        
+        for endpoint_name, method, endpoint, expected_status in endpoints_to_test:
+            success, response = self.run_test(
+                f"Accessibility - {endpoint_name}",
+                method,
+                endpoint,
+                expected_status,
+                description=f"Testing accessibility of {endpoint_name}"
+            )
+            
+            if not success:
+                all_accessible = False
+                print(f"   ❌ {endpoint_name} is not accessible")
+            else:
+                print(f"   ✅ {endpoint_name} is accessible")
+        
+        if all_accessible:
+            print("   ✅ All Outlook API endpoints are accessible")
+            return True
+        else:
+            print("   ❌ Some Outlook API endpoints are not accessible")
+            return False
+
+    def run_comprehensive_postadepo_test(self):
+        """Run comprehensive PostaDepo Outlook integration tests"""
+        print("🚀 STARTING POSTADEPO OUTLOOK INTEGRATION COMPREHENSIVE TEST")
+        print("=" * 80)
+        print(f"🕐 Test started at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        print(f"🌐 Testing against: {self.base_url}")
+        print("📋 Turkish Review Request: PostaDepo Outlook bağlı hesap yönetimi ve email content_type testleri")
+        print("=" * 80)
+        
+        # Test sequence based on Turkish review request
+        tests = [
+            ("Demo Kullanıcısı Giriş", self.test_demo_user_login),
+            ("Bağlı Hesapları Listeleme", self.test_outlook_connected_accounts),
+            ("Hesap Senkronizasyonu (Account Yok)", self.test_outlook_sync_no_account),
+            ("Hesap Senkronizasyonu (Fake Account)", self.test_outlook_sync_with_fake_account),
+            ("Hesap Bağlantısını Kesme", self.test_outlook_delete_account_fake),
+            ("Email Content_Type Field", self.test_email_content_type_field),
+            ("Email Liste Content_Type Görünürlük", self.test_email_list_content_type_visibility),
+            ("Outlook API Endpoints Erişilebilirlik", self.test_outlook_api_endpoints_accessibility),
+        ]
+        
+        failed_tests = []
+        critical_failures = []
+        
+        for test_name, test_func in tests:
+            try:
+                print(f"\n🎯 Running: {test_name}")
+                result = test_func()
+                if not result:
+                    failed_tests.append(test_name)
+                    # Mark critical failures
+                    if test_name in ["Demo Kullanıcısı Giriş", "Bağlı Hesapları Listeleme", "Email Content_Type Field"]:
+                        critical_failures.append(test_name)
+                    print(f"⚠️  {test_name} failed but continuing...")
+            except Exception as e:
+                failed_tests.append(test_name)
+                critical_failures.append(test_name)
+                print(f"💥 {test_name} crashed: {str(e)}")
+        
+        # Print final results
+        print("\n" + "=" * 80)
+        print("📊 POSTADEPO OUTLOOK INTEGRATION TEST RESULTS")
+        print("=" * 80)
+        print(f"✅ Tests Passed: {self.tests_passed}/{self.tests_run}")
+        print(f"❌ Tests Failed: {self.tests_run - self.tests_passed}/{self.tests_run}")
+        
+        if critical_failures:
+            print(f"\n🚨 CRITICAL FAILURES:")
+            for test in critical_failures:
+                print(f"   - {test}")
+        
+        if failed_tests:
+            print(f"\n⚠️  All Failed Tests:")
+            for test in failed_tests:
+                print(f"   - {test}")
+        
+        # Detailed results
+        print(f"\n📋 DETAILED RESULTS:")
+        for result in self.test_results:
+            status = "✅" if result['success'] else "❌"
+            print(f"   {status} {result['name']}: {result['details']}")
+        
+        success_rate = (self.tests_passed / self.tests_run * 100) if self.tests_run > 0 else 0
+        print(f"\n🎯 Success Rate: {success_rate:.1f}%")
+        
+        # Turkish summary based on review request
+        print(f"\n🔍 TÜRKÇE ÖZET:")
+        print("📧 Bağlı Hesap Yönetimi API'leri:")
+        print("   - GET /api/outlook/accounts: Bağlı hesapları listeleme endpoint'i test edildi")
+        print("   - POST /api/outlook/sync: Hesap senkronizasyonu endpoint'i test edildi")
+        print("   - DELETE /api/outlook/accounts/ID: Hesap bağlantısını kesme endpoint'i test edildi")
+        print("📨 Email Content Type:")
+        print("   - Email model'inde content_type field'ının varlığı kontrol edildi")
+        print("   - Demo emails'lerde content_type='text' ayarı doğrulandı")
+        print("   - Email listesinde content_type field'ının görünürlüğü test edildi")
+        
+        if success_rate >= 75:
+            print("🎉 POSTADEPO OUTLOOK INTEGRATION TEST SUITE PASSED!")
+            print("✅ Tüm temel özellikler çalışıyor durumda")
+            return 0
+        else:
+            print("⚠️  POSTADEPO OUTLOOK INTEGRATION NEEDS ATTENTION")
+            print("❌ Bazı kritik özellikler düzeltme gerektiriyor")
+            return 1
+
 class OutlookUndefinedVariableFixTester:
     def __init__(self, base_url="https://sync-delete-tool.preview.emergentagent.com/api"):
         self.base_url = base_url
