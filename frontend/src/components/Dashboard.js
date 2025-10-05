@@ -996,12 +996,9 @@ const Dashboard = ({ user, onLogout }) => {
                       <div className="prose max-w-none">
                         <div className="text-slate-700 leading-relaxed text-base">
                           {selectedEmail.content_type === 'html' ? (
-                            <div 
-                              dangerouslySetInnerHTML={{ __html: selectedEmail.content }}
-                              style={{
-                                wordBreak: 'break-word',
-                                overflowWrap: 'break-word'
-                              }}
+                            <SafeHTMLRenderer 
+                              htmlContent={selectedEmail.content}
+                              className="rounded-lg border border-slate-200"
                             />
                           ) : (
                             <div className="whitespace-pre-wrap">
