@@ -1420,9 +1420,7 @@ async def outlook_login(code: str, state: str):
         
         # Exchange authorization code for tokens
         token_data = await exchange_code_for_tokens(code, state)
-        
-        if not token_data:
-            raise HTTPException(status_code=400, detail="Failed to exchange code for tokens")
+       
         
         # Get user profile from Microsoft Graph
         user_profile = await get_user_profile_from_graph(token_data["access_token"])
@@ -2804,7 +2802,6 @@ async def get_outlook_auth_url(request: Request, current_user: dict = Depends(ge
         logger.info(f"Using redirect URI for OAuth: {redirect_uri}")
         
         # Store state in database for later verification  
-        from datetime import timedelta
         await db.oauth_states.insert_one({
             "state": state,
             "user_id": current_user["id"],
