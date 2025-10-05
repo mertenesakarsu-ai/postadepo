@@ -3344,8 +3344,9 @@ async def get_connected_outlook_accounts(current_user: dict = Depends(get_curren
 
 @api_router.post("/outlook/sync")
 async def sync_outlook_emails(
-    account_id: str,
-    folders: Optional[List[str]] = None,
+    request: dict = None,
+    account_id: str = Query(None),
+    folders: Optional[List[str]] = Query(None),
     current_user: dict = Depends(get_current_user)
 ):
     """Sync emails from connected Outlook account using stored tokens"""
