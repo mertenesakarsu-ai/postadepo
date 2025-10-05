@@ -2881,9 +2881,9 @@ def main():
             tester = AdminPanelBulkOperationsTester()
             return tester.run_comprehensive_test()
     else:
-        # Default: run new Outlook connection and sync tests based on review request
-        tester = OutlookConnectionAndSyncTester()
-        return tester.run_comprehensive_outlook_connection_test()
+        # Default: run PostaDepo Outlook integration tests based on Turkish review request
+        tester = PostaDepoOutlookTester()
+        return tester.run_comprehensive_postadepo_test()
 
 if __name__ == "__main__":
     sys.exit(main())
