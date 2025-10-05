@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 
 # MongoDB connection
 MONGO_URL = os.environ.get('MONGO_URL', 'mongodb://localhost:27017')
-DATABASE_NAME = "postadepo"
+DATABASE_NAME = os.environ.get('DB_NAME', 'postadepo')
 
 async def add_html_test_email():
     client = AsyncIOMotorClient(MONGO_URL)
