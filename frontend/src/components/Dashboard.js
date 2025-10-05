@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { toast } from 'sonner';
 import { useTheme } from '../contexts/ThemeContext';
 import { useLanguage } from '../contexts/LanguageContext';
+import SafeHTMLRenderer from './SafeHTMLRenderer';
 import { 
   Mail, 
   Search, 
