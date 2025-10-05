@@ -984,8 +984,20 @@ const Dashboard = ({ user, onLogout }) => {
                     {/* Email Content */}
                     <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
                       <div className="prose max-w-none">
-                        <div className="whitespace-pre-wrap text-slate-700 leading-relaxed text-base">
-                          {selectedEmail.content}
+                        <div className="text-slate-700 leading-relaxed text-base">
+                          {selectedEmail.content_type === 'html' ? (
+                            <div 
+                              dangerouslySetInnerHTML={{ __html: selectedEmail.content }}
+                              style={{
+                                wordBreak: 'break-word',
+                                overflowWrap: 'break-word'
+                              }}
+                            />
+                          ) : (
+                            <div className="whitespace-pre-wrap">
+                              {selectedEmail.content}
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
