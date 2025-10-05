@@ -3326,7 +3326,15 @@ async def get_connected_outlook_accounts(current_user: dict = Depends(get_curren
             "is_connected": True
         }).to_list(length=None)
         
-        return {"accounts": accounts}
+        # Clean up accounts for JSON serialization
+        cleaned_accounts = []
+        for account in accounts:
+            account_dict = dict(account)
+            if "_id" in account_dict:
+                del account_dict["_id"]
+            cleaned_accounts.append(account_dict)
+        
+        return {"accounts": cleaned_accounts}
         
     except Exception as e:
         logger.error(f"Error retrieving connected accounts: {e}")
