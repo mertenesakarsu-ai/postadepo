@@ -19,7 +19,7 @@ const SafeHTMLRenderer = ({ htmlContent, className = '' }) => {
         'align', 'valign', 'cellspacing', 'cellpadding', 'border', 'class', 'id',
         'target', 'rel', 'face', 'size'
       ],
-      ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|cid|xmpp|data):|[^a-z]|[a-z+.-]+(?:[^a-z+.-]|$))/i,
+      ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|cid|xmpp|data|blob):|[^a-z]|[a-z+.-]+(?:[^a-z+.-]|$))/i,
       // Resimlerin otomatik yüklenmesi için
       FORBID_ATTR: [],
       // Script'leri tamamen engelle
@@ -131,7 +131,7 @@ const SafeHTMLRenderer = ({ htmlContent, className = '' }) => {
       ref={iframeRef}
       className={`w-full border-0 ${className}`}
       style={{ minHeight: '100px' }}
-      sandbox="allow-same-origin"
+      sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-top-navigation-by-user-activation"
       title="E-posta İçeriği"
     />
   );
