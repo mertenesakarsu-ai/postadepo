@@ -1165,8 +1165,8 @@ Chief Innovation Officer & VP of Customer Success
         
         content = random.choice(content_templates)
         
-        # HTML formatında e-posta içeriği %30 şansla
-        content_type = "html" if random.random() < 0.3 else "text"
+        # HTML formatında e-posta içeriği %70 şansla
+        content_type = "html" if random.random() < 0.7 else "text"
         
         if content_type == "html":
             # HTML formatına dönüştür ve resim ekle
