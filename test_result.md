@@ -616,8 +616,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Undefined variable hatalarının düzeltilmesi"
-    - "Outlook OAuth callback endpoint test"
+    - "PostaDepo Outlook geliştirilmiş senkronizasyon sistemi - çoklu klasör desteği"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
