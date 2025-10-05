@@ -872,12 +872,9 @@ const Dashboard = ({ user, onLogout }) => {
                                 <div className="prose max-w-none">
                                   <div className="text-slate-700 leading-relaxed">
                                     {threadEmail.content_type === 'html' ? (
-                                      <div 
-                                        dangerouslySetInnerHTML={{ __html: threadEmail.content }}
-                                        style={{
-                                          wordBreak: 'break-word',
-                                          overflowWrap: 'break-word'
-                                        }}
+                                      <SafeHTMLRenderer 
+                                        htmlContent={threadEmail.content}
+                                        className="rounded-lg border border-slate-200"
                                       />
                                     ) : (
                                       <div className="whitespace-pre-wrap">
