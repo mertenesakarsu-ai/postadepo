@@ -3428,15 +3428,15 @@ async def get_outlook_emails(
         logger.error(f"Error retrieving Outlook emails: {e}")
         raise HTTPException(status_code=500, detail="Failed to retrieve emails")
 
-@api_router.delete("/outlook/accounts/{account_email}")
+@api_router.delete("/outlook/accounts/{account_id}")
 async def disconnect_outlook_account(
-    account_email: str,
+    account_id: str,
     current_user: dict = Depends(get_current_user)
 ):
     """Disconnect Outlook account"""
     try:
         result = await db.connected_accounts.update_one(
-            {"email": account_email, "user_id": current_user["id"]},
+            {"id": account_id, "user_id": current_user["id"]},
             {"$set": {"is_connected": False}}
         )
         
