@@ -634,6 +634,30 @@ test_plan:
         agent: "testing"
         comment: "🎉 BUILD PROCESS DRY-RUN TEST TAMAMLANDI! Yeni oluşturulan build.yml dosyasının işlevselliği kapsamlı test edildi (6/6 test %100 başarı): ✅ 1. Backend bağımlılıkları (requirements.txt): 39 paket başarıyla parse edildi, kritik bağımlılıklar (fastapi, uvicorn, pydantic, motor, pymongo) mevcut, syntax kontrolü geçti, ✅ 2. Backend test klasörü: /app/backend/tests klasörü mevcut ve yazılabilir, test dosyası oluşturma/silme başarılı, ✅ 3. Frontend yarn komutları: package.json geçerli (51 dependency, 10 devDependency), kritik scriptler (start, build, test, lint) mevcut, yarn.lock dosyası mevcut, React 19.0.0 bağımlılığı doğrulandı, ✅ 4. Build komutları syntax: Backend 5 komut ve Frontend 5 komut syntax kontrolü geçti, ✅ 5. Python Environment: Python 3.11.13 + pip 25.2 hazır, ✅ 6. Node.js Environment: Node.js v20.19.5 + Yarn 1.22.22 hazır. GERÇEK BUILD TEST: Backend pip install başarılı, Frontend yarn build başarılı (29.63s, 149.25kB JS + 14.44kB CSS), server.py syntax OK. Minor: ESLint v9 config sorunu (build'i etkilemiyor). BUILD SÜRECİ TAMAMEN PRODUCTION-READY!"
 
+  - task: "PostaDepo Outlook bağlı hesap yönetimi API'leri testi"
+    implemented: true
+    working: false
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "testing"
+        comment: "🎯 POSTADEPO OUTLOOK INTEGRATION KAPSAMLI TEST TAMAMLANDI! Türkçe review request'e göre bağlı hesap yönetimi ve email content_type testleri yapıldı (7/10 test %70 başarı): ✅ 1. Demo kullanıcısı giriş (demo@postadepo.com / demo123): Başarılı login, JWT token alındı, ✅ 2. GET /api/outlook/accounts: 1 bağlı hesap bulundu (kral21_amedli12@hotmail.com), endpoint çalışıyor, ✅ 3. DELETE /api/outlook/accounts/ID: Hesap bağlantısını kesme endpoint'i çalışıyor (404 fake ID için), ❌ 4. POST /api/outlook/sync: Azure credentials not configured (503 error), account_id parameter ile test edilemedi, ❌ 5. Email content_type field: Demo emails'lerde content_type field'ı eksik (None değeri), 'text' olarak set edilmemiş, ❌ 6. Email liste content_type görünürlük: API response'unda content_type field'ı görünmüyor. SORUNLAR: 1) Outlook sync endpoint'i Azure credentials eksikliği nedeniyle 503 döndürüyor, 2) Demo emails'lerde content_type field'ı eksik veya None, 3) Email API response'unda content_type field'ı eksik. ÇALIŞAN: Bağlı hesapları listeleme, hesap silme, demo kullanıcı girişi."
+
+  - task: "Email model content_type field implementasyonu"
+    implemented: true
+    working: false
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "testing"
+        comment: "❌ KRİTİK SORUN TESPİT EDİLDİ: Email model'inde content_type field'ı tanımlı (line 187: content_type: str = 'text') ancak demo emails'lerde ve API response'unda bu field eksik veya None değerinde. Demo email generation'da content_type='text' set ediliyor (line 1186) ama API response'unda görünmüyor. Email listesi API'sinde 52 email kontrol edildi, hiçbirinde content_type field'ı yok. Bu durum frontend'de content_type bilgisinin kullanılamamasına neden oluyor. FIX NEEDED: Email API response'unda content_type field'ının dahil edilmesi gerekiyor."
+
 agent_communication:
   - agent: "main"
     message: "🔧 OUTLOOK UNDEFINED VARIABLE HATALARI DÜZELT İLDİ! GitHub Action'da tespit edilen kritik hatalar çözüldü: ✅ Line 1418: 'oauth_data.code' -> 'code' (oauth_data undefined variable hatası düzeltildi), ✅ Line 2777: get_outlook_auth_url fonksiyonuna 'request: Request' parametresi eklendi (request undefined variable hatası düzeltildi), ✅ Request ve JSONResponse import'ları ana import bloğuna taşındı, ✅ Flake8 linting 0 hata ile başarılı, ✅ Backend restart edildi ve çalışıyor. Outlook OAuth callback endpoint'leri artık undefined variable hatası vermeyecek."
