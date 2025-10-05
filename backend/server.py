@@ -2103,27 +2103,90 @@ async def sync_emails(current_user: dict = Depends(get_current_user)):
 
 
 async def sync_outlook_account_emails(account: dict, current_user: dict) -> int:
-    """Tek bir Outlook hesabından e-posta senkronize et"""
+    """Tek bir Outlook hesabından tüm klasörlerden e-posta senkronize et (geliştirilmiş versiyon)"""
     try:
         if not outlook_auth_service.is_configured():
             logger.warning("Outlook integration not configured")
             return 0
         
-        # Microsoft Graph API endpoint'i
+        # Senkronize edilecek klasörler - kullanıcının isteği üzerine tüm önemli klasörler
+        folders_to_sync = [
+            {"name": "inbox", "display_name": "Inbox", "folder_type": "inbox"},
+            {"name": "sent", "display_name": "Sent Items", "folder_type": "sent"},
+            {"name": "drafts", "display_name": "Drafts", "folder_type": "drafts"},
+            {"name": "junk", "display_name": "Junk Email", "folder_type": "spam"}  # Spam klasörü
+        ]
+        
+        total_synced = 0
+        
+        # Her klasörü ayrı ayrı senkronize et
+        for folder_info in folders_to_sync:
+            try:
+                synced_count = await sync_folder_emails(
+                    account, 
+                    current_user, 
+                    folder_info["name"], 
+                    folder_info["folder_type"],
+                    email_limit=100  # Kullanıcının belirttiği 100 e-posta limiti
+                )
+                total_synced += synced_count
+                logger.info(f"Synced {synced_count} emails from {folder_info['name']} folder for {account['email']}")
+                
+            except Exception as e:
+                logger.error(f"Error syncing {folder_info['name']} folder for {account['email']}: {e}")
+                continue  # Bir klasörde hata olursa diğerlerine devam et
+        
+        return total_synced
+                    
+    except Exception as e:
+        logger.error(f"Error syncing emails for account {account.get('email', 'unknown')}: {e}")
+        return 0
+
+
+async def sync_folder_emails(account: dict, current_user: dict, folder_name: str, folder_type: str, email_limit: int = 100) -> int:
+    """Belirtilen klasörden e-postaları senkronize et (pagination desteği ile)"""
+    try:
         headers = {
             'Authorization': f'Bearer {account["access_token"]}',
             'Content-Type': 'application/json'
         }
         
-        # Son 30 güne ait e-postaları al (sadece yenileri)
+        # Klasör ID'sini al
+        folder_id = await get_outlook_folder_id(headers, folder_name)
+        if not folder_id:
+            logger.warning(f"Folder {folder_name} not found for account {account['email']}")
+            return 0
+        
         import aiohttp
+        synced_count = 0
+        page_size = 50  # Her sayfada 50 e-posta (Microsoft Graph API limiti)
+        skip = 0
+        
         async with aiohttp.ClientSession() as session:
-            # Inbox e-postaları
-            url = "https://graph.microsoft.com/v1.0/me/messages?$top=10&$orderby=receivedDateTime desc"
-            async with session.get(url, headers=headers) as response:
-                if response.status == 200:
+            while synced_count < email_limit:
+                # Remaining emails to fetch
+                remaining = email_limit - synced_count
+                current_page_size = min(page_size, remaining)
+                
+                # Microsoft Graph API endpoint with pagination
+                if folder_name == "inbox":
+                    # Inbox için özel endpoint (daha hızlı)
+                    url = f"https://graph.microsoft.com/v1.0/me/messages?$top={current_page_size}&$skip={skip}&$orderby=receivedDateTime desc"
+                else:
+                    # Diğer klasörler için folder-specific endpoint
+                    url = f"https://graph.microsoft.com/v1.0/me/mailFolders/{folder_id}/messages?$top={current_page_size}&$skip={skip}&$orderby=receivedDateTime desc"
+                
+                async with session.get(url, headers=headers) as response:
+                    if response.status != 200:
+                        logger.error(f"Failed to fetch emails from {folder_name}: {response.status}")
+                        break
+                    
                     data = await response.json()
                     emails = data.get('value', [])
+                    
+                    # Eğer bu sayfada e-posta yoksa dur
+                    if not emails:
+                        break
                     
                     new_emails = []
                     for email_data in emails:
@@ -2137,37 +2200,152 @@ async def sync_outlook_account_emails(account: dict, current_user: dict) -> int:
                             continue  # Bu e-posta zaten var, atla
                         
                         # E-postayı dönüştür
-                        email = {
-                            "id": str(uuid.uuid4()),
-                            "outlook_id": email_data["id"],  # Outlook'tan gelen unique ID
-                            "user_id": current_user["id"],
-                            "folder": "inbox",
-                            "sender": email_data.get("sender", {}).get("emailAddress", {}).get("address", "unknown@outlook.com"),
-                            "recipient": current_user["email"],
-                            "subject": email_data.get("subject", "Başlıksız"),
-                            "content": email_data.get("body", {}).get("content", ""),
-                            "preview": email_data.get("bodyPreview", "")[:200],
-                            "date": email_data.get("receivedDateTime", datetime.now(timezone.utc).isoformat()),
-                            "read": email_data.get("isRead", False),
-                            "important": email_data.get("importance") == "high",
-                            "size": len(email_data.get("body", {}).get("content", "")),
-                            "account_id": account["id"],
-                            "thread_id": email_data.get("conversationId", str(uuid.uuid4())),
-                            "attachments": []  # Attachments daha sonra eklenebilir
-                        }
+                        email = await convert_outlook_email_to_db_format(
+                            email_data, 
+                            account, 
+                            current_user, 
+                            folder_type
+                        )
                         new_emails.append(email)
                     
+                    # Yeni e-postaları veritabanına ekle
                     if new_emails:
                         await db.emails.insert_many(new_emails)
+                        synced_count += len(new_emails)
                     
-                    return len(new_emails)
-                else:
-                    logger.error(f"Failed to fetch emails: {response.status}")
-                    return 0
+                    # Eğer bu sayfada dönen e-posta sayısı page_size'dan azsa, son sayfaya ulaştık
+                    if len(emails) < current_page_size:
+                        break
                     
+                    skip += current_page_size
+        
+        return synced_count
+        
     except Exception as e:
-        logger.error(f"Error syncing emails for account {account.get('email', 'unknown')}: {e}")
+        logger.error(f"Error syncing folder {folder_name}: {e}")
         return 0
+
+
+async def get_outlook_folder_id(headers: dict, folder_name: str) -> str:
+    """Outlook klasör ID'sini al"""
+    try:
+        import aiohttp
+        async with aiohttp.ClientSession() as session:
+            url = "https://graph.microsoft.com/v1.0/me/mailFolders"
+            async with session.get(url, headers=headers) as response:
+                if response.status != 200:
+                    return None
+                
+                data = await response.json()
+                folders = data.get('value', [])
+                
+                # Klasör isim eşleştirmeleri
+                folder_mappings = {
+                    "inbox": ["inbox", "gelen kutusu"],
+                    "sent": ["sentitems", "sent items", "gönderilmiş öğeler"],
+                    "drafts": ["drafts", "taslaklar"],
+                    "junk": ["junkemail", "junk email", "spam", "istenmeyen"]
+                }
+                
+                target_names = folder_mappings.get(folder_name.lower(), [folder_name.lower()])
+                
+                # Klasör bul
+                for folder in folders:
+                    display_name = folder.get("displayName", "").lower()
+                    folder_id = folder.get("id")
+                    
+                    for target_name in target_names:
+                        if target_name in display_name or display_name == target_name:
+                            return folder_id
+                
+                return None
+                
+    except Exception as e:
+        logger.error(f"Error getting folder ID for {folder_name}: {e}")
+        return None
+
+
+async def convert_outlook_email_to_db_format(email_data: dict, account: dict, current_user: dict, folder_type: str) -> dict:
+    """Outlook e-postasını veritabanı formatına dönüştür"""
+    try:
+        # Sender bilgilerini al
+        sender_info = email_data.get("sender", {}).get("emailAddress", {})
+        sender_email = sender_info.get("address", "unknown@outlook.com")
+        sender_name = sender_info.get("name", "")
+        sender_display = f"{sender_email} ({sender_name})" if sender_name else sender_email
+        
+        # Recipient bilgilerini al
+        recipients = []
+        for recipient in email_data.get("toRecipients", []):
+            recipient_email = recipient.get("emailAddress", {}).get("address")
+            if recipient_email:
+                recipients.append(recipient_email)
+        
+        recipient_display = ", ".join(recipients) if recipients else current_user["email"]
+        
+        # İçerik bilgilerini al
+        body = email_data.get("body", {})
+        content = body.get("content", "")
+        content_type = "html" if body.get("contentType", "").lower() == "html" else "text"
+        
+        # Tarih bilgisini dönüştür
+        received_datetime = email_data.get("receivedDateTime")
+        if received_datetime:
+            try:
+                # ISO format'ı datetime'a dönüştür
+                date_obj = datetime.fromisoformat(received_datetime.replace("Z", "+00:00"))
+                date_str = date_obj.isoformat()
+            except:
+                date_str = datetime.now(timezone.utc).isoformat()
+        else:
+            date_str = datetime.now(timezone.utc).isoformat()
+        
+        return {
+            "id": str(uuid.uuid4()),
+            "outlook_id": email_data["id"],
+            "user_id": current_user["id"],
+            "folder": folder_type,  # inbox, sent, drafts, spam
+            "sender": sender_display,
+            "recipient": recipient_display,
+            "subject": email_data.get("subject", "Başlıksız"),
+            "content": content,
+            "content_type": content_type,
+            "preview": email_data.get("bodyPreview", content[:200])[:200],
+            "date": date_str,
+            "read": email_data.get("isRead", False),
+            "important": email_data.get("importance", "").lower() == "high",
+            "size": len(content.encode('utf-8')) if content else 1024,
+            "account_id": account["id"],
+            "thread_id": email_data.get("conversationId", str(uuid.uuid4())),
+            "attachments": [],  # TODO: Attachments gelecekte eklenebilir
+            "source": "outlook",
+            "synced_at": datetime.now(timezone.utc)
+        }
+        
+    except Exception as e:
+        logger.error(f"Error converting email to DB format: {e}")
+        # Hata durumunda minimal e-posta objesi döndür
+        return {
+            "id": str(uuid.uuid4()),
+            "outlook_id": email_data.get("id", str(uuid.uuid4())),
+            "user_id": current_user["id"],
+            "folder": folder_type,
+            "sender": "unknown@outlook.com",
+            "recipient": current_user["email"],
+            "subject": "İşlenemeyen E-posta",
+            "content": "Bu e-posta işlenirken hata oluştu.",
+            "content_type": "text",
+            "preview": "Bu e-posta işlenirken hata oluştu.",
+            "date": datetime.now(timezone.utc).isoformat(),
+            "read": False,
+            "important": False,
+            "size": 1024,
+            "account_id": account["id"],
+            "thread_id": str(uuid.uuid4()),
+            "attachments": [],
+            "source": "outlook",
+            "synced_at": datetime.now(timezone.utc)
+        }
 
 @api_router.post("/import-emails")
 async def import_emails(file: UploadFile = File(...), current_user: dict = Depends(get_current_user)):
