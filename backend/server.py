@@ -1,6 +1,8 @@
 from fastapi import FastAPI, APIRouter, HTTPException, Depends, UploadFile, File, Query, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.responses import StreamingResponse, HTMLResponse, JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -22,6 +24,8 @@ import httpx
 import base64
 import asyncio
 
+
+
 # Microsoft Graph SDK imports
 try:
     from kiota_abstractions.base_request_builder import BaseRequestBuilder
@@ -36,11 +40,11 @@ except ImportError as e:
     logging.warning(f"Microsoft Graph SDK not available: {e}")
     GRAPH_AVAILABLE = False
     # Define dummy classes to prevent NameError
-    GraphServiceClient = None
-    ClientSecretCredential = None
-    Message = None
+    GraphServiceClient = Any
+    ClientSecretCredential = Any
+    Message = Any
     Folder = None
-    MessagesRequestBuilder = None
+    MessagesRequestBuilder = Any
 
 
 ROOT_DIR = Path(__file__).parent
@@ -1502,9 +1506,9 @@ async def get_emails(folder: str = "inbox", current_user: dict = Depends(get_cur
             account = accounts_dict[email_dict["account_id"]]
             email_dict["account_info"] = {
                 "id": account["id"],
-                "name": account.get("name", ""),
+                "name": account.get("name", account.get("display_name", "")),
                 "email": account["email"],
-                "type": account["type"]
+                "type": account.get("account_type", "outlook")  # DÜZELTİLDİ: type yerine account_type
             }
         
         cleaned_emails.append(email_dict)
@@ -2794,19 +2798,10 @@ async def get_outlook_auth_url(request: Request, current_user: dict = Depends(ge
         # State parameter for security (CSRF protection)
         state = f"{current_user['id']}_{str(uuid.uuid4())}"
         
-        # Build authorization URL - use dynamic redirect URI based on current environment
-        # Try to get base URL from headers or fallback to environment variable
-        base_url = request.headers.get('origin') or request.headers.get('referer', '').rstrip('/')
-        if base_url and base_url.startswith('http'):
-            # Use the same domain as the frontend request
-            dynamic_redirect_uri = f"{base_url}/api/auth/callback"
-            logger.info(f"Using dynamic redirect URI based on origin: {dynamic_redirect_uri}")
-        else:
-            # Fallback to environment variable
-            dynamic_redirect_uri = os.getenv('REDIRECT_URI', 'https://oauth-debug-center.preview.emergentagent.com/api/auth/callback')
-            logger.info(f"Using fallback redirect URI: {dynamic_redirect_uri}")
+        # BACKEND'İN REDIRECT URI'SİNİ KULLAN (8080 portu)
+        redirect_uri = os.getenv('REDIRECT_URI', 'http://localhost:8080/api/auth/callback')
         
-        redirect_uri = dynamic_redirect_uri
+        logger.info(f"Using redirect URI for OAuth: {redirect_uri}")
         
         # Store state in database for later verification  
         from datetime import timedelta
@@ -2864,9 +2859,13 @@ async def process_oauth_callback(code: str, state: str, user_id: str = None):
         oauth_state = await db.oauth_states.find_one({"state": state, "user_id": user_id})
         if not oauth_state:
             raise HTTPException(status_code=400, detail="Invalid or expired state parameter")
-        
+        expires_at = oauth_state["expires_at"]
         # Check if state is expired
-        if datetime.now(timezone.utc) > oauth_state["expires_at"]:
+        if isinstance(expires_at, str):
+            expires_at = datetime.fromisoformat(expires_at.replace('Z', '+00:00'))
+        elif expires_at.tzinfo is None:
+            expires_at = expires_at.replace(tzinfo=timezone.utc) 
+        if datetime.now(timezone.utc) > expires_at:       
             raise HTTPException(status_code=400, detail="Authorization state expired")
         
         # Get user info for logging
@@ -2899,9 +2898,7 @@ async def process_oauth_callback(code: str, state: str, user_id: str = None):
                 {"$set": {
                     "access_token": token_data["access_token"],
                     "refresh_token": token_data.get("refresh_token"),
-                    "token_expires_at": datetime.now(timezone.utc).replace(
-                        second=datetime.now(timezone.utc).second + token_data.get("expires_in", 3600)
-                    ),
+                    "token_expires_at": datetime.now(timezone.utc) + timedelta(seconds=token_data.get("expires_in", 3600)),  # seconds!
                     "last_connected": datetime.now(timezone.utc),
                     "is_connected": True
                 }}
@@ -2935,9 +2932,7 @@ async def process_oauth_callback(code: str, state: str, user_id: str = None):
             "last_sync": None,
             "access_token": token_data["access_token"],
             "refresh_token": token_data.get("refresh_token"),
-            "token_expires_at": datetime.now(timezone.utc).replace(
-                second=datetime.now(timezone.utc).second + token_data.get("expires_in", 3600)
-            ),
+            "token_expires_at": datetime.now(timezone.utc) + timedelta(seconds=token_data.get("expires_in", 3600)),  # seconds!,
             "scopes": token_data.get("scope", "").split(" ")
         }
         
@@ -2981,7 +2976,6 @@ async def process_oauth_callback(code: str, state: str, user_id: str = None):
 @api_router.post("/auth/callback") 
 @api_router.options("/auth/callback")
 async def unified_oauth_callback(request: Request):
-    """Unified OAuth callback endpoint - handles both GET query params and POST JSON body"""
     
     # Log incoming request details
     method = request.method
@@ -3050,7 +3044,7 @@ async def unified_oauth_callback(request: Request):
                         </button>
                         <script>
                             if (window.opener) {{
-                                window.opener.postMessage({str(error_response).replace("'", '"')}, '*');
+                                window.opener.postMessage({json.dumps(error_response)}, '*');
                             }}
                         </script>
                     </body>
@@ -3092,7 +3086,7 @@ async def unified_oauth_callback(request: Request):
                         </button>
                         <script>
                             if (window.opener) {{
-                                window.opener.postMessage({str(error_response).replace("'", '"')}, '*');
+                                window.opener.postMessage({json.dumps(error_response)}, '*');
                             }}
                         </script>
                     </body>
@@ -3104,6 +3098,11 @@ async def unified_oauth_callback(request: Request):
         
         # Process OAuth callback using shared logic
         result = await process_oauth_callback(code, state)
+        
+        # Convert datetime objects to ISO format strings for JSON serialization
+        if "account" in result and "connected_at" in result["account"]:
+            if isinstance(result["account"]["connected_at"], datetime):
+                result["account"]["connected_at"] = result["account"]["connected_at"].isoformat()
         
         # For GET requests (popup window), return HTML with postMessage
         if method == "GET":
@@ -3130,7 +3129,7 @@ async def unified_oauth_callback(request: Request):
                     </style>
                     <script>
                         if (window.opener) {{
-                            window.opener.postMessage({str(result).replace("'", '"')}, '*');
+                            window.opener.postMessage({json.dumps(result)}, '*');
                         }}
                         setTimeout(() => {{
                             window.close();
@@ -3170,7 +3169,7 @@ async def unified_oauth_callback(request: Request):
                     <p style="color: #666; font-size: 14px;">Hata: {str(e)}</p>
                     <script>
                         if (window.opener) {{
-                            window.opener.postMessage({str(error_response).replace("'", '"')}, '*');
+                            window.opener.postMessage({json.dumps(error_response)}, '*');
                         }}
                         setTimeout(() => {{
                             window.close();
@@ -3327,7 +3326,7 @@ async def exchange_code_for_tokens(authorization_code: str, state: str = None) -
         
         # Fallback to environment variable if no state or no stored URI
         if not redirect_uri:
-            base_url_env = os.getenv('REDIRECT_URI', 'https://oauth-debug-center.preview.emergentagent.com/api/auth/callback')
+            base_url_env = os.getenv('REDIRECT_URI', 'http://localhost:8080/api/auth/callback')
             if '/api/auth/callback' not in base_url_env:
                 # Convert old format to new API format
                 redirect_uri = base_url_env.replace('/auth/callback', '/api/auth/callback')
@@ -3344,50 +3343,56 @@ async def exchange_code_for_tokens(authorization_code: str, state: str = None) -
             "scope": "https://graph.microsoft.com/Mail.Read https://graph.microsoft.com/Mail.ReadWrite https://graph.microsoft.com/User.Read offline_access"
         }
         
+        # DETAYLI LOG EKLE
+        logger.info("=" * 80)
+        logger.info("TOKEN EXCHANGE ATTEMPT")
+        logger.info(f"Token URL: {token_url}")
+        logger.info(f"Client ID: {data['client_id'][:20]}...")
+        logger.info(f"Redirect URI: {data['redirect_uri']}")
+        logger.info(f"Authorization Code (first 30 chars): {authorization_code[:30]}...")
+        logger.info("=" * 80)
+        
         async with httpx.AsyncClient() as client:
-            response = await client.post(token_url, data=data)
+            response = await client.post(token_url, data=data, timeout=30.0)
             
-            logger.info(f"Token exchange attempt - Status: {response.status_code}")
-            logger.info(f"Token exchange - Request data: {data}")
+            logger.info(f"Token exchange response status: {response.status_code}")
             
             if response.status_code == 200:
-                logger.info("Token exchange successful")
+                logger.info("✓ Token exchange successful")
                 return response.json()
             else:
-                logger.error(f"Token exchange failed: {response.status_code} - {response.text}")
+                # DETAYLI HATA LOGU
+                logger.error("=" * 80)
+                logger.error("TOKEN EXCHANGE FAILED")
+                logger.error(f"Status Code: {response.status_code}")
+                logger.error(f"Response Body: {response.text}")
+                logger.error("=" * 80)
                 
-                # If redirect_uri error, try alternative URIs
-                if "redirect_uri" in response.text.lower():
-                    logger.warning("Redirect URI mismatch detected, trying alternatives...")
-                    
-                    alternative_uris = [
-                        "http://localhost:3000/auth/callback",
-                        "https://localhost:3000/auth/callback", 
-                        "https://oauth-debug-center.preview.emergentagent.com/auth/callback",
-                        "http://localhost:8080/auth/callback"
-                    ]
-                    
-                    for alt_uri in alternative_uris:
-                        if alt_uri != data["redirect_uri"]:  # Don't try the same URI again
-                            logger.info(f"Trying alternative redirect URI: {alt_uri}")
-                            alt_data = data.copy()
-                            alt_data["redirect_uri"] = alt_uri
-                            
-                            alt_response = await client.post(token_url, data=alt_data)
-                            logger.info(f"Alternative URI attempt - Status: {alt_response.status_code}")
-                            
-                            if alt_response.status_code == 200:
-                                logger.info(f"Token exchange successful with alternative URI: {alt_uri}")
-                                return alt_response.json()
-                            else:
-                                logger.error(f"Alternative URI failed: {alt_uri} - {alt_response.text}")
+                # Azure Portal'da kayıtlı redirect URI'leri kontrol et
+                error_json = response.json() if response.text else {}
+                error_code = error_json.get("error", "unknown")
+                error_description = error_json.get("error_description", "No description")
+                
+                logger.error(f"Error Code: {error_code}")
+                logger.error(f"Error Description: {error_description}")
+                
+                # Redirect URI hatası için özel mesaj
+                if "redirect_uri" in error_description.lower():
+                    logger.error("⚠️  REDIRECT URI MISMATCH!")
+                    logger.error(f"Used redirect_uri: {redirect_uri}")
+                    logger.error("Please check Azure Portal -> App Registration -> Redirect URIs")
+                    logger.error("Make sure this URI is registered: " + redirect_uri)
                 
                 return None
                 
-    except Exception as e:
-        logger.error(f"Error exchanging code for tokens: {e}")
+    except httpx.TimeoutException:
+        logger.error("Token exchange timeout after 30 seconds")
         return None
-
+    except Exception as e:
+        logger.error(f"Unexpected error in token exchange: {type(e).__name__}: {str(e)}")
+        import traceback
+        logger.error(traceback.format_exc())
+        return None
 async def get_user_profile_from_graph(access_token: str) -> Optional[dict]:
     """Get user profile from Microsoft Graph API"""
     try:
@@ -3457,9 +3462,7 @@ async def get_valid_access_token(account_id: str) -> Optional[str]:
                     {"$set": {
                         "access_token": new_tokens["access_token"],
                         "refresh_token": new_tokens.get("refresh_token", account["refresh_token"]),
-                        "token_expires_at": datetime.now(timezone.utc).replace(
-                            second=datetime.now(timezone.utc).second + new_tokens.get("expires_in", 3600)
-                        )
+                        "token_expires_at": datetime.now(timezone.utc) + timedelta(seconds=token_data.get("expires_in", 3600)),
                     }}
                 )
                 return new_tokens["access_token"]
@@ -3481,11 +3484,11 @@ async def health_check():
 
 # Include the router in the main app
 app.include_router(api_router)
-
+origins = os.getenv("CORS_ORIGINS", "http://localhost:3000,http://localhost:8080").split(",")
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
-    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
+    allow_origins=origins, 
     allow_methods=["*"],
     allow_headers=["*"],
 )

@@ -7,13 +7,32 @@ import LoginPage from './components/LoginPage';
 import Dashboard from './components/Dashboard';
 import HomePage from './components/HomePage';
 import AdminDashboard from './components/AdminDashboard';
-import OutlookCallback from './components/OutlookCallback';
 import { Toaster } from './components/ui/sonner';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { LanguageProvider } from './contexts/LanguageContext';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
+
+// Outlook callback redirect bileşeni
+function OutlookCallbackRedirect() {
+  useEffect(() => {
+    // URL'deki tüm parametreleri al
+    const searchParams = window.location.search;
+    
+    // Backend'e yönlendir
+    window.location.href = `${BACKEND_URL}/api/auth/callback${searchParams}`;
+  }, []);
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-[#2c5282] mx-auto"></div>
+        <p className="mt-4 text-gray-600">Outlook bağlantısı yapılıyor...</p>
+      </div>
+    </div>
+  );
+}
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -120,8 +139,8 @@ function App() {
                 } 
               />
               <Route 
-                path="/auth/callback" 
-                element={<OutlookCallback />} 
+                path="/api/auth/callback" 
+                element={<OutlookCallbackRedirect />} 
               />
             </Routes>
           </Router>
