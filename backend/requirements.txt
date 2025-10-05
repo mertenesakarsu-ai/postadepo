@@ -38,3 +38,4 @@ opentelemetry-api>=1.12.0
 opentelemetry-sdk>=1.12.0
 importlib_metadata>=4.0.0
 std-uritemplate>=2.0.0
+aiohttp>=3.8.0
