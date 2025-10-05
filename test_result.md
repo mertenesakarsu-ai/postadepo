@@ -648,15 +648,18 @@ test_plan:
 
   - task: "Email model content_type field implementasyonu"
     implemented: true
-    working: false
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: false
         agent: "testing"
         comment: "❌ KRİTİK SORUN TESPİT EDİLDİ: Email model'inde content_type field'ı tanımlı (line 187: content_type: str = 'text') ancak demo emails'lerde ve API response'unda bu field eksik veya None değerinde. Demo email generation'da content_type='text' set ediliyor (line 1186) ama API response'unda görünmüyor. Email listesi API'sinde 52 email kontrol edildi, hiçbirinde content_type field'ı yok. Bu durum frontend'de content_type bilgisinin kullanılamamasına neden oluyor. FIX NEEDED: Email API response'unda content_type field'ının dahil edilmesi gerekiyor."
+      - working: true
+        agent: "testing"
+        comment: "✅ CONTENT_TYPE FIELD SORUNU ÇÖZÜLDÜ! Kök neden tespit edildi: Veritabanındaki mevcut emails'lerde content_type field'ı eksikti (87 email). MongoDB update query ile tüm eksik content_type field'ları 'text' olarak güncellendi. KAPSAMLI TEST SONUÇLARI (5/6 test %83.3 başarı): ✅ Demo kullanıcısı giriş (demo@postadepo.com / demo123) başarılı, ✅ GET /api/outlook/accounts endpoint çalışıyor (0 bağlı hesap normal), ✅ GET /api/emails endpoint: content_type field'ı artık mevcut (10/10 email'de 'text' değeri), ✅ HTML email storage: Backend HTML content'i destekliyor, ⚠️ POST /api/outlook/sync: 503 Service Unavailable (Azure credentials not configured - beklenen davranış). SONUÇ: Email content_type field'ı artık tüm emails'lerde mevcut ve API response'unda görünüyor. Frontend artık content_type bilgisini kullanabilir."
 
 agent_communication:
   - agent: "main"
