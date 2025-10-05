@@ -184,6 +184,7 @@ class Email(BaseModel):
     recipient: str
     subject: str
     content: str
+    content_type: str = "text"  # text or html
     preview: str
     date: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     read: bool = False
