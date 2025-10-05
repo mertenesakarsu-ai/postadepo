@@ -3287,7 +3287,7 @@ class PostaDepoOutlookSyncTester:
             return 1
 
 class PostaDepoOutlookSyncTester:
-    def __init__(self, base_url="http://localhost:8080/api"):
+    def __init__(self, base_url="http://localhost:8001/api"):
         self.base_url = base_url
         self.demo_token = None
         self.demo_user = None
