@@ -143,8 +143,7 @@ const OutlookConnection = ({ user, onAccountsUpdate }) => {
     try {
       setSyncingAccount(accountId);
       
-      const response = await axios.post(`${API}/outlook/sync`, null, {
-        params: { account_id: accountId },
+      const response = await axios.post(`${API}/outlook/sync?account_id=${accountId}`, null, {
         headers: getAuthHeaders()
       });
 
