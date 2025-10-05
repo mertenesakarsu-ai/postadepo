@@ -3183,6 +3183,44 @@ async def unified_oauth_callback(request: Request):
             response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
             return response
 
+@api_router.post("/outlook/connect-account")
+async def connect_outlook_account(
+    request: Request,
+    current_user: dict = Depends(get_current_user)
+):
+    """Connect Outlook account using OAuth code and state"""
+    try:
+        # Parse JSON body or query parameters
+        try:
+            json_data = await request.json()
+            code = json_data.get('code')
+            state = json_data.get('state')
+        except Exception:
+            # Fallback to query parameters
+            code = request.query_params.get('code')
+            state = request.query_params.get('state')
+        
+        if not code or not state:
+            raise HTTPException(status_code=400, detail="Missing code or state parameter")
+        
+        # Process OAuth callback - this will create the connected account
+        result = await process_oauth_callback(code, state, current_user["id"])
+        
+        if result.get("success"):
+            return {
+                "success": True,
+                "message": "Outlook hesabı başarıyla bağlandı",
+                "account": result.get("account")
+            }
+        else:
+            raise HTTPException(status_code=400, detail=result.get("error_description", "Hesap bağlantısı başarısız"))
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error connecting Outlook account: {e}")
+        raise HTTPException(status_code=500, detail=f"Hesap bağlantısı sırasında hata: {str(e)}")
+
 @api_router.get("/outlook/accounts")
 async def get_connected_outlook_accounts(current_user: dict = Depends(get_current_user)):
     """Get user's connected Outlook accounts"""
