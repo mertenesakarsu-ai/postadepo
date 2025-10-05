@@ -6,7 +6,7 @@ import uuid
 import time
 
 class AdminPanelBulkOperationsTester:
-    def __init__(self, base_url="https://safe-email-view.preview.emergentagent.com/api"):
+    def __init__(self, base_url="https://outlook-sync-1.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.admin_token = None
         self.admin_user = None
@@ -415,7 +415,7 @@ class AdminPanelBulkOperationsTester:
             return 1
 
 class OutlookIntegrationTester:
-    def __init__(self, base_url="https://safe-email-view.preview.emergentagent.com/api"):
+    def __init__(self, base_url="https://outlook-sync-1.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.demo_token = None
         self.demo_user = None
@@ -900,7 +900,7 @@ class OutlookIntegrationTester:
             return 1
 
 class OutlookCallbackTester:
-    def __init__(self, base_url="https://safe-email-view.preview.emergentagent.com/api"):
+    def __init__(self, base_url="https://outlook-sync-1.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.demo_token = None
         self.demo_user = None
@@ -1502,7 +1502,7 @@ class OutlookCallbackTester:
             return 1
 
 class PostaDepoOutlookTester:
-    def __init__(self, base_url="https://safe-email-view.preview.emergentagent.com/api"):
+    def __init__(self, base_url="https://outlook-sync-1.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.demo_token = None
         self.demo_user = None
@@ -1930,7 +1930,7 @@ class PostaDepoOutlookTester:
             return 1
 
 class OutlookUndefinedVariableFixTester:
-    def __init__(self, base_url="https://safe-email-view.preview.emergentagent.com/api"):
+    def __init__(self, base_url="https://outlook-sync-1.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.demo_token = None
         self.demo_user = None
@@ -2446,7 +2446,7 @@ class OutlookUndefinedVariableFixTester:
             return 1
 
 class OutlookConnectionAndSyncTester:
-    def __init__(self, base_url="https://safe-email-view.preview.emergentagent.com/api"):
+    def __init__(self, base_url="https://outlook-sync-1.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.demo_token = None
         self.demo_user = None
@@ -2858,7 +2858,7 @@ class OutlookConnectionAndSyncTester:
             return 1
 
 class PostaDepoOutlookSyncTester:
-    def __init__(self, base_url="https://safe-email-view.preview.emergentagent.com/api"):
+    def __init__(self, base_url="https://outlook-sync-1.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.demo_token = None
         self.demo_user = None
