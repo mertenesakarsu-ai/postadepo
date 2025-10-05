@@ -2277,18 +2277,15 @@ class OutlookConnectionAndSyncTester:
         
         if success:
             if isinstance(response, dict):
-                if 'synced_count' in response:
-                    synced_count = response['synced_count']
-                    print(f"   📬 Synced emails count: {synced_count}")
-                    
-                    if synced_count > 0:
-                        print("   ✅ Demo emails generated successfully")
-                        return True
-                    else:
-                        print("   ⚠️  No emails synced for demo user")
-                        return False
+                # Check for either synced_count or new_emails field
+                synced_count = response.get('synced_count', response.get('new_emails', 0))
+                print(f"   📬 Synced emails count: {synced_count}")
+                
+                if synced_count > 0:
+                    print("   ✅ Demo emails generated successfully")
+                    return True
                 else:
-                    print("   ⚠️  Response missing synced_count field")
+                    print("   ⚠️  No emails synced for demo user")
                     return False
             else:
                 print("   ⚠️  Unexpected response format")
