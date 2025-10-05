@@ -869,8 +869,20 @@ const Dashboard = ({ user, onLogout }) => {
 
                                 {/* Message Content */}
                                 <div className="prose max-w-none">
-                                  <div className="whitespace-pre-wrap text-slate-700 leading-relaxed">
-                                    {threadEmail.content}
+                                  <div className="text-slate-700 leading-relaxed">
+                                    {threadEmail.content_type === 'html' ? (
+                                      <div 
+                                        dangerouslySetInnerHTML={{ __html: threadEmail.content }}
+                                        style={{
+                                          wordBreak: 'break-word',
+                                          overflowWrap: 'break-word'
+                                        }}
+                                      />
+                                    ) : (
+                                      <div className="whitespace-pre-wrap">
+                                        {threadEmail.content}
+                                      </div>
+                                    )}
                                   </div>
                                 </div>
                               </div>
