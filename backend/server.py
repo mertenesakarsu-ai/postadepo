@@ -1165,6 +1165,58 @@ Chief Innovation Officer & VP of Customer Success
         
         content = random.choice(content_templates)
         
+        # HTML formatında e-posta içeriği %30 şansla
+        content_type = "html" if random.random() < 0.3 else "text"
+        
+        if content_type == "html":
+            # HTML formatına dönüştür ve resim ekle
+            html_content = content.replace('\n\n', '</p><p>').replace('\n', '<br>')
+            html_content = f'<p>{html_content}</p>'
+            
+            # Listeyi HTML'e dönüştür
+            if '•' in html_content:
+                lines = html_content.split('<br>')
+                new_lines = []
+                in_list = False
+                
+                for line in lines:
+                    if '•' in line:
+                        if not in_list:
+                            new_lines.append('<ul>')
+                            in_list = True
+                        list_item = line.replace('•', '').strip()
+                        new_lines.append(f'<li>{list_item}</li>')
+                    else:
+                        if in_list:
+                            new_lines.append('</ul>')
+                            in_list = False
+                        new_lines.append(line)
+                
+                if in_list:
+                    new_lines.append('</ul>')
+                
+                html_content = '<br>'.join(new_lines)
+            
+            # Resim ekle %50 şansla
+            if random.random() < 0.5:
+                images = [
+                    "https://picsum.photos/400/200?random=1",
+                    "https://picsum.photos/500/250?random=2", 
+                    "https://picsum.photos/450/225?random=3",
+                    "https://picsum.photos/600/300?random=4"
+                ]
+                selected_image = random.choice(images)
+                html_content += f'<br><br><img src="{selected_image}" alt="E-posta İçeriği" style="max-width: 100%; border-radius: 8px; margin: 16px 0;">'
+            
+            # HTML styling ekle
+            content = f'''
+            <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+                {html_content}
+                <hr style="margin: 20px 0; border: none; border-top: 1px solid #eee;">
+                <p style="color: #666; font-size: 12px;">Bu e-posta {sender} tarafından gönderilmiştir.</p>
+            </div>
+            '''
+        
         # Demo attachments ekle
         attachments = generate_demo_attachments()
         
@@ -1183,7 +1235,7 @@ Chief Innovation Officer & VP of Customer Success
             "recipient": "demo@postadepo.com",
             "subject": subject,
             "content": content,
-            "content_type": "text",  # demo emails are text format
+            "content_type": content_type,  # text veya html
             "preview": content[:100] + "..." if len(content) > 100 else content,
             "date": datetime.now(timezone.utc).isoformat(),
             "read": random.choice([True, False]),
