@@ -1965,59 +1965,155 @@ async def delete_email(email_id: str, current_user: dict = Depends(get_current_u
 
 @api_router.post("/sync-emails")
 async def sync_emails(current_user: dict = Depends(get_current_user)):
-    # Simulate email sync by adding a few new demo emails from connected accounts
+    """Sync emails from connected Outlook accounts"""
     
-    # Bağlı hesaplardan sender bilgilerini al
-    connected_accounts = await db.connected_accounts.find({"user_id": current_user["id"]}).to_list(length=None)
+    # Bağlı hesapları al (sadece is_connected: True olanlar)
+    connected_accounts = await db.connected_accounts.find({
+        "user_id": current_user["id"],
+        "is_connected": True
+    }).to_list(length=None)
     
-    # Account mapping
-    account_mapping = {}
     if not connected_accounts:
-        # Eğer bağlı hesap yoksa, demo sender'lar kullan
-        senders = ["demo.sync@outlook.com (Demo Sync)", "system@outlook.com (Sistem)", "info@outlook.com (Bilgi)"]
-        for sender in senders:
-            account_mapping[sender] = f"demo-{sender.split('@')[0]}-account"
-    else:
-        senders = []
-        for account in connected_accounts:
-            email = account["email"]
-            name = account.get("name", email.split("@")[0].replace(".", " ").title())
-            sender_format = f"{email} ({name})" if name and name != email.split("@")[0].replace(".", " ").title() else email
-            senders.append(sender_format)
-            account_mapping[sender_format] = account["id"]
+        # Eğer hiç bağlı hesap yoksa demo kullanıcısı için demo e-postalar üret
+        if current_user.get("email") == "demo@postadepo.com":
+            # Demo kullanıcısı için demo e-postalar üret
+            demo_senders = ["demo.sync@outlook.com (Demo Sync)", "system@outlook.com (Sistem)", "info@outlook.com (Bilgi)"]
+            new_emails = []
+            
+            for i in range(3):
+                sender = random.choice(demo_senders)
+                attachments = generate_demo_attachments()
+                attachments_size = sum(att["size"] for att in attachments)
+                total_size = random.randint(1024, 5120) + attachments_size
+                
+                email = {
+                    "id": str(uuid.uuid4()),
+                    "user_id": current_user["id"],
+                    "folder": "inbox",
+                    "sender": sender,
+                    "recipient": current_user["email"],
+                    "subject": f"Demo Senkronizasyon E-postası {i+1}",
+                    "content": f"Bu e-posta demo senkronizasyon işlemi sonucu eklenen demo e-postadır. Gönderen: {sender}, Timestamp: {datetime.now(timezone.utc)}",
+                    "preview": "Bu e-posta demo senkronizasyon işlemi sonucu eklenen demo e-postadır...",
+                    "date": datetime.now(timezone.utc).isoformat(),
+                    "read": False,
+                    "important": False,
+                    "size": total_size,
+                    "account_id": f"demo-{i}",
+                    "thread_id": str(uuid.uuid4()),
+                    "attachments": attachments
+                }
+                new_emails.append(email)
+            
+            if new_emails:
+                await db.emails.insert_many(new_emails)
+            
+            return {"success": True, "new_emails": len(new_emails), "message": "Demo e-postalar eklendi"}
+        else:
+            raise HTTPException(
+                status_code=400, 
+                detail="Senkronizasyon için en az bir Outlook hesabı bağlanmalıdır"
+            )
     
-    new_emails = []
-    for i in range(3):
-        sender = random.choice(senders)
+    # Gerçek Outlook hesaplarından e-posta senkronizasyonu
+    total_synced = 0
+    
+    for account in connected_accounts:
+        try:
+            # Hesap için senkronizasyon yap
+            if account.get("access_token"):
+                # Microsoft Graph API kullanarak gerçek e-postaları çek
+                synced_count = await sync_outlook_account_emails(account, current_user)
+                total_synced += synced_count
+                logger.info(f"Synced {synced_count} emails from {account['email']}")
+            else:
+                logger.warning(f"No access token for account {account['email']}")
+                
+        except Exception as e:
+            logger.error(f"Error syncing account {account.get('email', 'unknown')}: {e}")
+            # Bir hesaptan hata gelirse diğer hesapları da dene
+            continue
+    
+    # Son senkronizasyon zamanını güncelle
+    for account in connected_accounts:
+        await db.connected_accounts.update_one(
+            {"id": account["id"]},
+            {"$set": {"last_sync": datetime.now(timezone.utc)}}
+        )
+    
+    return {
+        "success": True, 
+        "new_emails": total_synced,
+        "message": f"{total_synced} e-posta {len(connected_accounts)} hesaptan senkronize edildi"
+    }
+
+
+async def sync_outlook_account_emails(account: dict, current_user: dict) -> int:
+    """Tek bir Outlook hesabından e-posta senkronize et"""
+    try:
+        if not outlook_auth_service.is_configured():
+            logger.warning("Outlook integration not configured")
+            return 0
         
-        # Demo attachments ekle
-        attachments = generate_demo_attachments()
-        attachments_size = sum(att["size"] for att in attachments)
-        total_size = random.randint(1024, 5120) + attachments_size
-        
-        email = {
-            "id": str(uuid.uuid4()),
-            "user_id": current_user["id"],
-            "folder": "inbox",
-            "sender": sender,
-            "recipient": current_user["email"],
-            "subject": f"Senkronizasyon Sonucu Yeni E-posta {i+1}",
-            "content": f"Bu e-posta senkronizasyon işlemi sonucu eklenen demo e-postadır. Gönderen: {sender}, Timestamp: {datetime.now(timezone.utc)}",
-            "preview": "Bu e-posta senkronizasyon işlemi sonucu eklenen demo e-postadır...",
-            "date": datetime.now(timezone.utc).isoformat(),
-            "read": False,
-            "important": False,
-            "size": total_size,
-            "account_id": account_mapping.get(sender),
-            "thread_id": str(uuid.uuid4()),
-            "attachments": attachments
+        # Microsoft Graph API endpoint'i
+        headers = {
+            'Authorization': f'Bearer {account["access_token"]}',
+            'Content-Type': 'application/json'
         }
-        new_emails.append(email)
-    
-    if new_emails:
-        await db.emails.insert_many(new_emails)
-    
-    return {"success": True, "new_emails": len(new_emails)}
+        
+        # Son 30 güne ait e-postaları al (sadece yenileri)
+        import aiohttp
+        async with aiohttp.ClientSession() as session:
+            # Inbox e-postaları
+            url = "https://graph.microsoft.com/v1.0/me/messages?$top=10&$orderby=receivedDateTime desc"
+            async with session.get(url, headers=headers) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    emails = data.get('value', [])
+                    
+                    new_emails = []
+                    for email_data in emails:
+                        # E-posta zaten var mı kontrol et
+                        existing = await db.emails.find_one({
+                            "user_id": current_user["id"],
+                            "outlook_id": email_data["id"]
+                        })
+                        
+                        if existing:
+                            continue  # Bu e-posta zaten var, atla
+                        
+                        # E-postayı dönüştür
+                        email = {
+                            "id": str(uuid.uuid4()),
+                            "outlook_id": email_data["id"],  # Outlook'tan gelen unique ID
+                            "user_id": current_user["id"],
+                            "folder": "inbox",
+                            "sender": email_data.get("sender", {}).get("emailAddress", {}).get("address", "unknown@outlook.com"),
+                            "recipient": current_user["email"],
+                            "subject": email_data.get("subject", "Başlıksız"),
+                            "content": email_data.get("body", {}).get("content", ""),
+                            "preview": email_data.get("bodyPreview", "")[:200],
+                            "date": email_data.get("receivedDateTime", datetime.now(timezone.utc).isoformat()),
+                            "read": email_data.get("isRead", False),
+                            "important": email_data.get("importance") == "high",
+                            "size": len(email_data.get("body", {}).get("content", "")),
+                            "account_id": account["id"],
+                            "thread_id": email_data.get("conversationId", str(uuid.uuid4())),
+                            "attachments": []  # Attachments daha sonra eklenebilir
+                        }
+                        new_emails.append(email)
+                    
+                    if new_emails:
+                        await db.emails.insert_many(new_emails)
+                    
+                    return len(new_emails)
+                else:
+                    logger.error(f"Failed to fetch emails: {response.status}")
+                    return 0
+                    
+    except Exception as e:
+        logger.error(f"Error syncing emails for account {account.get('email', 'unknown')}: {e}")
+        return 0
 
 @api_router.post("/import-emails")
 async def import_emails(file: UploadFile = File(...), current_user: dict = Depends(get_current_user)):
