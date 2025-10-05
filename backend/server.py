@@ -1183,6 +1183,7 @@ Chief Innovation Officer & VP of Customer Success
             "recipient": "demo@postadepo.com",
             "subject": subject,
             "content": content,
+            "content_type": "text",  # demo emails are text format
             "preview": content[:100] + "..." if len(content) > 100 else content,
             "date": datetime.now(timezone.utc).isoformat(),
             "read": random.choice([True, False]),
